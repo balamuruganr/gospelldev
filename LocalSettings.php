@@ -136,3 +136,9 @@ require_once( "$IP/extensions/WikiEditor/WikiEditor.php" );
 # End of automatically generated settings.
 # Add more configuration options below.
 
+require_once("$IP/extensions/SocialProfile/SocialProfile.php");
+$wgUserProfileDisplay['friends'] = true;
+$wgUserProfileDisplay['foes'] = false;
+$wgUserBoard = true;
+$wgUserProfileDisplay['board'] = true;
+$wgUserProfileDisplay['stats'] = true;

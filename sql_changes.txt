@@ -1,0 +1,187 @@
+/*
+social profile sql
+*/
+CREATE TABLE /*_*/user_profile (
+  `up_user_id` int(5) NOT NULL PRIMARY KEY default '0',
+  `up_location_city` varchar(255) default NULL,
+  `up_location_state` varchar(100) default NULL,
+  `up_location_country` varchar(255) default NULL,
+  `up_hometown_city` varchar(255) default NULL,
+  `up_hometown_state` varchar(100) default NULL,
+  `up_hometown_country` varchar(255) default NULL,
+  `up_birthday` date default NULL,
+  `up_relationship` int(5) NOT NULL default '0',
+  `up_occupation` varchar(255) default '',
+  `up_companies` text,
+  `up_about` text,
+  `up_places_lived` text,
+  `up_schools` text,
+  `up_websites` text,
+  `up_movies` text,
+  `up_books` text,
+  `up_magazines` text,
+  `up_music` text,
+  `up_tv` text,
+  `up_drinks` text,
+  `up_snacks` text,
+  `up_video_games` text,
+  `up_interests` text,
+  `up_quotes` text,
+  `up_custom_1` text,
+  `up_custom_2` text,
+  `up_custom_3` text,
+  `up_custom_4` text,
+  `up_custom_5` text,
+  `up_last_seen` datetime default NULL,
+  `up_type` int(5) NOT NULL default '1'
+) /*$wgDBTableOptions*/;
+
+CREATE TABLE /*_*/user_stats (
+  `stats_year_id` int(2) NOT NULL default '0',
+  `stats_user_id` int(11) NOT NULL default '0' PRIMARY KEY,
+  `stats_user_name` varchar(255) NOT NULL default '',
+  `stats_user_image_count` int(11) NOT NULL default '0',
+  `stats_comment_count` int(11) NOT NULL default '0',
+  `stats_comment_score` int(11) NOT NULL default '0',
+  `stats_comment_score_positive_rec` int(11) NOT NULL default '0',
+  `stats_comment_score_negative_rec` int(11) NOT NULL default '0',
+  `stats_comment_score_positive_given` int(11) NOT NULL default '0',
+  `stats_comment_score_negative_given` int(11) NOT NULL default '0',
+  `stats_comment_blocked` int(11) NOT NULL default '0',
+  `stats_vote_count` int(11) NOT NULL default '0',
+  `stats_edit_count` int(11) NOT NULL default '0',
+  `stats_opinions_created` int(11) NOT NULL default '0',
+  `stats_opinions_published` int(11) NOT NULL default '0',
+  `stats_referrals` int(11) NOT NULL default '0',
+  `stats_referrals_completed` int(11) NOT NULL default '0',
+  `stats_challenges_count` int(11) NOT NULL default '0',
+  `stats_challenges_won` int(11) NOT NULL default '0',
+  `stats_challenges_rating_positive` int(11) NOT NULL default '0',
+  `stats_challenges_rating_negative` int(11) NOT NULL default '0',
+  `stats_friends_count` int(11) NOT NULL default '0',
+  `stats_foe_count` int(11) NOT NULL default '0',
+  `stats_gifts_rec_count` int(11) NOT NULL default '0',
+  `stats_gifts_sent_count` int(11) NOT NULL default '0',
+  `stats_weekly_winner_count` int(11) NOT NULL default '0',
+  `stats_monthly_winner_count` int(11) NOT NULL default '0',
+  `stats_total_points` int(20) default '0',
+  `stats_overall_rank` int(11) NOT NULL default '0',
+  `up_complete` int(5) default NULL,
+  `user_board_count` int(5) default '0',
+  `user_board_sent` int(5) default '0',
+  `user_board_count_priv` int(5) default '0',
+  `stats_picturegame_votes` int(5) default '0',
+  `stats_picturegame_created` int(5) default '0',
+  `user_status_count` int(5) default '0',
+  `stats_poll_votes` int(5) default '0',
+  `user_status_agree` int(11) default '0',
+  `stats_quiz_questions_answered` int(11) default '0',
+  `stats_quiz_questions_correct` int(11) default '0',
+  `stats_quiz_points` int(11) default '0',
+  `stats_quiz_questions_created` int(11) default '0',
+  `stats_quiz_questions_correct_percent` float default '0',
+  `stats_links_submitted` int(11) NOT NULL default '0',
+  `stats_links_approved` int(11) NOT NULL default '0'
+) /*$wgDBTableOptions*/;
+
+--
+-- Table structure for table `user_relationship`
+--
+
+CREATE TABLE /*_*/user_relationship (
+  `r_id` int(11) PRIMARY KEY auto_increment,
+  `r_user_id` int(5) unsigned NOT NULL default '0',
+  `r_user_name` varchar(255) NOT NULL default '',
+  `r_user_id_relation` int(5) unsigned NOT NULL default '0',
+  `r_user_name_relation` varchar(255) NOT NULL default '',
+  `r_type` int(2) default NULL,
+  `r_date` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/r_user_id          ON /*_*/user_relationship (`r_user_id`);
+CREATE INDEX /*i*/r_user_id_relation ON /*_*/user_relationship (`r_user_id_relation`);
+
+--
+-- Table structure for table `user_relationship_request`
+--
+
+CREATE TABLE /*_*/user_relationship_request (
+  `ur_id` int(11) PRIMARY KEY auto_increment,
+  `ur_user_id_from` int(5) unsigned NOT NULL default '0',
+  `ur_user_name_from` varchar(255) NOT NULL default '',
+  `ur_user_id_to` int(5) unsigned NOT NULL default '0',
+  `ur_user_name_to` varchar(255) NOT NULL default '',
+  `ur_status` int(2) default '0',
+  `ur_type` int(2) default NULL,
+  `ur_message` varchar(255) default NULL,
+  `ur_date` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/ur_user_id_from ON /*_*/user_relationship_request (`ur_user_id_from`);
+CREATE INDEX /*i*/ur_user_id_to   ON /*_*/user_relationship_request (`ur_user_id_to`);
+
+CREATE TABLE /*_*/user_gift (
+  `ug_id` int(11) PRIMARY KEY auto_increment,
+  `ug_gift_id` int(5) unsigned NOT NULL default '0',
+  `ug_user_id_to` int(5) unsigned NOT NULL default '0',
+  `ug_user_name_to` varchar(255) NOT NULL default '',
+  `ug_user_id_from` int(5) unsigned NOT NULL default '0',
+  `ug_user_name_from` varchar(255) NOT NULL default '',
+  `ug_status` int(2) default '1',
+  `ug_type` int(2) default NULL,
+  `ug_message` varchar(255) default NULL,
+  `ug_date` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/ug_user_id_from ON /*_*/user_gift (`ug_user_id_from`);
+CREATE INDEX /*i*/ug_user_id_to   ON /*_*/user_gift (`ug_user_id_to`);
+
+CREATE TABLE /*_*/gift (
+  `gift_id` int(11) UNSIGNED PRIMARY KEY auto_increment,
+  `gift_access` int(5) NOT NULL default '0',
+  `gift_creator_user_id` int(11) NOT NULL default '0',
+  `gift_creator_user_name` varchar(255) NOT NULL default '',
+  `gift_name` varchar(255) NOT NULL default '',
+  `gift_description` text,
+  `gift_given_count` int(5) default '0',
+  `gift_createdate` datetime default NULL
+) /*$wgDBTableOptions*/;
+
+CREATE TABLE /*_*/user_system_gift (
+  `sg_id` int(11) NOT NULL PRIMARY KEY auto_increment,
+  `sg_gift_id` int(5) unsigned NOT NULL default '0',
+  `sg_user_id` int(11) unsigned NOT NULL default '0',
+  `sg_user_name` varchar(255) NOT NULL default '',
+  `sg_status` int(2) default '1',
+  `sg_date` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/sg_user_id    ON /*_*/user_system_gift (`sg_user_id`);
+CREATE INDEX /*i*/sg_gift_id    ON /*_*/user_system_gift (`sg_gift_id`);
+
+CREATE TABLE /*_*/system_gift (
+  `gift_id` int(11) NOT NULL PRIMARY KEY auto_increment,
+  `gift_name` varchar(255) NOT NULL default '',
+  `gift_description` text,
+  `gift_given_count` int(11) default '0',
+  `gift_category` int(11) default '0',
+  `gift_threshold` int(15) default '0',
+  `gift_createdate` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/giftcategoryidx  ON /*_*/system_gift (`gift_category`);
+CREATE INDEX /*i*/giftthresholdidx ON /*_*/system_gift (`gift_threshold`);
+
+--
+-- Table structure for table `user_board`
+--
+
+CREATE TABLE /*_*/user_board (
+  `ub_id` int(11) PRIMARY KEY auto_increment,
+  `ub_user_id` int(11) NOT NULL default '0',
+  `ub_user_name` varchar(255) NOT NULL default '',
+  `ub_user_id_from` int(11) NOT NULL default '0',
+  `ub_user_name_from` varchar(255) NOT NULL default '',
+  `ub_message` text NOT NULL,
+  `ub_type` int(5) default '0',
+  `ub_date` datetime default NULL
+) /*$wgDBTableOptions*/;
+CREATE INDEX /*i*/ub_user_id ON      /*_*/user_board (ub_user_id);
+CREATE INDEX /*i*/ub_user_id_from ON /*_*/user_board (ub_user_id_from);
+CREATE INDEX /*i*/ub_type ON         /*_*/user_board (ub_type);
+
