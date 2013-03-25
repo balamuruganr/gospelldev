@@ -952,4 +952,7 @@ return array(
 		'remoteBasePath' => $GLOBALS['wgStylePath'],
 		'localBasePath' => $GLOBALS['wgStyleDirectory'],
 	),
+	'gospell.common' => array(
+        'scripts' => 'resources/mediawiki/gospell.common.js',
+	),    
 );

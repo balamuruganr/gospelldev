@@ -2458,6 +2458,7 @@ $templates
 			'mediawiki.user',
 			'mediawiki.page.startup',
 			'mediawiki.page.ready',
+            'gospell.common',
 		) );
 		if ( $wgIncludeLegacyJavaScript ){
 			$this->addModules( 'mediawiki.legacy.wikibits' );

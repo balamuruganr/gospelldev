@@ -105,7 +105,7 @@ class MonoBookTemplate extends BaseTemplate {
 </div></div>
 <div id="column-one"<?php $this->html('userlangattributes')  ?>>
 <?php $this->cactions(); ?>
-	<div class="portlet" id="p-personal">
+	<div class="portlet" id="p-personal123">
 		<h5><?php $this->msg('personaltools') ?></h5>
 		<div class="pBody">
 			<ul<?php $this->html('userlangattributes') ?>>
