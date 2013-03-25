@@ -299,6 +299,11 @@ class UserMailer {
 			set_error_handler( 'UserMailer::errorHandler' );
 
 			$safeMode = wfIniGetBool( 'safe_mode' );
+            /*echo "TEST-To:".$recip; echo("<br />");
+            echo "TEST-Subject:".self::quotedPrintable( $subject ); echo("<br />"); 
+            echo "TEST-Body:".$body; echo("<br />");
+            echo "TEST-HeaderInfo:".$headers;
+            die;*/
 			foreach ( $to as $recip ) {
 				if ( $safeMode ) {
 					$sent = mail( $recip, self::quotedPrintable( $subject ), $body, $headers );
@@ -312,12 +317,13 @@ class UserMailer {
 
 			if ( self::$mErrorString ) {
 				wfDebug( "Error sending mail: " . self::$mErrorString . "\n" );
+                //echo("TEST...1"); die;
 				return Status::newFatal( 'php-mail-error', self::$mErrorString );
 			} elseif ( ! $sent ) {
 				// mail function only tells if there's an error
-				wfDebug( "Unknown error sending mail\n" );
+				wfDebug( "Unknown error sending mail\n" ); echo("TEST...2"); die;
 				return Status::newFatal( 'php-mail-error-unknown' );
-			} else {
+			} else { echo("TEST...3"); die;
 				return Status::newGood();
 			}
 		}

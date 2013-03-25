@@ -126,6 +126,20 @@ $wgDiff3 = "";
 # that value)
 $wgResourceLoaderMaxQueryLength = -1;
 
+//=============================Edit and Read Permissions ===================================//
+                       //////////// Updated By Mathivanan ///////////////////
+//Remove edit and read access from anonymous users
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['read'] = true;
+//add/Remove edit permissions from registered users
+$wgGroupPermissions['user']['edit'] = true;
+// Grant edit access to sysops
+$wgGroupPermissions['sysop']['edit'] = true;
+
+$wgGospellSettingsProfileAboutMaxLenth = 512;
+
+                     //////////// Updated By Mathivanan ///////////////////
+//==========================================================================================//
 
 # Enabled Extensions. Most extensions are enabled by including the base extension file here
 # but check specific extension documentation for more details

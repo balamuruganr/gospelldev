@@ -440,6 +440,8 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 	// For Special:ListGroupRights
 	'right-avatarremove' => "Remove user's avatars",
 	'right-editothersprofiles' => "Update other users' social profiles",
+    //==============Updated By mathivanan ==============================//.
+    'user-profile-update-validation-about' => "Not allowed above _MAXLEN_ characters",
 );
 
 /** Message documentation (Message documentation)

@@ -48,9 +48,9 @@ class EmailConfirmation extends UnlistedSpecialPage {
 
 		$this->checkReadOnly();
 
-		if( $code === null || $code === '' ) {
+		if( $code === null || $code === '' ) { 
 			if( $this->getUser()->isLoggedIn() ) {
-				if( Sanitizer::validateEmail( $this->getUser()->getEmail() ) ) {
+				if( Sanitizer::validateEmail( $this->getUser()->getEmail() ) ) {  
 					$this->showRequestForm();
 				} else {
 					$this->getOutput()->addWikiMsg( 'confirmemail_noemail' );
@@ -64,7 +64,7 @@ class EmailConfirmation extends UnlistedSpecialPage {
 				);
 				$this->getOutput()->addHTML( $this->msg( 'confirmemail_needlogin' )->rawParams( $llink )->parse() );
 			}
-		} else {
+		} else { 
 			$this->attemptConfirm( $code );
 		}
 	}
@@ -75,11 +75,12 @@ class EmailConfirmation extends UnlistedSpecialPage {
 	function showRequestForm() {
 		$user = $this->getUser();
 		$out = $this->getOutput();
+                
 		if( $this->getRequest()->wasPosted() && $user->matchEditToken( $this->getRequest()->getText( 'token' ) ) ) {
 			$status = $user->sendConfirmationMail();
-			if ( $status->isGood() ) {
+			if ( $status->isGood() ) { 
 				$out->addWikiMsg( 'confirmemail_sent' );
-			} else {
+			} else { 
 				$out->addWikiText( $status->getWikiText( 'confirmemail_sendfailed' ) );
 			}
 		} else {

@@ -53,7 +53,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 	 * @param $section Mixed: parameter passed to the page or null
 	 */
 	public function execute( $section ) {
-		global $wgUser, $wgOut, $wgRequest, $wgUserProfileScripts, $wgUpdateProfileInRecentChanges, $wgSupressPageTitle;
+		global $wgUser, $wgOut, $wgRequest, $wgUserProfileScripts, $wgUpdateProfileInRecentChanges, $wgSupressPageTitle, $wgGospellSettingsProfileAboutMaxLenth;
 		$wgSupressPageTitle = true;
 
 		$wgOut->setHTMLTitle( wfMsg( 'pagetitle', wfMsg( 'edit-profile-title' ) ) );
@@ -91,8 +91,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			}
 			switch( $section ) {
 				case 'basic':
-					$this->saveProfileBasic( $wgUser );
-					$this->saveSettings_basic( $wgUser );
+                    if(strlen($wgRequest->getVal( 'about' ))<= $wgGospellSettingsProfileAboutMaxLenth){                        
+                      $this->saveProfileBasic( $wgUser );                      
+	                  $this->saveSettings_basic( $wgUser );  
+                     }
+					//$this->saveProfileBasic( $wgUser );
+					//$this->saveSettings_basic( $wgUser );
 					break;
 				case 'personal':
 					$this->saveProfilePersonal( $wgUser );
@@ -117,11 +121,20 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				wfMsgForContent( 'user-profile-update-log-section' ) .
 					" '{$section}'"
 			);
+            
+			if(strlen($wgRequest->getVal( 'about' ))<= $wgGospellSettingsProfileAboutMaxLenth){
 			$wgOut->addHTML(
 				'<span class="profile-on">' .
 				wfMsg( 'user-profile-update-saved' ) .
 				'</span><br /><br />'
 			);
+           } else {
+            $wgOut->addHTML(
+				'<span class="profile-on">'.
+                str_replace('_MAXLEN_',$wgGospellSettingsProfileAboutMaxLenth,wfMsg( 'user-profile-update-validation-about' )).
+                '</span><br /><br />'
+			);
+           }
 
 			// create the user page if it doesn't exist yet
 			$title = Title::makeTitle( NS_USER, $wgUser->getName() );
@@ -231,6 +244,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		} else {
 			$birthday_date = '';
 		}
+        
 		return ( $birthday_date );
 	}
 
@@ -262,7 +276,14 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( is_null( $user ) ) {
 			$user = $wgUser;
 		}
-
+        if($wgRequest->getVal( 'birthday' )){
+            $dob_arr = explode("/",$wgRequest->getVal( 'birthday' ));
+            if(count($dob_arr)< 3 && count($dob_arr)==2){
+               $dob_str = $wgRequest->getVal( 'birthday' ) ."/". $wgRequest->getVal( 'hiddenbirthday' ); 
+            } else {
+               $dob_str =  $wgRequest->getVal( 'birthday' );
+            }
+        }
 		$this->initProfile( $user );
 		$dbw = wfGetDB( DB_MASTER );
 		$basicProfileData = array(
@@ -274,7 +295,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_hometown_state' => $wgRequest->getVal( 'hometown_state' ),
 			'up_hometown_country' => $wgRequest->getVal( 'hometown_country' ),
 
-			'up_birthday' => self::formatBirthdayDB( $wgRequest->getVal( 'birthday' ) ),
+			'up_birthday' => self::formatBirthdayDB( $dob_str ),
 			'up_about' => $wgRequest->getVal( 'about' ),
 			'up_occupation' => $wgRequest->getVal( 'occupation' ),
 			'up_schools' => $wgRequest->getVal( 'schools' ),
@@ -282,6 +303,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_websites' => $wgRequest->getVal( 'websites' ),
 			'up_relationship' => $wgRequest->getVal( 'relationship' )
 		);
+        //print_r($basicProfileData);
 		$dbw->update(
 			'user_profile',
 			/* SET */$basicProfileData,
@@ -510,7 +532,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<p class="profile-update-unit"><input type="text"' .
 			( $showYOB ? ' class="long-birthday"' : null ) .
 			' size="25" name="birthday" id="birthday" value="' .
-			( isset( $birthday ) ? $birthday : '' ) . '" /></p>
+			( isset( $birthday ) ? $birthday : '' ) . '" />' .
+            ( $showYOB ? null : '<input type="hidden" name="hiddenbirthday" id="hiddenbirthday" />' ) .
+            '</p>
 			<div class="cleared"></div>
 		</div><div class="cleared"></div>';
 
