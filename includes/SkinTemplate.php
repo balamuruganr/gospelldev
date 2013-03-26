@@ -1434,6 +1434,8 @@ abstract class BaseTemplate extends QuickTemplate {
 	 */
 	function getPersonalTools() {
 		$personal_tools = array();
+        //set user real name instead of user name
+        $this->data['personal_urls']['userpage']['text'] = ($this->getSkin()->getUser()->mRealName) ? $this->getSkin()->getUser()->mRealName : $this->getSkin()->getUser()->mName;        
 		foreach ( $this->data['personal_urls'] as $key => $plink ) {
 			# The class on a personal_urls item is meant to go on the <a> instead
 			# of the <li> so we have to use a single item "links" array instead
