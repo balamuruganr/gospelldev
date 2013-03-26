@@ -71,7 +71,6 @@ function calculateAge(dateOfBirth)
 var countries = new Array();
 countries[0] = {
 	country: 'United States',
-	name: 'State',
 	sections: [
 		'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
 		'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
@@ -85,6 +84,12 @@ countries[0] = {
 		'Washington', 'Washington, D.C.', 'West Virginia', 'Wisconsin', 'Wyoming'
 	]
 };
+countries[1] = {
+	country: 'India',
+	sections: [
+		'Andra Pradesh', 'Tamil Nadu', 'Kerala'
+	]
+};
 
 function displaySection( id, country, section ) {
 	country_id = -1;
@@ -96,8 +101,7 @@ function displaySection( id, country, section ) {
 
 	var section_select = '';
 	if( countries[country_id] ) {
-		document.getElementById( id + '_label' ).innerHTML = countries[country_id].name;
-		section_select += '<option>-Select State-</option>';
+		section_select += '<option value="">-Select State-</option>';
 		for( x = 0; x <= countries[country_id].sections.length-1; x++ ) {
 			section_select += '<option value="' + countries[country_id].sections[x] + '"' +
 				( ( countries[country_id].sections[x] == section ) ? ' selected="selected"' : '' ) + '>' + countries[country_id].sections[x] + '</option>';
@@ -128,7 +132,7 @@ $(document).ready(function(){
 mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
 	jQuery( function( jQuery ) {
 	    jQuery( '.required' ).each(function(){
-	       $(this).attr('title', $(this).attr('title') + " is required.");
+	       $(this).attr('title', $(this).attr('title').replace("*") + " is required.");
 	    });
 		jQuery( '#birthday' ).datepicker({
 			changeYear: true,

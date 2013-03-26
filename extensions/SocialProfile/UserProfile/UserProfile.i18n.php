@@ -110,7 +110,7 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 	'user-profile-personal-name' => 'Name',
 	'user-profile-personal-email' => 'E-mail',
 	'user-profile-personal-email-needs-auth' => '(your e-mail needs to be authenticated to receive site notifications)',
-	'user-profile-personal-confirmemail' => 'Confirm e-mail',
+	'user-profile-personal-confirmemail' => 'Confirm e-mail',    
 	'user-profile-personal-location' => 'Location',
 	'user-profile-personal-city' => 'City',
 	'user-profile-personal-country' => 'Country',
@@ -442,6 +442,11 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 	'right-editothersprofiles' => "Update other users' social profiles",
     //==============Updated By mathivanan ==============================//.
     'user-profile-update-validation-about' => "Not allowed above _MAXLEN_ characters",
+    'user-profile-personal-state' => 'State',
+    'user-profile-personal-gender' => 'Gender',    
+    'userprofile-gender-list' =>'
+*Male
+*Female',
 );
 
 /** Message documentation (Message documentation)
