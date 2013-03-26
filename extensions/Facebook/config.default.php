@@ -24,8 +24,9 @@
  * instead override them in LocalSettings.php by adding new settings after
  * require_once("$IP/extensions/Facebook/Facebook.php");
  */
-$wgFbAppId          = 'YOUR_APP_ID';    # Change this!
-$wgFbSecret         = 'YOUR_SECRET';    # Change this!
+
+$wgFbAppId          = '368276639952161';    # Change this!
+$wgFbSecret         = '1198fe997910be1a6a1e47480b73c51b';    # Change this!
 $wgFbNamespace      = 'YOUR_NAMESPACE'; # Change this too
 //$wgFbPageId       = 'YOUR_PAGE_ID';   # Optional
 

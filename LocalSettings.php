@@ -159,5 +159,5 @@ $wgUserProfileDisplay['board'] = true;
 $wgUserProfileDisplay['stats'] = true;
 
 require_once("$IP/extensions/Facebook/Facebook.php");
-$wgFbAppId  = '368276639952161';
-$wgFbSecret = '1198fe997910be1a6a1e47480b73c51b';
+//hide ip address , because facebook config showing
+$wgShowIPinHeader = false; 
