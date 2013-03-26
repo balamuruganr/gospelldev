@@ -140,20 +140,20 @@ class LoginForm extends SpecialPage {
 			'userlogin' : 'userloginnocreate' )->text();
 	}
 
-	public function execute( $par ) {
-	   //gospell:rajaraman
-                            
+	public function execute( $par ) {	                               
 		if ( session_id() == '' ) {
 			wfSetupSession();
 		}
         
 		$this->load();
+        
+        //gospell                
         if(isset($_REQUEST['checkuser'])){
             if(isset($_REQUEST['uname'])){
                 $user_name = substr($_REQUEST['uname'], 0, -4);
             }            
             if($user_name == ''){
-                echo '0';
+                echo '0||';
                 die();
             }                        
             $dbw = wfGetDB( DB_SLAVE );
@@ -166,13 +166,14 @@ class LoginForm extends SpecialPage {
             
 			foreach ( $res as $row ) {
 			 if(isset($row->user_name)){
-			     echo '1';
+			     echo '1||'.$user_name.$this->generateRandomString();
                  die();
 			 }
-			}
-            echo '0';
+			}            
+            echo '0||';
             die();                                    
         }
+        //gospell
         
 		$this->setHeaders();
 
@@ -1351,4 +1352,18 @@ class LoginForm extends SpecialPage {
 			$query
 		);
 	}
+    /**
+	 * Create random text generation 
+	 * gospell rajaraman
+	 *
+	 * @param $length int
+	 */        
+    function generateRandomString($length = 5) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzgospell';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $randomString;
+    }    
 }
