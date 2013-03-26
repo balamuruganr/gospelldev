@@ -52,7 +52,6 @@ class UsercreateTemplate extends QuickTemplate {
 	</div>
 	<div class="visualClear"></div>
 <?php } ?>
-
 <div id="signupstart"><?php $this->msgWiki( 'signupstart' ); ?></div>
 <div id="userlogin">
 
@@ -74,6 +73,7 @@ class UsercreateTemplate extends QuickTemplate {
 				'required',
 				'autofocus'
 			) ); ?>
+            <div id="uNameExists" style="color: red;"></div>
 			</td>
 		</tr>
 		<tr>

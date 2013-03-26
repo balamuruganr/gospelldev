@@ -821,15 +821,15 @@ class UserProfilePage extends Article {
 					$toggleMessage . '</a>
 			</div>';
 		}
-
+        $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
 		$output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
 			'</div>';
 
 		$output .= '<div id="profile-right">';
-
+        
 		$output .= '<div id="profile-title-container">
 				<div id="profile-title">' .
-					$user_name .
+					$gs_user_real_name.
 				'</div>';
 		// Show the user's level and the amount of points they have if
 		// UserLevels has been configured

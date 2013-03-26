@@ -66,7 +66,6 @@ class LoginForm extends SpecialPage {
 	 */
 	public function __construct( $request = null ) {
 		parent::__construct( 'Userlogin' );
-
 		$this->mOverrideRequest = $request;
 	}
 
@@ -142,11 +141,39 @@ class LoginForm extends SpecialPage {
 	}
 
 	public function execute( $par ) {
+	   //gospell:rajaraman
+                            
 		if ( session_id() == '' ) {
 			wfSetupSession();
 		}
-
+        
 		$this->load();
+        if(isset($_REQUEST['checkuser'])){
+            if(isset($_REQUEST['uname'])){
+                $user_name = substr($_REQUEST['uname'], 0, -4);
+            }            
+            if($user_name == ''){
+                echo '0';
+                die();
+            }                        
+            $dbw = wfGetDB( DB_SLAVE );
+            $res = $dbw->select(
+				'user',
+				array( 'user_name' ),
+				array( 'user_name' => ucfirst( $user_name )),
+				__METHOD__
+			);
+            
+			foreach ( $res as $row ) {
+			 if(isset($row->user_name)){
+			     echo '1';
+                 die();
+			 }
+			}
+            echo '0';
+            die();                                    
+        }
+        
 		$this->setHeaders();
 
 		if ( $par == 'signup' ) { # Check for [[Special:Userlogin/signup]]
@@ -213,7 +240,7 @@ class LoginForm extends SpecialPage {
 		global $wgUser, $wgEmailAuthentication, $wgLoginLanguageSelector;
 
 		# Create the account and abort if there's a problem doing so
-		$u = $this->addNewAccountInternal();
+		echo $u = $this->addNewAccountInternal();
 		if( $u == null ) {
 			return false;
 		}
