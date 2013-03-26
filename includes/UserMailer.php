@@ -317,13 +317,13 @@ class UserMailer {
 
 			if ( self::$mErrorString ) {
 				wfDebug( "Error sending mail: " . self::$mErrorString . "\n" );
-                //echo("TEST...1"); die;
+                
 				return Status::newFatal( 'php-mail-error', self::$mErrorString );
 			} elseif ( ! $sent ) {
 				// mail function only tells if there's an error
-				wfDebug( "Unknown error sending mail\n" ); echo("TEST...2"); die;
+				wfDebug( "Unknown error sending mail\n" );
 				return Status::newFatal( 'php-mail-error-unknown' );
-			} else { echo("TEST...3"); die;
+			} else { 
 				return Status::newGood();
 			}
 		}
