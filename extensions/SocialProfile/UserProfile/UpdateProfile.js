@@ -2,97 +2,13 @@
  * JavaScript used on Special:UpdateProfile
  * Displays the "State" dropdown menu if selected country is the United States
  */
-
+ 
+////////////////////////////////////// Common js /////////////////////////////////////////////////
  //global settings it wil be written on common.js 
  wgGospellSettingsProfileAboutMaxLenth = 512;
  wgGospellSettingsProfileMinAgeLimit   = 13;
-
-var countries = new Array();
-countries[0] = {
-	country: 'United States',
-	name: 'State',
-	sections: [
-		'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
-		'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
-		'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-		'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-		'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada',
-		'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
-		'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
-		'Pennsylvania', 'Puerto Rico', 'Rhode Island', 'South Carolina',
-		'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia',
-		'Washington', 'Washington, D.C.', 'West Virginia', 'Wisconsin', 'Wyoming'
-	]
-};
-
-function displaySection( id, country, section ) {
-	country_id = -1;
-	for( var x = 0; x <= countries.length-1; x++ ) {
-		if( country == countries[x].country ) {
-			country_id = x;
-		}
-	}
-
-	var section_select = '';
-	if( countries[country_id] ) {
-		document.getElementById( id + '_label' ).innerHTML = countries[country_id].name;
-		section_select += '<select class="profile-form" name="' + id + '" id="' + id + '"><option></option>';
-		for( x = 0; x <= countries[country_id].sections.length-1; x++ ) {
-			section_select += '<option value="' + countries[country_id].sections[x] + '"' +
-				( ( countries[country_id].sections[x] == section ) ? ' selected="selected"' : '' ) + '>' + countries[country_id].sections[x] + '</option>';
-		}
-		section_select += '</select>';
-	}
-
-	document.getElementById( id + '_form' ).innerHTML = section_select;
-}
-
-function emailCheck(obj)
-{
  
-           var str = $(obj).val();
-		   var aflag = 0;
-		   var dflag = 0;
-		   var z;
-		   var len;
-		   
-		   len=str.length;
-		   var spflag = 0; 
-		   for(z=0;z<len;z++)
-		   {
-			  if(str.charAt(z)=='@')
-			  {
-				 aflag++;
-			  }
-			  if(str.charAt(z)=='.')
-			  {
-				 dflag++;
-			  }
-			  if(str.charAt(z)=="'" || str.charAt(z)=='"' || str.charAt(z)=='+' || str.charAt(z)==';' || str.charAt(z)==':'
-				 || str.charAt(z)=='!' || str.charAt(z)=='*' || str.charAt(z)=='$' || str.charAt(z)=='%' || str.charAt(z)=='A..Z' || str.charAt(z)=='a..z')
-			  {
-				 spflag++;
-			  }
-		   }
-		   if(spflag==1)
-		   {
-			  alert('Sorry, Special Characters can not be entered.');
-			  $(obj).val('');
-			  $(obj).focus();
-			  return false;
-		   }
-		   else if((aflag==1)&&(dflag>=1))
-		   {
-			  return true;
-		   }
-		   else if(str!='')
-		   {
-			  alert('Please enter a valid Email ID, Thanks!');
-			  $(obj).val('');
-			  $(obj).focus(); 
-			  return false;
-		   }
-}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Function Name: calculateAge()                                                      //
 //
@@ -100,7 +16,7 @@ function emailCheck(obj)
 //
 // Description: To get the Age of given DOB(date)                                     // 
 // 
-// Input Parameters: DOB obj, ageField obj                                            //  
+// Input Parameters: DOB obj                                                          //  
 // 
 // Created Date: 25 March 2013                                                        //
 //
@@ -150,8 +66,51 @@ function calculateAge(dateOfBirth)
     } 
   }
 }
+////////////////////////////////////// Common js /////////////////////////////////////////////////
+
+var countries = new Array();
+countries[0] = {
+	country: 'United States',
+	name: 'State',
+	sections: [
+		'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
+		'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+		'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+		'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+		'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada',
+		'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
+		'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
+		'Pennsylvania', 'Puerto Rico', 'Rhode Island', 'South Carolina',
+		'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia',
+		'Washington', 'Washington, D.C.', 'West Virginia', 'Wisconsin', 'Wyoming'
+	]
+};
+
+function displaySection( id, country, section ) {
+	country_id = -1;
+	for( var x = 0; x <= countries.length-1; x++ ) {
+		if( country == countries[x].country ) {
+			country_id = x;
+		}
+	}
+
+	var section_select = '';
+	if( countries[country_id] ) {
+		document.getElementById( id + '_label' ).innerHTML = countries[country_id].name;
+		section_select += '<option>-Select State-</option>';
+		for( x = 0; x <= countries[country_id].sections.length-1; x++ ) {
+			section_select += '<option value="' + countries[country_id].sections[x] + '"' +
+				( ( countries[country_id].sections[x] == section ) ? ' selected="selected"' : '' ) + '>' + countries[country_id].sections[x] + '</option>';
+		}
+		section_select += '';
+	}
+
+	document.getElementById( id  ).innerHTML = section_select;
+}
+
 
 $(document).ready(function(){
+    //$( 'form[name="profile"]' ).validate();
     $('#about').keyup(function(){
        if($(this).val().length !=0 && $(this).val().length > wgGospellSettingsProfileAboutMaxLenth ){ 
         //var str = $(this).val().substring(0,512);//$(this).val(str);//$(this).focus();
@@ -160,25 +119,33 @@ $(document).ready(function(){
        }
     });
     
-    $('#email').blur(function(){ 
-        emailCheck($(this));
-    });
-    
     $('#birthday').change(function(){
        calculateAge($(this)); 
     });
     
 });
 
- 
-mw.loader.using( 'jquery.ui.datepicker', function() {
+mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
 	jQuery( function( jQuery ) {
+	    jQuery( '.required' ).each(function(){
+	       $(this).attr('title', $(this).attr('title') + " is required.");
+	    });
 		jQuery( '#birthday' ).datepicker({
 			changeYear: true,
             changeMonth: true,
-			yearRange: '2001:c',  
+			 yearRange: '-100:'+((-1)*wgGospellSettingsProfileMinAgeLimit), //yearRange: '2001:c',  
 			dateFormat: jQuery( '#birthday' ).hasClass( 'long-birthday' ) ? 'mm/dd/yy' : 'mm/dd'
 		});
+        
+        jQuery( 'form[name="profile"]' ).validate();
+        /*{
+              rules: {
+                real_name: "required"//,
+                //password_again: {
+                //  equalTo: "#password"
+                //}
+              }
+        }*/
 	});
 });
 

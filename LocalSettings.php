@@ -137,6 +137,8 @@ $wgGroupPermissions['user']['edit'] = true;
 $wgGroupPermissions['sysop']['edit'] = true;
 
 $wgGospellSettingsProfileAboutMaxLenth = 512;
+//$wgLoadScript = true; 
+$wgLegacyJavaScript = true;
 
                      //////////// Updated By Mathivanan ///////////////////
 //==========================================================================================//
