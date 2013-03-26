@@ -473,8 +473,25 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				<p class="profile-update-unit-small">' . wfMsg( 'user-profile-personal-email-needs-auth' ) . '</p>';
 		}
 		$form .= '<div class="cleared"></div>
-            <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-gender' ) . ' *</p>
-            <p class="profile-update-unit"><select name="gender" id="gender" class="required" title="' . wfMsg( 'user-profile-personal-gender' ) . '"><option value="">-Select Gender-</option>';
+             <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-pwd' ) . '</p>
+             <p class="profile-update-unit"><span id="changepwd-click"><a>' . wfMsg( 'user-profile-personal-changepwd' ) . '</a></span></p>
+             <div class="cleared"></div>
+             <div id="change_pwd_unit">
+              <div id="change_pwd-block">
+               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-current' ) . '</p>
+               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_current" id="change_pwd_current" title="' . wfMsg( 'user-profile-personal-current' ) . '" /></p>
+               <div class="cleared"></div>
+               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-new' ) . '</p>
+               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_new" id="change_pwd_new" title="' . wfMsg( 'user-profile-personal-new' ) . '" /></p>
+               <div class="cleared"></div>
+               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-retype-new' ) . '</p>
+               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_retype" id="change_pwd_retype" title="' . wfMsg( 'user-profile-personal-retype-new' ) . '" /></p>
+               <div class="cleared"></div>
+              </div>
+             </div>
+             <div class="cleared"></div>
+             <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-gender' ) . ' *</p>
+             <p class="profile-update-unit"><select name="gender" id="gender" class="required" title="' . wfMsg( 'user-profile-personal-gender' ) . '"><option value="">-Select Gender-</option>';
              
        foreach ( $genders as $gendr ) {
 			 $form .= "<option value=\"{$gendr}\"" . ( ( $gendr == $gender ) ? ' selected="selected"' : '' ) . ">";
