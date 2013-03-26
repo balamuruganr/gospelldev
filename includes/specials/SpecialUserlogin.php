@@ -241,7 +241,7 @@ class LoginForm extends SpecialPage {
 		global $wgUser, $wgEmailAuthentication, $wgLoginLanguageSelector;
 
 		# Create the account and abort if there's a problem doing so
-		echo $u = $this->addNewAccountInternal();
+		$u = $this->addNewAccountInternal();
 		if( $u == null ) {
 			return false;
 		}

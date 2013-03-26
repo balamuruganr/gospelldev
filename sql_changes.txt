@@ -1,4 +1,10 @@
 --
+-- sex coloumn added
+--
+
+ALTER TABLE `user_profile` ADD `up_gender` CHAR( 6 ) NOT NULL AFTER `up_user_id` 
+
+--
 -- SQL schema for FBConnect extension
 --
 
