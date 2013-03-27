@@ -1072,6 +1072,8 @@ Note that some pages may continue to be displayed as if you were still logged in
 Your account has been created.
 Do not forget to change your [[Special:Preferences|{{SITENAME}} preferences]].',
 'yourname'                   => 'Username:',
+'firstname'                  => 'Firstname:',
+'lastname'                   => 'Lastname:',
 'yourpassword'               => 'Password:',
 'yourpasswordagain'          => 'Retype password:',
 'remembermypassword'         => 'Remember my login on this browser (for a maximum of $1 {{PLURAL:$1|day|days}})',

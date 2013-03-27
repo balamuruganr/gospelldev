@@ -85,8 +85,9 @@ class LoginForm extends SpecialPage {
 		} else {
 			$request = $this->mOverrideRequest;
 		}
-
 		$this->mType = $request->getText( 'type' );
+        $this->mFirstUsername = $request->getText( 'wpFirstName' );
+        $this->mLastUsername = $request->getText( 'wpLastName' );        
 		$this->mUsername = $request->getText( 'wpName' );
 		$this->mPassword = $request->getText( 'wpPassword' );
 		$this->mRetype = $request->getText( 'wpRetype' );
@@ -112,12 +113,15 @@ class LoginForm extends SpecialPage {
 		} else {
 			$this->mEmail = '';
 		}
+                        
 		if( !in_array( 'realname', $wgHiddenPrefs ) ) {
 			$this->mRealName = $request->getText( 'wpRealName' );
 		} else {
 			$this->mRealName = '';
 		}
-
+        //first name and last name consider as real name 
+        $this->mRealName = trim($this->mFirstUsername).' '.trim($this->mLastUsername);
+        
 		if( !$wgAuth->validDomain( $this->mDomain ) ) {
 			$this->mDomain = $wgAuth->getDomain();
 		}
@@ -140,17 +144,20 @@ class LoginForm extends SpecialPage {
 			'userlogin' : 'userloginnocreate' )->text();
 	}
 
-	public function execute( $par ) {	                               
+	public function execute( $par ) {
 		if ( session_id() == '' ) {
 			wfSetupSession();
 		}
         
 		$this->load();
-        
         //gospell                
         if(isset($_REQUEST['checkuser'])){
+            $user_first_last_name = '';
             if(isset($_REQUEST['uname'])){
                 $user_name = substr($_REQUEST['uname'], 0, -4);
+                $split_user_name = explode('|||',$user_name);
+                $user_name = $split_user_name[0];
+                $user_first_last_name = $split_user_name[1]; 
             }            
             if($user_name == ''){
                 echo '0||';
@@ -166,7 +173,11 @@ class LoginForm extends SpecialPage {
             
 			foreach ( $res as $row ) {
 			 if(isset($row->user_name)){
-			     echo '1||'.$user_name.$this->generateRandomString();
+			     if(!empty($user_first_last_name)){
+			         echo '1||'.$user_first_last_name.$this->generateRandomString();
+                 }else{
+                    echo '1||'.$user_name.$this->generateRandomString();
+                 }
                  die();
 			 }
 			}            
@@ -1080,10 +1091,13 @@ class LoginForm extends SpecialPage {
 			: is_array( $wgPasswordResetRoutes ) && in_array( true, array_values( $wgPasswordResetRoutes ) );
 
 		$template->set( 'header', '' );
+        
+        $template->set( 'firstname', $this->mFirstUsername );
+        $template->set( 'lastname', $this->mLastUsername );
 		$template->set( 'name', $this->mUsername );
 		$template->set( 'password', $this->mPassword );
 		$template->set( 'retype', $this->mRetype );
-		$template->set( 'email', $this->mEmail );
+		$template->set( 'email', $this->mEmail );        
 		$template->set( 'realname', $this->mRealName );
 		$template->set( 'domain', $this->mDomain );
 		$template->set( 'reason', $this->mReason );

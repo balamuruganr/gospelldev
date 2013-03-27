@@ -54,13 +54,43 @@ class UsercreateTemplate extends QuickTemplate {
 <?php } ?>
 <div id="signupstart"><?php $this->msgWiki( 'signupstart' ); ?></div>
 <div id="userlogin">
-
 <form name="userlogin2" id="userlogin2" method="post" action="<?php $this->text('action') ?>">
+<input type='hidden' class='loginText' name="wpRealName" id="wpRealName" value="<?php $this->text('realname') ?>" size='20' />
 	<h2><?php $this->msg('createaccount') ?></h2>
 	<p id="userloginlink"><?php $this->html('link') ?></p>
 	<?php $this->html('header'); /* pre-table point for form plugins... */ ?>
 	<?php if( $this->haveData( 'languages' ) ) { ?><div id="languagelinks"><p><?php $this->html( 'languages' ); ?></p></div><?php } ?>
 	<table>
+		<tr>
+			<td class="mw-label"><label for='wpFirstName2'><?php $this->msg('firstname') ?></label></td>
+			<td class="mw-input">
+				<?php
+			echo Html::input( 'wpFirstName', $this->data['firstname'], 'text', array(
+				'class' => 'loginText',
+				'id' => 'wpFirstName2',
+				'tabindex' => '1',
+				'size' => '20',
+				'required',
+				'autofocus'
+			) ); ?>
+            <span id="errfirstname2" class="error"></span>            
+			</td>
+		</tr>    
+		<tr>
+			<td class="mw-label"><label for='wpLastName2'><?php $this->msg('lastname') ?></label></td>
+			<td class="mw-input">
+				<?php
+			echo Html::input( 'wpLastName', $this->data['lastname'], 'text', array(
+				'class' => 'loginText',
+				'id' => 'wpLastName2',
+				'tabindex' => '1',
+				'size' => '20',
+				'required',
+				'autofocus'
+			) ); ?>            
+			<span id="errlastname2" class="error"></span>
+            </td>
+		</tr>            
 		<tr>
 			<td class="mw-label"><label for='wpName2'><?php $this->msg('yourname') ?></label></td>
 			<td class="mw-input">
@@ -73,6 +103,7 @@ class UsercreateTemplate extends QuickTemplate {
 				'required',
 				'autofocus'
 			) ); ?>
+            <span id="errname2" class="error"></span>
             <div id="uNameExists" style="color: red;"></div>
 			</td>
 		</tr>
@@ -114,7 +145,8 @@ class UsercreateTemplate extends QuickTemplate {
 			'tabindex' => '4',
 			'size' => '20'
 		) + User::passwordChangeInputAttribs() ); ?>
-			</td>
+			<span id="errretype" class="error"></span>     
+            </td>                   
 		</tr>
 		<tr>
 			<?php if( $this->data['useemail'] ) { ?>
@@ -139,19 +171,6 @@ class UsercreateTemplate extends QuickTemplate {
 							} ?>
 					</div>
 				</td>
-			<?php } ?>
-			<?php if( $this->data['userealname'] ) { ?>
-				</tr>
-				<tr>
-					<td class="mw-label"><label for='wpRealName'><?php $this->msg('yourrealname') ?></label></td>
-					<td class="mw-input">
-						<input type='text' class='loginText' name="wpRealName" id="wpRealName"
-							tabindex="6"
-							value="<?php $this->text('realname') ?>" size='20' />
-						<div class="prefsectiontip">
-							<?php $this->msgWiki('prefs-help-realname'); ?>
-						</div>
-					</td>
 			<?php } ?>
 			<?php if( $this->data['usereason'] ) { ?>
 				</tr>
