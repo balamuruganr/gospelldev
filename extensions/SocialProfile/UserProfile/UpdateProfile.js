@@ -126,7 +126,14 @@ $(document).ready(function(){
     $('#birthday').change(function(){
        calculateAge($(this)); 
     });
-    
+    $('#change_pwd-block .profile-update-unit').children('input[type="text"]').attr("disabled", "disabled");
+    $('#changepwd-click').toggle(function() {
+             $('#change_pwd-block .profile-update-unit').children('input[type="text"]').removeAttr("disabled");
+             $('#change_pwd_unit').show("slow");  
+            }, function() {
+             $('#change_pwd-block .profile-update-unit').children('input[type="text"]').attr("disabled", "disabled");   
+             $('#change_pwd_unit').hide("slow");             
+            });    
 });
 
 mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {

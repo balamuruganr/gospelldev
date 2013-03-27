@@ -443,6 +443,11 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
     //==============Updated By mathivanan ==============================//.
     'user-profile-update-validation-about' => "Not allowed above _MAXLEN_ characters",
     'user-profile-personal-state' => 'State',
+    'user-profile-personal-current' => 'Current',
+    'user-profile-personal-new' => 'New',
+    'user-profile-personal-retype-new' => 'Retype-New',
+    'user-profile-personal-pwd' => 'Password',
+    'user-profile-personal-changepwd' => 'Change password',
     'user-profile-personal-gender' => 'Gender',    
     'userprofile-gender-list' =>'
 *Male
