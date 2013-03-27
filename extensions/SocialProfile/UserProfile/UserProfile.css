@@ -640,6 +640,13 @@
 	padding: 1px 5px 1px 5px;
 }
 
+.profile-off {
+	background-color: #FF0000;
+	border: 1px solid #FDC745;
+	font-weight: bold;
+	padding: 1px 5px 1px 5px;
+}
+
 #profile-toggle-button {
 	position: absolute;
 	top: 5px;
@@ -660,17 +667,3 @@
 #changepwd-click {
   cursor: pointer;  
 }
-#change_pwd_unit {
-    width:530px;
-    margin:0px 2px 0px 150px;
-    padding:2px 2px 2px 2px;
-    border:1px solid #cccccc;
-    display:none;
-    height:auto;
-}
-#change_pwd-block {
-   width:520px; 
-   height:150px;
-   border:0px solid red;
-}
-#change_pwd-block .profile-update-unit { float:none; width:520px; }

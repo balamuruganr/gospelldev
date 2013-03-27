@@ -4099,8 +4099,7 @@ class User {
 		$this->loadOptions();
 
 		// Not using getOptions(), to keep hidden preferences in database
-		$saveOptions = $this->mOptions;
-
+		$saveOptions = $this->mOptions;        
 		// Allow hooks to abort, for instance to save to a global profile.
 		// Reset options to default state before saving.
 		if( !wfRunHooks( 'UserSaveOptions', array( $this, &$saveOptions ) ) ) {

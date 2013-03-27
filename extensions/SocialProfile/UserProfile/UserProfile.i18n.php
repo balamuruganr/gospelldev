@@ -447,6 +447,7 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
     'user-profile-personal-new' => 'New',
     'user-profile-personal-retype-new' => 'Retype-New',
     'user-profile-personal-pwd' => 'Password',
+    'user-profile-personal-changeemail' => 'Change e-mail address',
     'user-profile-personal-changepwd' => 'Change password',
     'user-profile-personal-gender' => 'Gender',    
     'userprofile-gender-list' =>'

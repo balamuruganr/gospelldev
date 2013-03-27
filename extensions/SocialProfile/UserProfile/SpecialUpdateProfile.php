@@ -128,7 +128,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			);
            } else {
             $wgOut->addHTML(
-				'<span class="profile-on">'.
+				'<span class="profile-off">'.
                 str_replace('_MAXLEN_',$wgGospellSettingsProfileAboutMaxLenth,wfMsg( 'user-profile-update-validation-about' )).
                 '</span><br /><br />'
 			);
@@ -274,6 +274,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( is_null( $user ) ) {
 			$user = $wgUser;
 		}
+        if($wgRequest->getVal( 'gender' )){
+            
+        }
         if($wgRequest->getVal( 'birthday' )){
             $dob_arr = explode("/",$wgRequest->getVal( 'birthday' ));
             if(count($dob_arr)< 3 && count($dob_arr)==2){
@@ -282,6 +285,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
                $dob_str =  $wgRequest->getVal( 'birthday' );
             }
         }
+       
 		$this->initProfile( $user );
 		$dbw = wfGetDB( DB_MASTER );
 		$basicProfileData = array(
@@ -393,8 +397,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 	 *                      duplication
 	 */
 	function displayBasicForm( $user ) {
-		global $wgRequest, $wgUser, $wgOut;
-
+		global $wgRequest, $wgUser, $wgOut, $wgScriptPath;      
 		$dbr = wfGetDB( DB_SLAVE );
 		$s = $dbr->selectRow( 'user_profile',
 			array(
@@ -461,7 +464,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<p class="profile-update-unit"><input type="text" class="required" size="25" name="real_name" id="real_name" value="' . $real_name . '" title="' . wfMsg( 'user-profile-personal-name' ) . '" /></p>
 			<div class="cleared"></div>
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-email' ) . ' *</p>
-			<p class="profile-update-unit"><input type="text" class="email required" size="25" name="email" id="email" value="' . $email . '" title="' . wfMsg( 'user-profile-personal-email' ) . '" />';
+			<p class="profile-update-unit"><input type="text" class="email required" size="25" name="email" id="email" value="' . $email . '" title="' . wfMsg( 'user-profile-personal-email' ) . '" readonly />';
 		if ( !$wgUser->mEmailAuthenticated ) {
 			$confirm = SpecialPage::getTitleFor( 'Confirmemail' );
 			$form .= " <a href=\"{$confirm->getFullURL()}\">" . wfMsg( 'user-profile-personal-confirmemail' ) . '</a>';
@@ -472,23 +475,14 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$form .= '<p class="profile-update-unit-left"></p>
 				<p class="profile-update-unit-small">' . wfMsg( 'user-profile-personal-email-needs-auth' ) . '</p>';
 		}
+              
+        #/gospelldev/index.php?title=Special:ChangeEmail&returnto=Special%3AUpdateProfileecho($this->getTitle()->getLocalUrl());
 		$form .= '<div class="cleared"></div>
-             <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-pwd' ) . '</p>
-             <p class="profile-update-unit"><span id="changepwd-click"><a>' . wfMsg( 'user-profile-personal-changepwd' ) . '</a></span></p>
+             <p class="profile-update-unit-left">&nbsp;</p>
+             <p class="profile-update-unit"><span id="changepwd-click"><a title="Special:ChangeEmail" href="'.$wgScriptPath.'/index.php?title=Special:ChangeEmail&returnto=Special:UpdateProfile">' . wfMsg( 'user-profile-personal-changeemail' ) . '</a></span></p>
              <div class="cleared"></div>
-             <div id="change_pwd_unit">
-              <div id="change_pwd-block">
-               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-current' ) . '</p>
-               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_current" id="change_pwd_current" title="' . wfMsg( 'user-profile-personal-current' ) . '" /></p>
-               <div class="cleared"></div>
-               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-new' ) . '</p>
-               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_new" id="change_pwd_new" title="' . wfMsg( 'user-profile-personal-new' ) . '" /></p>
-               <div class="cleared"></div>
-               <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-retype-new' ) . '</p>
-               <p class="profile-update-unit"><input type="text" class="required" size="25" name="change_pwd_retype" id="change_pwd_retype" title="' . wfMsg( 'user-profile-personal-retype-new' ) . '" /></p>
-               <div class="cleared"></div>
-              </div>
-             </div>
+             <p class="profile-update-unit-left">&nbsp;</p>
+             <p class="profile-update-unit"><span id="changepwd-click"><a title="Special:ChangePassword" href="'.$wgScriptPath.'/index.php?title=Special:ChangePassword&returnto=Special:UpdateProfile">' . wfMsg( 'user-profile-personal-changepwd' ) . '</a></span></p>
              <div class="cleared"></div>
              <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-gender' ) . ' *</p>
              <p class="profile-update-unit"><select name="gender" id="gender" class="required" title="' . wfMsg( 'user-profile-personal-gender' ) . '"><option value="">-Select Gender-</option>';
@@ -507,18 +501,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-location' ) . '</p>
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-city' ) . ' *</p>
 			<p class="profile-update-unit"><input type="text" class="required" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) ? $location_city : '' ) . '" title="' . wfMsg( 'user-profile-personal-location' ) . '-' . wfMsg( 'user-profile-personal-city' ) . '" /></p>
-			<div class="cleared"></div>
-			<p class="profile-update-unit-left" id="location_state_label">' . wfMsg( 'user-profile-personal-state' ) . ' *</p>';
-		$form .= '<p class="profile-update-unit">';
-		$form .= '<span id="location_state_form">
-                   <select class="required profile-form" name="location_state" id="location_state" title="' . wfMsg( 'user-profile-personal-location' ) . '-' . wfMsg( 'user-profile-personal-state' ) . '">
-                   </select>';
-		$form .= "</span>
-				<script type=\"text/javascript\">
-					displaySection(\"location_state\",\"" . $location_country . "\",\"" . ( isset( $location_state ) ? $location_state : '' ) . "\");
-				</script>";
-        $form .= '<div class="cleared"></div><p class="profile-update-unit-left">&nbsp;</p>';        
-		$form .= "<select name=\"location_country\" id=\"location_country\" class=\"required\" onchange=\"displaySection('location_state',this.value,'')\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"><option value=\"\">-Select Country-</option>";
+			<div class="cleared"></div>';
+		$form .= '<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-country' ) . ' *</p>';        
+		$form .= "<select name=\"location_country\" id=\"location_country\" class=\"required\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"><option value=\"\">-Select Country-</option>";
 
 		foreach ( $countries as $country ) {
 			$form .= "<option value=\"{$country}\"" . ( ( $country == $location_country ) ? ' selected="selected"' : '' ) . ">";
@@ -536,17 +521,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-city' ) . ' *</p>
 			<p class="profile-update-unit"><input type="text" class="required" size="25" name="hometown_city" id="hometown_city" value="' . ( isset( $hometown_city ) ? $hometown_city : '' ) . '" title="' . wfMsg( 'user-profile-personal-hometown' ) . '-' . wfMsg( 'user-profile-personal-city' ) . '" /></p>
 			<div class="cleared"></div>
-			<p class="profile-update-unit-left" id="hometown_state_label">' . wfMsg( 'user-profile-personal-state' ) . ' *</p>
-			<p class="profile-update-unit">';
-		$form .= '<span id="hometown_state_form">
-                   <select class="required profile-form" name="hometown_state" id="hometown_state" title="' . wfMsg( 'user-profile-personal-hometown' ) . '-' . wfMsg( 'user-profile-personal-state' ) . '">
-                   </select>';
-		$form .= "</span>
-			<script type=\"text/javascript\">
-				displaySection(\"hometown_state\",\"" . $hometown_country . "\",\"" . ( isset( $hometown_state ) ? $hometown_state : '' ) . "\");
-			</script>";
-        $form .= '<div class="cleared"></div><p class="profile-update-unit-left">&nbsp;</p>';    
-		$form .= "<select name=\"hometown_country\" id=\"hometown_country\" class=\"required\" onchange=\"displaySection('hometown_state',this.value,'')\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"><option value=\"\">-Select Country-</option>";
+            <p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-country' ) . ' *</p>';    
+		$form .= "<select name=\"hometown_country\" id=\"hometown_country\" class=\"required\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"><option value=\"\">-Select Country-</option>";
 
 		foreach ( $countries as $country ) {
 			$form .= "<option value=\"{$country}\"" . ( ( $country == $hometown_country ) ? ' selected="selected"' : '' ) . ">";
