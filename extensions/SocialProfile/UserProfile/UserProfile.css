@@ -641,10 +641,12 @@
 }
 
 .profile-off {
-	background-color: #FF0000;
-	border: 1px solid #FDC745;
+	background-color: #FDC745;
+	border: 1px solid #FF0000;
 	font-weight: bold;
 	padding: 1px 5px 1px 5px;
+    display:inline-block;
+    margin-top:3px;    
 }
 
 #profile-toggle-button {

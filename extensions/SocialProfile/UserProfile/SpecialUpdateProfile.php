@@ -55,7 +55,21 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 	public function execute( $section ) {
 		global $wgUser, $wgOut, $wgRequest, $wgUserProfileScripts, $wgUpdateProfileInRecentChanges, $wgSupressPageTitle, $wgGospellSettingsProfileAboutMaxLenth;
 		$wgSupressPageTitle = true;
-
+        //============================
+        $profile_upd_one = false;
+        $profile_upd_two = false;
+        $valid_name = true;
+        $valid_email = true;
+        $valid_gender = true;
+        $valid_location_city = true;
+        $valid_location_country = true;
+        $valid_hometown_city = true;
+        $valid_hometown_country = true;
+        $valid_birth_date = true;
+        $valid_about_text = true;
+        $valid_about_text_limit = true;
+        //=============================
+        
 		$wgOut->setHTMLTitle( wfMsg( 'pagetitle', wfMsg( 'edit-profile-title' ) ) );
 
 		// This feature is only available for logged-in users.
@@ -91,10 +105,22 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			}
 			switch( $section ) {
 				case 'basic':
-                    if(strlen($wgRequest->getVal( 'about' ))<= $wgGospellSettingsProfileAboutMaxLenth){                        
-                       $this->saveProfileBasic( $wgUser );                      
-	                   $this->saveSettings_basic( $wgUser );                       
-                     }  					
+                    if(strlen(trim($wgRequest->getVal( 'real_name' )))<=0): $valid_name = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'email' )))<=0): $valid_email = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'gender' )))<=0): $valid_gender = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'location_city' )))<=0): $valid_location_city = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'location_country' )))<=0): $valid_location_country = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'hometown_city' )))<=0): $valid_hometown_city = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'hometown_country' )))<=0): $valid_hometown_country = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'birthday' )))<=0): $valid_birth_date  = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'about' )))<=0): $valid_about_text  = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'about' ))) > $wgGospellSettingsProfileAboutMaxLenth):$valid_about_text_limit= false; endif;
+                    
+                    if($valid_name && $valid_email && $valid_gender && $valid_location_city && $valid_location_country && $valid_hometown_city && $valid_hometown_country && $valid_birth_date && $valid_about_text):
+                       $profile_upd_one = $this->saveProfileBasic( $wgUser );                      
+	                   $profile_upd_two = $this->saveSettings_basic( $wgUser );
+                    endif;
+                    					
 					break;
 				case 'personal':
 					$this->saveProfilePersonal( $wgUser );
@@ -119,21 +145,21 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				wfMsgForContent( 'user-profile-update-log-section' ) .
 					" '{$section}'"
 			);
-            
-			if(strlen($wgRequest->getVal( 'about' ))<= $wgGospellSettingsProfileAboutMaxLenth){
-			$wgOut->addHTML(
+                                   
+            if($valid_name && $valid_email && $valid_gender && $valid_location_city && $valid_location_country && $valid_hometown_city && $valid_hometown_country && $valid_birth_date && $valid_about_text):
+              $wgOut->addHTML(
 				'<span class="profile-on">' .
-				wfMsg( 'user-profile-update-saved' ) .
+				wfMsg( 'user-profile-update-saved' ) . 
 				'</span><br /><br />'
-			);
-           } else {
-            $wgOut->addHTML(
-				'<span class="profile-off">'.
-                str_replace('_MAXLEN_',$wgGospellSettingsProfileAboutMaxLenth,wfMsg( 'user-profile-update-validation-about' )).
-                '</span><br /><br />'
-			);
-           }
-
+			  );
+            else:
+              $wgOut->addHTML(
+				'<span class="profile-on">' .
+				wfMsg( 'user-profile-update-unsaved' ) . 
+				'</span><br /><br />'
+			  );
+            endif;
+            
 			// create the user page if it doesn't exist yet
 			$title = Title::makeTitle( NS_USER, $wgUser->getName() );
 			$article = new Article( $title );
@@ -191,6 +217,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			}
 		}
 		$wgUser->saveSettings();
+     return true;   
 	}
 
 	/**
@@ -319,6 +346,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		wfRunHooks( 'BasicProfileChanged', array( $user, $basicProfileData ) );
 		// end of the hook
 		$wgMemc->delete( wfMemcKey( 'user', 'profile', 'info', $user->getID() ) );
+        
+     return true;   
 	}
 
 	/**
