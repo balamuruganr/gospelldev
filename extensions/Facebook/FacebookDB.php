@@ -144,8 +144,9 @@ class FacebookDB {
 	
 	/**
 	 * Add a User <-> Facebook ID association to the database.
+     * $fb_userinfo it has facebook information details edited by gospelldev rajaraman
 	 */
-	public static function addFacebookID( $user, $fbid ) {
+	public static function addFacebookID( $user, $fbid, $fb_userinfo = array() ) {
 		global $wgMemc;
 		wfProfileIn( __METHOD__ );
 		
@@ -166,6 +167,22 @@ class FacebookDB {
 				array( 'IGNORE' )
 			);
 			$dbw->commit();
+            //gospelldev
+            if(!empty($fb_userinfo)) {
+                if($fb_userinfo['birthday']) {                    
+                    $expl_bday = explode('/',$fb_userinfo['birthday']); 
+                    $new_bday = $expl_bday[2].'-'.$expl_bday[0].'-'.$expl_bday[1];                    
+    				$dbw->insert(
+    					"{$prefix}user_profile",
+    					array(
+    						'up_user_id' => $user->getId(),
+    						'up_birthday' => $new_bday
+    					),
+    					__METHOD__
+    				);
+                }								
+            }
+            //gospelldev
 		}
 		
 		$wgMemc->set( $memkey, self::getFacebookIDs( $user, DB_MASTER ) );
