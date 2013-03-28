@@ -60,7 +60,7 @@ $dir = dirname( __FILE__ ) . '/';
 include_once $dir . 'config.default.php';
 if (file_exists( $dir . 'config.php' )) {
 	// If config.php exists, import those settings over the default ones
-	require_once $dir . 'config.php';
+    require_once $dir . 'config.php';
 }
 
 // Install the extension
