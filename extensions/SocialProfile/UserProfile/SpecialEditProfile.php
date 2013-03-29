@@ -173,12 +173,12 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		if ( $s !== false ) {
 			$location_city = $s->up_location_city;
 			$location_state = $s->up_location_state;
-			$location_country = $s->up_location_country;
+			$location_country = trim($s->up_location_country);
 			$about = $s->up_about;
 			$occupation = $s->up_occupation;
 			$hometown_city = $s->up_hometown_city;
 			$hometown_state = $s->up_hometown_state;
-			$hometown_country = $s->up_hometown_country;
+			$hometown_country = trim($s->up_hometown_country);
 			$birthday = self::formatBirthday( $s->up_birthday, true );
 			$schools = $s->up_schools;
 			$places = $s->up_places_lived;

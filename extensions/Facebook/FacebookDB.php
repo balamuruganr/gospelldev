@@ -169,13 +169,33 @@ class FacebookDB {
 			$dbw->commit();
             //gospelldev
             if(!empty($fb_userinfo)) {
-                if($fb_userinfo['birthday']) {                    
+                if($fb_userinfo['birthday']) {
+                /*getting home town country */
+                    $hometown_country = '';                    
+                    if($fb_userinfo['hometown']) {                    
+                        $split_hometown_country = explode(',',$fb_userinfo['hometown']['name']);
+                        $split_hometown_country_cnt = count($split_hometown_country);
+                        if($split_hometown_country_cnt) {
+                            $hometown_country = $split_hometown_country[$split_hometown_country_cnt-1];
+                        }  
+                    }
+                    $location_country = '';                    
+                    if($fb_userinfo['location']) {                    
+                        $split_location_country = explode(',',$fb_userinfo['location']['name']);
+                        $split_location_country_cnt = count($split_location_country);
+                        if($split_location_country_cnt) {
+                            $location_country = $split_location_country[$split_location_country_cnt-1];
+                        }  
+                    }                  
+                                      
                     $expl_bday = explode('/',$fb_userinfo['birthday']); 
                     $new_bday = $expl_bday[2].'-'.$expl_bday[0].'-'.$expl_bday[1];                    
     				$dbw->insert(
     					"{$prefix}user_profile",
     					array(
     						'up_user_id' => $user->getId(),
+                            'up_location_country' => trim($location_country),
+                            'up_hometown_country' => trim($hometown_country),
     						'up_birthday' => $new_bday
     					),
     					__METHOD__
