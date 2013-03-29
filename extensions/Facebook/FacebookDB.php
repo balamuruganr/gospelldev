@@ -38,7 +38,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * In this case, you will need to fix this by running the MW updater:
  * >php maintenance/update.php
  */
-class FacebookDB {
+class FacebookDB {    
 	/**
 	 * Find the Facebook IDs of the given user, if any, using the database
 	 * connection provided.
@@ -147,7 +147,7 @@ class FacebookDB {
      * $fb_userinfo it has facebook information details edited by gospelldev rajaraman
 	 */
 	public static function addFacebookID( $user, $fbid, $fb_userinfo = array() ) {
-		global $wgMemc;
+		global $wgMemc,$wgUploadDirectory,$wgDBname;
 		wfProfileIn( __METHOD__ );
 		
 		$memkey = wfMemcKey( 'fb_user_id', $user->getId() );
@@ -180,7 +180,35 @@ class FacebookDB {
     					),
     					__METHOD__
     				);
-                }								
+                }
+            
+                $fb_profile_img_url = self::getFacebookProfliePicture("http://graph.facebook.com/$fbid/picture?width=160&height=160");
+                $temp_file = $fbid.'.jpg';
+                $temp_path = $wgUploadDirectory.'/temp/'.$temp_file;
+                file_put_contents($temp_path, file_get_contents($fb_profile_img_url));
+
+    			if ( is_file( $temp_path ) ) {				
+            		$imageInfo = getimagesize( $temp_path );
+            		switch ( $imageInfo[2] ) {
+            			case 1:
+            				$ext = 'gif';
+            				break;
+            			case 2:
+            				$ext = 'jpg';
+            				break;
+            			case 3:
+            				$ext = 'png';
+            				break;
+            			default:
+            				break;
+            		}                    
+                    self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_l', 75 );    
+                    self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_ml', 50 );
+                    self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_m', 30 );
+                    self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_s', 16 ); 
+                    unlink( $temp_path ); //delete temp file                                  
+    			}
+                                                
             }
             //gospelldev
 		}
@@ -251,4 +279,116 @@ class FacebookDB {
 		global $wgDBprefix, $wgSharedPrefix;
 		return self::sharedDB() ? $wgSharedPrefix : ""; // bugfix for $wgDBprefix;
 	}
+    /**
+     * Getting facebook profile picture url by curl gospelldev
+    */
+    public static function getFacebookProfliePicture($url) {
+        $ch = curl_init();        
+        curl_setopt($ch, CURLOPT_URL, $url);        
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_exec($ch);        
+        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);        
+        curl_close($ch);
+        return $url;        
+    }    
+	public static function createThumbnail( $imageSrc, $imageInfo, $imgDest, $thumbWidth ) {
+		global $wgUseImageMagick, $wgImageMagickConvertCommand, $wgUploadDirectory;        
+        $avatar_upload_dir = $wgUploadDirectory.'/avatars';
+        
+		if ( $wgUseImageMagick ) { // ImageMagick is enabled
+			list( $origWidth, $origHeight, $typeCode ) = $imageInfo;
+
+			if ( $origWidth < $thumbWidth ) {
+				$thumbWidth = $origWidth;
+			}
+			$thumbHeight = ( $thumbWidth * $origHeight / $origWidth );
+			$border = ' -bordercolor white  -border  0x';
+			if ( $thumbHeight < $thumbWidth ) {
+				$border = ' -bordercolor white  -border  0x' . ( ( $thumbWidth - $thumbHeight ) / 2 );
+			}
+			if ( $typeCode == 2 ) {
+				exec(
+					$wgImageMagickConvertCommand . ' -size ' . $thumbWidth . 'x' . $thumbWidth .
+					' -resize ' . $thumbWidth . ' -crop ' . $thumbWidth . 'x' .
+					$thumbWidth . '+0+0   -quality 100 ' . $border . ' ' .
+					$imageSrc . ' ' . $avatar_upload_dir . '/' . $imgDest . '.jpg'
+				);
+			}
+			if ( $typeCode == 1 ) {
+				exec(
+					$wgImageMagickConvertCommand . ' -size ' . $thumbWidth . 'x' . $thumbWidth .
+					' -resize ' . $thumbWidth . ' -crop ' . $thumbWidth . 'x' .
+					$thumbWidth . '+0+0 ' . $imageSrc . ' ' . $border . ' ' .
+					$avatar_upload_dir . '/' . $imgDest . '.gif'
+				);
+			}
+			if ( $typeCode == 3 ) {
+				exec(
+					$wgImageMagickConvertCommand . ' -size ' . $thumbWidth . 'x' . $thumbWidth .
+					' -resize ' . $thumbWidth . ' -crop ' . $thumbWidth . 'x' .
+					$thumbWidth . '+0+0 ' . $imageSrc . ' ' .
+					$avatar_upload_dir . '/' . $imgDest . '.png'
+				);
+			}
+		} else { // ImageMagick is not enabled, so fall back to PHP's GD library
+			// Get the image size, used in calculations later.
+			list( $origWidth, $origHeight, $typeCode ) = getimagesize( $imageSrc );
+
+			switch( $typeCode ) {
+				case '1':
+					$fullImage = imagecreatefromgif( $imageSrc );
+					$ext = 'gif';
+					break;
+				case '2':
+					$fullImage = imagecreatefromjpeg( $imageSrc );
+					$ext = 'jpg';
+					break;
+				case '3':
+					$fullImage = imagecreatefrompng( $imageSrc );
+					$ext = 'png';
+					break;
+			}
+
+			$scale = ( $thumbWidth / $origWidth );
+
+			// Create our thumbnail size, so we can resize to this, and save it.
+			$tnImage = imagecreatetruecolor(
+				$origWidth * $scale,
+				$origHeight * $scale
+			);
+
+			// Resize the image.
+			imagecopyresampled(
+				$tnImage,
+				$fullImage,
+				0, 0, 0, 0,
+				$origWidth * $scale,
+				$origHeight * $scale,
+				$origWidth,
+				$origHeight
+			);
+
+			// Create a new image thumbnail.
+			if ( $typeCode == 1 ) {
+				imagegif( $tnImage, $imageSrc );
+			} elseif ( $typeCode == 2 ) {
+				imagejpeg( $tnImage, $imageSrc );
+			} elseif ( $typeCode == 3 ) {
+				imagepng( $tnImage, $imageSrc );
+			}
+
+			// Clean up.
+			imagedestroy( $fullImage );
+			imagedestroy( $tnImage );
+
+			// Copy the thumb
+			copy(
+				$imageSrc,
+				$avatar_upload_dir . '/' . $imgDest . '.' . $ext
+			);
+		}
+	}        
 }
