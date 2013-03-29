@@ -396,7 +396,7 @@ class FacebookUser {
 		// Fill in the info we know
 		$userinfo = $this->getUserInfo();
 		$email    = FacebookUser::getOptionFromInfo('email', $userinfo);
-		$realName = FacebookUser::getOptionFromInfo('fullname', $userinfo);
+		$realName = FacebookUser::getOptionFromInfo('fullname', $userinfo);        
 		$pass     = '';
 		// Create the account (locally on main cluster or via $wgAuth on other clusters)
 		// $wgAuth essentially checks to see if these are valid parameters for new users
@@ -427,7 +427,7 @@ class FacebookUser {
 		// This must be done up here, because somewhere after this (I'm not too
 		// sure where) the data must be in the database before copy-to-local is
 		// done for shared setups.
-		FacebookDB::addFacebookID($user, $this->id);
+		FacebookDB::addFacebookID($user, $this->id, $userinfo);
 		$this->user = $user;
 		
 		$wgAuth->initUser( $this->user, true ); // $autocreate == true

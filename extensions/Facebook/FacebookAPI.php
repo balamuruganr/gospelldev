@@ -95,6 +95,8 @@ class FacebookAPI extends Facebook {
 		
 		if ( self::$scope === NULL ) {
 			$scope = array();
+            $scope[] = 'user_birthday';//gospelldev
+            $scope[] = 'user_location';//gospelldev
 			if ( !empty( $wgEnableEmail ) ) {
 				$scope[] = 'email';
 			}
