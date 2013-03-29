@@ -17,6 +17,22 @@ function send_message() {
 		);
 	}
 }
+var wall_posted = 0;
+function send_wall() {
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	var encMsg = encodeURIComponent( document.getElementById( 'message_wall' ).value );
+	var msgType = document.getElementById( 'message_type_wall' ).value;
+	if( document.getElementById( 'message_wall' ).value && !wall_posted ) {
+		wall_posted = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSendBoardMessageWall', [ userTo, encMsg, msgType, 10 ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+				wall_posted = 0;
+				document.getElementById( 'message_wall' ).value = '';
+			}
+		);
+	}
+}
 
 function delete_message( id ) {
 	if( confirm( 'Are you sure you want to delete this message?' ) ) {

@@ -184,6 +184,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			case 'preferences':
 				$wgOut->addHTML( $this->displayPreferencesForm() );
 				break;
+            case 'books':
+				$wgOut->addHTML( $this->displayBooksForm() );
+				break;    
+            case 'wall':
+				$wgOut->addHTML( $this->displayWallForm() );
+				break;    
 		}
 	}
 
@@ -440,8 +446,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		);
 
 		$showYOB = true;
-		if ( $s !== false ) {
-		    $gender = $s->up_gender;
+		if ( $s !== false ) {		    
+		    $gender = ($s->up_gender)?$s->up_gender:"";
 			$location_city = $s->up_location_city;
 			$location_state = $s->up_location_state;
 			$location_country = $s->up_location_country;
@@ -517,7 +523,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
              <p class="profile-update-unit"><select name="gender" id="gender" class="required" title="' . wfMsg( 'user-profile-personal-gender' ) . '"><option value="">-Select Gender-</option>';
              
        foreach ( $genders as $gendr ) {
-			 $form .= "<option value=\"{$gendr}\"" . ( ( $gendr == $gender ) ? ' selected="selected"' : '' ) . ">";
+			 $form .= "<option value=\"{$gendr}\"" . ( (isset($gender) && $gendr == $gender ) ? ' selected="selected"' : '' ) . ">";
 			 $form .= $gendr . "</option>\n";
 		    }
                         
@@ -794,7 +800,136 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 
 		return $form;
 	}
+    
+    /**
+	 * Displays the form for toggling notifications related to social tools
+	 * (e-mail me when someone friends/foes me, send me a gift, etc.)
+	 *
+	 * @return HTML
+	 */
+	function displayBooksForm() {
+		global $wgRequest, $wgUser, $wgOut;
 
+		$dbr = wfGetDB( DB_SLAVE );
+		$s = $dbr->selectRow(
+			'user_profile',
+			array( 'up_birthday' ),
+			array( 'up_user_id' => $wgUser->getID() ),
+			__METHOD__
+		);
+
+		$showYOB = isset( $s, $s->up_birthday ) ? false : true;
+
+		// @todo If the checkboxes are in front of the option, this would look more like Special:Wall
+		$wgOut->setPageTitle( wfMsg( 'user-profile-section-books' ) );
+		$form = UserProfile::getEditProfileNav( wfMsg( 'user-profile-section-books' ) );
+		$form .= '<!--form action="" method="post" enctype="multipart/form-data" name="profile">';
+		$form .= '<div class="profile-info clearfix">
+			<div class="profile-update">
+				<p class="profile-update-title">' . wfMsg( 'user-profile-preferences-emails' ) . '</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-personalmessage' ) .
+					' <input type="checkbox" size="25" name="notify_message" id="notify_message" value="1"' . ( ( $wgUser->getIntOption( 'notifymessage', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-friendfoe' ) .
+					' <input type="checkbox" size="25" class="createbox" name="notify_friend" id="notify_friend" value="1" ' . ( ( $wgUser->getIntOption( 'notifyfriendrequest', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-gift' ) .
+					' <input type="checkbox" size="25" name="notify_gift" id="notify_gift" value="1" ' . ( ( $wgUser->getIntOption( 'notifygift', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-level' ) .
+					' <input type="checkbox" size="25" name="notify_honorifics" id="notify_honorifics" value="1"' . ( ( $wgUser->getIntOption( 'notifyhonorifics', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>';
+
+		$form .= '<p class="profile-update-title">' .
+			wfMsg( 'user-profile-preferences-miscellaneous' ) .
+			'</p>
+			<p class="profile-update-row">' .
+				wfMsg( 'user-profile-preferences-miscellaneous-show-year-of-birth' ) .
+				' <input type="checkbox" size="25" name="show_year_of_birth" id="show_year_of_birth" value="1"' . ( ( $wgUser->getIntOption( 'showyearofbirth', $showYOB ) == 1 ) ? 'checked' : '' ) . '/>
+			</p>';
+
+		// Allow extensions (like UserMailingList) to add new checkboxes
+		wfRunHooks( 'SpecialUpdateProfile::displayPreferencesForm', array( $this, &$form ) );
+
+		$form .= '</div>
+			<div class="cleared"></div>';
+		$form .= '<input type="button" class="site-button" value="' . wfMsg( 'user-profile-update-button' ) . '" size="20" onclick="document.profile.submit()" />
+			</form-->';
+		$form .= '</div>';
+
+		return $form;
+	}
+    
+    /**
+	 * Displays the form for toggling notifications related to social tools
+	 * (e-mail me when someone friends/foes me, send me a gift, etc.)
+	 *
+	 * @return HTML
+	 */
+	function displayWallForm() {
+		global $wgRequest, $wgUser, $wgOut;
+
+		$dbr = wfGetDB( DB_SLAVE );
+		$s = $dbr->selectRow(
+			'user_profile',
+			array( 'up_birthday' ),
+			array( 'up_user_id' => $wgUser->getID() ),
+			__METHOD__
+		);
+
+		$showYOB = isset( $s, $s->up_birthday ) ? false : true;
+
+		// @todo If the checkboxes are in front of the option, this would look more like Special:Preferences
+		$wgOut->setPageTitle( wfMsg( 'user-profile-section-wall' ) );
+		$form = UserProfile::getEditProfileNav( wfMsg( 'user-profile-section-wall' ) );
+		$form .= '<!--form action="" method="post" enctype="multipart/form-data" name="profile">';
+		$form .= '<div class="profile-info clearfix">
+			<div class="profile-update">
+				<p class="profile-update-title">' . wfMsg( 'user-profile-preferences-emails' ) . '</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-personalmessage' ) .
+					' <input type="checkbox" size="25" name="notify_message" id="notify_message" value="1"' . ( ( $wgUser->getIntOption( 'notifymessage', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-friendfoe' ) .
+					' <input type="checkbox" size="25" class="createbox" name="notify_friend" id="notify_friend" value="1" ' . ( ( $wgUser->getIntOption( 'notifyfriendrequest', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-gift' ) .
+					' <input type="checkbox" size="25" name="notify_gift" id="notify_gift" value="1" ' . ( ( $wgUser->getIntOption( 'notifygift', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+
+				<p class="profile-update-row">'
+					. wfMsg( 'user-profile-preferences-emails-level' ) .
+					' <input type="checkbox" size="25" name="notify_honorifics" id="notify_honorifics" value="1"' . ( ( $wgUser->getIntOption( 'notifyhonorifics', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>';
+
+		$form .= '<p class="profile-update-title">' .
+			wfMsg( 'user-profile-preferences-miscellaneous' ) .
+			'</p>
+			<p class="profile-update-row">' .
+				wfMsg( 'user-profile-preferences-miscellaneous-show-year-of-birth' ) .
+				' <input type="checkbox" size="25" name="show_year_of_birth" id="show_year_of_birth" value="1"' . ( ( $wgUser->getIntOption( 'showyearofbirth', $showYOB ) == 1 ) ? 'checked' : '' ) . '/>
+			</p>';
+
+		// Allow extensions (like UserMailingList) to add new checkboxes
+		wfRunHooks( 'SpecialUpdateProfile::displayPreferencesForm', array( $this, &$form ) );
+
+		$form .= '</div>
+			<div class="cleared"></div>';
+		$form .= '<input type="button" class="site-button" value="' . wfMsg( 'user-profile-update-button' ) . '" size="20" onclick="document.profile.submit()" />
+			</form-->';
+		$form .= '</div>';
+
+		return $form;
+	}
+    
+     
 	/**
 	 * Displays the form for editing custom (site-specific) information.
 	 *

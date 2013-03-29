@@ -82,9 +82,17 @@ class UserProfilePage extends Article {
 		}
 
 		$wgOut->addHTML( '</div>' );
-
+        /*/===========================
+        // middle side
+        wfDebug( "profile start middle\n" );
+        $wgOut->addHTML( '<div id="user-page-middle" class="clearfix">' );
+        if ( !wfRunHooks( 'UserProfileBeginLeft', array( &$this ) ) ) {
+			wfDebug( __METHOD__ . ": UserProfileBeginMiddle messed up profile!\n" );
+		}
+        $wgOut->addHTML( '</div>' );
+        //===========================*/
 		wfDebug( "profile start right\n" );
-
+                
 		// Right side
 		$wgOut->addHTML( '<div id="user-page-right" class="clearfix">' );
 
@@ -99,6 +107,9 @@ class UserProfilePage extends Article {
 			wfDebug( __METHOD__ . ": UserProfileRightSideAfterActivity hook messed up profile!\n" );
 		}
 		$wgOut->addHTML( $this->getCasualGames( $this->user_id, $this->user_name ) );
+        //Customised by Mathivanan ///////////////////
+        $wgOut->addHTML( $this->getUserWall( $this->user_id, $this->user_name ) );
+        //Customized ends ///////////////////////////
 		$wgOut->addHTML( $this->getUserBoard( $this->user_id, $this->user_name ) );
 
 		if ( !wfRunHooks( 'UserProfileEndRight', array( &$this ) ) ) {
@@ -816,10 +827,10 @@ class UserProfilePage extends Article {
 			} else {
 				$toggleMessage = wfMsg( 'user-type-toggle-new' );
 			}
-			$output .= '<div id="profile-toggle-button">
+			/*$output .= '<div id="profile-toggle-button">
 				<a href="' . $toggle_title->escapeFullURL() . '" rel="nofollow">' .
 					$toggleMessage . '</a>
-			</div>';
+			</div>'; */
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
 		$output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
@@ -848,15 +859,17 @@ class UserProfilePage extends Article {
 					</div>';
 		}
 		$output .= '<div class="cleared"></div>
-			</div>
-			<div class="profile-actions">';
+			</div>';
+		$output .= '<div class="profile-actions">';
 
 		if ( $this->isOwner() ) {
 			$output .= $wgLang->pipeList( array(
 				'<a href="' . $update_profile->escapeFullURL() . '">' . wfMsg( 'user-edit-profile' ) . '</a>',
 				'<a href="' . $upload_avatar->escapeFullURL() . '">' . wfMsg( 'user-upload-avatar' ) . '</a>',
 				'<a href="' . $watchlist->escapeFullURL() . '">' . wfMsg( 'user-watchlist' ) . '</a>',
-				''
+				'<a href="'.$update_profile->escapeFullURL().'/books" rel="nofollow">' . wfMsg( 'user-books' ) . '</a>',
+                '<a href="'.$update_profile->escapeFullURL().'/wall" rel="nofollow">' . wfMsg( 'user-wall' ) . '</a>',
+                ''
 			) );
 		} elseif ( $wgUser->isLoggedIn() ) {
 			if ( $relationship == false ) {
@@ -871,6 +884,7 @@ class UserProfilePage extends Article {
 						'<a href="' . $remove_relationship->escapeFullURL( 'user=' . $user_safe ) . '">' . wfMsg( 'user-remove-friend' ) . '</a>',
 						''
 					) );
+                     
 				}
 				if ( $relationship == 2 ) {
 					$output .= $wgLang->pipeList( array(
@@ -889,8 +903,12 @@ class UserProfilePage extends Article {
 			$output .= '<a href="' . $give_gift->escapeFullURL( 'user=' . $user_safe ) . '" rel="nofollow">' .
 				wfMsg( 'user-send-gift' ) . '</a>';
 			$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
+        
+           
 		}
-
+        
+               
+/*
 		$output .= '<a href="' . $contributions->escapeFullURL() . '" rel="nofollow">' . wfMsg( 'user-contributions' ) . '</a> ';
 
 		// Links to User:user_name from User_profile:
@@ -908,7 +926,7 @@ class UserProfilePage extends Article {
 		if ( $wgTitle->getNamespace() == NS_USER && ( !$this->profile_data['user_id'] || $this->profile_data['user_page_type'] == 1 ) ) {
 			$output .= '| <a href="' . $user_wiki->escapeFullURL() . '" rel="nofollow">' .
 				wfMsg( 'user-wiki-link' ) . '</a>';
-		}
+		} */
 
 		$output .= '</div>
 
@@ -1442,7 +1460,8 @@ class UserProfilePage extends Article {
 		if ( $wgUser->getName() == $user_name || $wgUser->isAllowed( 'userboard-delete' ) ) {
 			$total = $total + $stats_data['user_board_priv'];
 		}
-
+ $output .='<div id="user-board-message-block">';
+ 
 		$output .= '<div class="user-section-heading">
 			<div class="user-section-title">' .
 				wfMsg( 'user-board-title' ) .
@@ -1463,13 +1482,13 @@ class UserProfilePage extends Article {
 				wfMsg( 'user-view-all' ) . '</a>';
 		}
 		$output .= '</div>
-				<div class="action-left">';
+				<!--div class="action-left">';
 		if ( $total > 10 ) {
 			$output .= wfMsg( 'user-count-separator', '10', $total );
 		} elseif ( $total > 0 ) {
 			$output .= wfMsg( 'user-count-separator', $total, $total );
 		}
-		$output .= '</div>
+		$output .= '</div-->
 				<div class="cleared"></div>
 			</div>
 		</div>
@@ -1479,17 +1498,18 @@ class UserProfilePage extends Article {
 			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
 				$output .= '<div class="user-page-message-form">
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
-						<span class="profile-board-message-type">' .
+						<!--span class="profile-board-message-type">' .
 							wfMsgHtml( 'userboard_messagetype' ) .
-						'</span>
-						<select id="message_type">
+						'</span-->
+                        <input type="hidden" id="message_type" value="1" />
+						<!--select id="message_type">
 							<option value="0">' .
 								wfMsgHtml( 'userboard_public' ) .
 							'</option>
 							<option value="1">' .
 								wfMsgHtml( 'userboard_private' ) .
 							'</option>
-						</select><p>
+						</select--><p>
 						<textarea name="message" id="message" cols="43" rows="4"/></textarea>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:send_message();" />
@@ -1505,12 +1525,123 @@ class UserProfilePage extends Article {
 
 		$output .= '<div id="user-page-board">';
 		$b = new UserBoard();
-		$output .= $b->displayMessages( $user_id, 0, 10 );
+		$output .= $b->displayMessages( $user_id, 0, 10);
 		$output .= '</div>';
-
+        
+     $output .='</div>';
 		return $output;
 	}
+    //==================================
+    /**
+	 * Get the user board for a given user.
+	 *
+	 * @param $user_id Integer: user's ID number
+	 * @param $user_name String: user name
+	 */
+	function getUserWall( $user_id, $user_name ) {
+		global $wgUser, $wgOut, $wgUserProfileDisplay, $wgUserProfileScripts;
 
+		// Anonymous users cannot have user boards
+		if ( $user_id == 0 ) {
+			return '';
+		}
+
+		// Don't display anything if user board on social profiles isn't
+		// enabled in site configuration
+		if ( $wgUserProfileDisplay['board'] == false ) {
+			return '';
+		}
+
+		$output = ''; // Prevent E_NOTICE
+
+		$wgOut->addScriptFile( $wgUserProfileScripts . '/UserProfilePage.js' );
+
+		$rel = new UserRelationship( $user_name );
+		$friends = $rel->getRelationshipList( 1, 4 );
+
+		$stats = new UserStats( $user_id, $user_name );
+		$stats_data = $stats->getUserStats();
+		$total = $stats_data['user_board'];
+
+		// If the user is viewing their own profile or is allowed to delete
+		// board messages, add the amount of private messages to the total
+		// sum of board messages.
+		if ( $wgUser->getName() == $user_name || $wgUser->isAllowed( 'userboard-delete' ) ) {
+			$total = $total + $stats_data['user_board_priv'];
+		}
+ 
+ $output .='<div id="user-board-wall-block">';
+ 
+		$output .= '<div class="user-section-heading">
+			<div class="user-section-title">' .
+				wfMsg( 'user-wall-title' ) .
+			'</div>
+			<div class="user-section-actions">
+				<div class="action-right">';
+		if ( $wgUser->getName() == $user_name ) {
+			/*if ( $friends ) { //UserBoard::getBoardBlastURL() 
+				$output .= '<a href="' .UserBoard::getWallBlastURL() .'">' .
+					wfMsg( 'user-send-wall-blast' ) . '</a>';
+			}
+			if ( $total > 10 ) {
+				$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
+			}*/
+		}
+		if ( $total > 10 ) {
+			$output .= '<a href="' . UserBoard::getUserWallURL( $user_name ) . '">' .
+				wfMsg( 'user-view-all' ) . '</a>';
+		}
+		$output .= '</div>
+				<div class="action-left">';
+		//if ( $total > 10 ) {
+		//	$output .= wfMsg( 'user-count-separator', '10', $total );
+		//} elseif ( $total > 0 ) {
+		//	$output .= wfMsg( 'user-count-separator', $total, $total );
+		//}
+		$output .= '</div>
+				<div class="cleared"></div>
+			</div>
+		</div>
+		<div class="cleared"></div>';
+
+		//if ( $wgUser->getName() !== $user_name ) {
+			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
+				$output .= '<div class="user-page-message-form">
+						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
+						<!--span class="profile-board-message-type">' .
+							wfMsgHtml( 'userboard_messagetype' ) .
+						'</span-->
+                        <input type="hidden" id="message_type_wall" value="0" />
+						<!--select id="message_type">
+							<option value="0">' .
+								wfMsgHtml( 'userboard_public' ) .
+							'</option>
+							<!--option value="1">' .
+								wfMsgHtml( 'userboard_private' ) .
+							'</option-->
+						</select--><p>
+						<textarea name="message_wall" id="message_wall" cols="43" rows="4"/></textarea>
+						<div class="user-page-message-box-button">
+							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall();" />
+						</div>
+					</div>';
+			} else {
+				$login_link = SpecialPage::getTitleFor( 'Userlogin' );
+				$output .= '<div class="user-page-message-form">' .
+					wfMsg( 'user-wall-login-message', $login_link->escapeFullURL() ) .
+				'</div>';
+			}
+		//}
+
+		$output .= '<div id="user-page-wall" style="border:1px solid 1px;">';
+		$b = new UserBoard();
+		$output .= $b->displayWalls( $user_id, 0, 10);
+		$output .= '</div>';
+      $output .='</div>';
+      
+		return $output;
+	}
+    //==================================
 	/**
 	 * Gets the user's fanboxes if $wgEnableUserBoxes = true; and
 	 * $wgUserProfileDisplay['userboxes'] = true; and the FanBoxes extension is

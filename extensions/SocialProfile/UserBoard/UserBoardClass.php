@@ -278,12 +278,14 @@ class UserBoard {
 		} else {
 			$user_sql = "ub_user_id = {$user_id}";
 			if ( $user_id != $wgUser->getID() ) {
+			   
 				$user_sql .= ' AND ub_type = 0 ';
 			}
 			if ( $wgUser->isLoggedIn() ) {
-				$user_sql .= " OR (ub_user_id={$user_id} AND ub_user_id_from={$wgUser->getID() }) ";
+				$user_sql .= " OR (ub_user_id={$user_id} AND ub_user_id_from={$wgUser->getID() }" . ") ";
 			}
 		}
+//echo $user_sql."<br />";
 
 		$sql = "SELECT ub_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
 			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type
@@ -348,59 +350,66 @@ class UserBoard {
 		global $wgUser, $wgTitle;
 
 		$output = ''; // Prevent E_NOTICE
+        
 		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {
-			foreach ( $messages as $message ) {
-				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
-				$avatar = new wAvatar( $message['user_id_from'], 'm' );
-
-				$board_to_board = '';
-				$board_link = '';
-				$message_type_label = '';
-				$delete_link = '';
-
-				if ( $wgUser->getName() != $message['user_name_from'] ) {
-					$board_to_board = '<a href="' . UserBoard::getUserBoardToBoardURL( $message['user_name'], $message['user_name_from'] ) . '">' .
-						wfMsgHtml( 'userboard_board-to-board' ) . '</a>';
-					$board_link = '<a href="' . UserBoard::getUserBoardURL( $message['user_name_from'] ) . '">' .
-						wfMsgHtml( 'userboard_sendmessage', $message['user_name_from'] ) . '</a>';
-				}
-				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
-					$delete_link = "<span class=\"user-board-red\">
-							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_message({$message['id']})\">" .
-								wfMsgHtml( 'userboard_delete' ) . '</a>
-						</span>';
-				}
-				if ( $message['type'] == 1 ) {
-					$message_type_label = '(' . wfMsgHtml( 'userboard_private' ) . ')';
-				}
-
-				$message_text = $message['message_text'];
-				# $message_text = preg_replace_callback( "/(<a[^>]*>)(.*?)(<\/a>)/i", 'cut_link_text', $message['message_text'] );
-
-				$output .= "<div class=\"user-board-message\">
-					<div class=\"user-board-message-from\">
-					<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a> {$message_type_label}
-					</div>
-					<div class=\"user-board-message-time\">" .
-						wfMsgHtml( 'userboard_posted_ago', $this->getTimeAgo( $message['timestamp'] ) ) .
-					"</div>
-					<div class=\"user-board-message-content\">
-						<div class=\"user-board-message-image\">
-							<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$avatar->getAvatarURL()}</a>
-						</div>
-						<div class=\"user-board-message-body\">
-							{$message_text}
-						</div>
-						<div class=\"cleared\"></div>
-					</div>
-					<div class=\"user-board-message-links\">
-						{$board_link}
-						{$board_to_board}
-						{$delete_link}
-					</div>
-				</div>";
-			}
+		  
+    		     foreach ( $messages as $message ) {
+    			  if( $message['type'] == 1 ){	
+    				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
+    				$avatar = new wAvatar( $message['user_id_from'], 'm' );
+    
+    				$board_to_board = '';
+    				$board_link = '';
+    				$message_type_label = '';
+    				$delete_link = '';
+    
+    				if ( $wgUser->getName() != $message['user_name_from'] ) {
+    					$board_to_board = '<a href="' . UserBoard::getUserBoardToBoardURL( $message['user_name'], $message['user_name_from'] ) . '">' .
+    						wfMsgHtml( 'userboard_board-to-board' ) . '</a>';
+    					$board_link = '<a href="' . UserBoard::getUserBoardURL( $message['user_name_from'] ) . '">' .
+    						wfMsgHtml( 'userboard_sendmessage', $message['user_name_from'] ) . '</a>';
+    				}
+    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
+    					$delete_link = "<span class=\"user-board-red\">
+    							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_message({$message['id']})\">" .
+    								wfMsgHtml( 'userboard_delete' ) . '</a>
+    						</span>';
+    				}
+                    
+    				//if ( $message['type'] == 1 ) {
+    				//	$message_type_label = '(' . wfMsgHtml( 'userboard_private' ) . ')';
+    				//}
+    
+    				$message_text = $message['message_text'];
+    				# $message_text = preg_replace_callback( "/(<a[^>]*>)(.*?)(<\/a>)/i", 'cut_link_text', $message['message_text'] );
+    
+    				$output .= "<div class=\"user-board-message\">
+    					<div class=\"user-board-message-from\">
+    					<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a> {$message_type_label}
+    					</div>
+    					<div class=\"user-board-message-time\">" .
+    						wfMsgHtml( 'userboard_posted_ago', $this->getTimeAgo( $message['timestamp'] ) ) .
+    					"</div>
+    					<div class=\"user-board-message-content\">
+    						<div class=\"user-board-message-image\">
+    							<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$avatar->getAvatarURL()}</a>
+    						</div>
+    						<div class=\"user-board-message-body\">
+    							{$message_text}
+    						</div>
+    						<div class=\"cleared\"></div>
+    					</div>
+    					<div class=\"user-board-message-links\">
+    						{$board_link}
+    						{$board_to_board}
+    						{$delete_link}
+    					</div>
+    				</div>";
+                  } //if ends here  
+    			} 
+		  
+			
 		} elseif ( $wgUser->getName() == $wgTitle->getText() ) {
 			$output .= '<div class="no-info-container">' .
 				wfMsgHtml( 'userboard_nomessages' ) .
@@ -409,7 +418,79 @@ class UserBoard {
 		}
 		return $output;
 	}
+    
+    public function displayWalls( $user_id, $user_id_2 = 0, $count = 10, $page = 0) {
+		global $wgUser, $wgTitle;
 
+		$output = ''; // Prevent E_NOTICE
+        
+		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
+		if ( $messages ) {		  
+    		     foreach ( $messages as $message ) {
+    			 if( $message['type'] == 0 ){		     
+    			 
+    				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
+    				$avatar = new wAvatar( $message['user_id_from'], 'm' );
+    
+    				$board_to_board = '';
+    				$board_link = '';
+    				$message_type_label = '';
+    				$delete_link = '';
+    
+    				if ( $wgUser->getName() != $message['user_name_from'] ) {
+    					//$board_to_board = '<a href="' . UserBoard::getUserBoardToBoardURL( $message['user_name'], $message['user_name_from'] ) . '">' .
+    					//	wfMsgHtml( 'userboard_board-to-board' ) . '</a>'; //getUserBoardURL getUserWallURL
+    					$board_link = '<a href="' . UserBoard::getUserWallURL( $message['user_name_from'] ) . '">' .
+    						wfMsgHtml( 'userwall_sendmessage', $message['user_name_from'] ) . '</a>';
+    				}
+    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
+    					$delete_link = "<span class=\"user-board-red\">
+    							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_message({$message['id']})\">" .
+    								wfMsgHtml( 'userboard_delete' ) . '</a>
+    						</span>';
+    				}
+                    
+    				//if ( $message['type'] == 0 ) {
+    				//	$message_type_label = '( Public )';
+    				//}
+    
+    				$message_text = $message['message_text'];
+    				# $message_text = preg_replace_callback( "/(<a[^>]*>)(.*?)(<\/a>)/i", 'cut_link_text', $message['message_text'] );
+    
+    				$output .= "<div class=\"user-board-message\">
+    					<div class=\"user-board-message-from\">
+    					<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a> {$message_type_label}
+    					</div>
+    					<div class=\"user-board-message-time\">" .
+    						wfMsgHtml( 'userboard_posted_ago', $this->getTimeAgo( $message['timestamp'] ) ) .
+    					"</div>
+    					<div class=\"user-board-message-content\">
+    						<div class=\"user-board-message-image\">
+    							<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$avatar->getAvatarURL()}</a>
+    						</div>
+    						<div class=\"user-board-message-body\">
+    							{$message_text}
+    						</div>
+    						<div class=\"cleared\"></div>
+    					</div>
+    					<div class=\"user-board-message-links\">
+    						{$board_link}
+    						{$board_to_board}
+    						{$delete_link}
+    					</div>
+    				</div>";
+                  } //if ends  
+    			} 
+		  
+			
+		} elseif ( $wgUser->getName() == $wgTitle->getText() ) {
+			$output .= '<div class="no-info-container">' .
+				wfMsgHtml( 'userboard_nomessages' ) .
+			'</div>';
+
+		}
+		return $output;
+	}
 	/**
 	 * Get the escaped full URL to Special:SendBoardBlast.
 	 * This is just a silly wrapper function.
@@ -419,6 +500,13 @@ class UserBoard {
 	static function getBoardBlastURL() {
 		$title = SpecialPage::getTitleFor( 'SendBoardBlast' );
 		return $title->escapeFullURL();
+	}
+    
+    //Mathi
+    static function getWallBlastURL() {
+		$title = SpecialPage::getTitleFor( 'SendBoardBlast' );
+		//$user_name = str_replace( '&', '%26', $user_name );
+		return $title->escapeFullURL( 'is_wall=1' );
 	}
 
 	/**
@@ -432,6 +520,12 @@ class UserBoard {
 		$title = SpecialPage::getTitleFor( 'UserBoard' );
 		$user_name = str_replace( '&', '%26', $user_name );
 		return $title->escapeFullURL( 'user=' . $user_name );
+	}
+    
+    static function getUserWallURL( $user_name ) {
+		$title = SpecialPage::getTitleFor( 'UserBoard' );
+		$user_name = str_replace( '&', '%26', $user_name );
+		return $title->escapeFullURL( 'user=' . $user_name ).'&is_wall=1';
 	}
 
 	/**

@@ -57,8 +57,7 @@ class SpecialPreferences extends SpecialPage {
 				'savedprefs'
 			);
 		}
-//echo("<pre>");        
-//print_r($user);
+
 		$htmlForm = Preferences::getFormObject( $user, $this->getContext() );
 		$htmlForm->setSubmitCallback( array( 'Preferences', 'tryUISubmit' ) );
 

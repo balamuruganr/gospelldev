@@ -79,7 +79,9 @@ class UserStatsTrack {
 		'links_submitted' => 'stats_links_submitted',
 		'links_approved' => 'stats_links_approved'
 	);
-
+   var $point_values;
+   var $user_name;
+   var $user_id;
 	/**
 	 * Constructor
 	 * @param $user_id Integer: ID number of the user that we want to track stats for
@@ -607,13 +609,15 @@ class UserStatsTrack {
 		if ( $row ) {
 			// recaculate point total
 			$new_total_points = 1000;
-			// FIXME: Invalid argument supplied for foreach()            
-			foreach ( $this->point_values as $point_field => $point_value ) {
-				if ( $this->stats_fields[$point_field] ) {
-					$field = $this->stats_fields[$point_field];
-					$new_total_points += $point_value * $row->$field;
-				}
-			}
+			// FIXME: Invalid argument supplied for foreach()
+           if(is_array($this->point_values)){             
+    			foreach ( $this->point_values as $point_field => $point_value ) {
+    				if ( $this->stats_fields[$point_field] ) {
+    					$field = $this->stats_fields[$point_field];
+    					$new_total_points += $point_value * $row->$field;
+    				}
+    			}
+            }
 			if ( $wgEnableFacebook ) {
 				$s = $dbw->selectRow(
 					'fb_link_view_opinions',

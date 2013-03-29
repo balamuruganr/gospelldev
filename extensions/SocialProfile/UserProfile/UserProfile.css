@@ -31,13 +31,22 @@
 }
 
 #user-page-left {
-	width: 35%;
+	width: 30%;
 	float: left;
+    border:0px solid red;    
+}
+
+#user-page-middle {
+    width: 40%;
+	float: left; 
+    border:1px solid red;
+    margin-left:25px;
 }
 
 #user-page-right {
 	float: right;
-	width: 60%;
+	width: 65%;
+    border:0px solid red;
 }
 
 #user-page-left h2, #user-page-right h2 {
@@ -158,7 +167,7 @@
 
 #profile-right {
 	float: left;
-	position: relative;
+	position: relative;    
 }
 
 .profile-actions a {
@@ -241,6 +250,19 @@
 }
 
 /* Message Board */
+#user-board-wall-block{
+    border: 0px solid red;
+    float: left;
+    margin-right: 2px;
+    width: 49%;
+  
+}
+#user-board-message-block{
+    border:0px solid red;
+    width:49%;
+    float:right;
+    margin-left:10px;
+}
 #user-page-board {
 	margin: 5px 0px 10px 0px;
 }
