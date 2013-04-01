@@ -14,7 +14,9 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-
+ 
+global $IP;
+require_once("$IP/includes/gospellCommonClass.php"); 
 class SpecialUploadAvatar extends SpecialUpload {
 	var $avatarUploadDirectory;
 
@@ -43,10 +45,31 @@ class SpecialUploadAvatar extends SpecialUpload {
 	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $params ) {
-		global $wgUserProfileScripts;
+		global $wgUserProfileScripts,$wgUploadDirectory,$wgDBname;
 
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $x1 = $_REQUEST['x1'];
+            $y1 = $_REQUEST['y1'];
+            $user_id = $this->getUser()->getId();
+            $l_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_l'.'.jpg';
+            $lm_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_ml'.'.jpg';
+            $m_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_m'.'.jpg';
+            $s_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_s'.'.jpg';
+            
+            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,160,160,$l_path);
+            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,50,50,$lm_path);
+            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,30,30,$m_path);
+            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,16,16,$s_path);                                            
+            @unlink($wgUploadDirectory . '/temp/usr_tmp_avatar_'.$user_id.'.jpg'); //delete the main temporary uploaded file
+            die();        
+        }
 		$out = $this->getOutput();
+        
 		$out->addExtensionStyle( $wgUserProfileScripts . '/UserProfile.css' );
+        $out->addExtensionStyle( $wgUserProfileScripts . '/jquery.Jcrop.min.css' );
+        $out->addScriptFile( $wgUserProfileScripts . '/jquery.Jcrop.min.js' );
+        $out->addScriptFile( $wgUserProfileScripts . '/userProfileCrop.js' );
+        
 		parent::execute( $params );
 
 		if ( $this->mUploadSuccessful ) {
@@ -65,7 +88,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 	 * @param $ext String: file extension (gif, jpg or png)
 	 */
 	private function showSuccess( $ext ) {
-		global $wgDBname, $wgUploadPath, $wgUploadAvatarInRecentChanges;
+		global $wgDBname, $wgUploadPath, $wgUploadAvatarInRecentChanges,$wgUploadDirectory,$IP;
 
 		$user = $this->getUser();
 		$log = new LogPage( 'avatar' );
@@ -93,7 +116,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 				wfMsg( 'user-profile-picture-large' ) .
 			'</td>
 			<td style="padding-bottom:20px;">
-				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_l.' . $ext . '?ts=' . rand() . '" alt="" border="0" />
+				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_l.' . $ext . '?ts=' . rand() . '" alt="" border="0" id="usrAvatar_l" />
 			</td>
 		</tr>';
 		$output .= '<tr>
@@ -101,7 +124,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 				wfMsg( 'user-profile-picture-medlarge' ) .
 			'</td>
 			<td style="padding-bottom:20px;">
-				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_ml.' . $ext . '?ts=' . rand() . '" alt="" border="0" />
+				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_ml.' . $ext . '?ts=' . rand() . '" alt="" border="0" id="usrAvatar_ml" />
 			</td>
 		</tr>';
 		$output .= '<tr>
@@ -109,7 +132,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 				wfMsg( 'user-profile-picture-medium' ) .
 			'</td>
 			<td style="padding-bottom:20px;">
-				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_m.' . $ext . '?ts=' . rand() . '" alt="" border="0" />
+				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_m.' . $ext . '?ts=' . rand() . '" alt="" border="0" id="usrAvatar_m" />
 			</td>
 		</tr>';
 		$output .= '<tr>
@@ -117,7 +140,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 				wfMsg( 'user-profile-picture-small' ) .
 			'</td>
 			<td style="padding-bottom:20px;">
-				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_s.' . $ext . '?ts=' . rand() . '" alt="" border="0" />
+				<img src="' . $wgUploadPath . '/avatars/' . $wgDBname . '_' . $uid . '_s.' . $ext . '?ts=' . rand() . '" alt="" border="0" id="usrAvatar_s" />
 			</td>
 		</tr>';
 		$output .= '<tr>
@@ -125,9 +148,13 @@ class SpecialUploadAvatar extends SpecialUpload {
 				<input type="button" onclick="javascript:history.go(-1)" class="site-button" value="' . wfMsg( 'user-profile-picture-uploaddifferent' ) . '" />
 			</td>
 		</tr>';
-		$output .= '</table>';
+		$output .= '</table>';                
 		$output .= '</div>';
-
+  
+        //if(is_file($wgUploadDirectory.'/temp/usr_tmp_avatar_'.$uid)){
+            require_once("$IP/extensions/SocialProfile/UserProfile/gospellSpUpInclude.php");
+        //}
+        
 		$this->getOutput()->addHTML( $output );
 	}
 
@@ -190,7 +217,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 		// hurt either
 		// @see https://bugzilla.wikimedia.org/show_bug.cgi?id=30953
 		$output .= Html::hidden( 'wpEditToken', $this->getUser()->getEditToken(), array( 'id' => 'wpEditToken' ) ) . "\n";
-		$output .= Html::hidden( 'title', $this->getTitle()->getPrefixedText() ) . "\n";
+		$output .= Html::hidden( 'title', $this->getTitle()->getPrefixedText() ) . "\n";                 
 		$output .= '<table border="0">
 				<tr>
 					<td>
@@ -342,7 +369,7 @@ class UploadAvatar extends UploadFromFile {
 	 * Create the thumbnails and delete old files
 	 */
 	public function performUpload( $comment, $pageText, $watch, $user ) {
-		global $wgUploadDirectory, $wgDBname, $wgMemc;
+		global $wgUploadDirectory, $wgDBname, $wgMemc, $IP;
 
 		$this->avatarUploadDirectory = $wgUploadDirectory . '/avatars';
 
@@ -371,13 +398,15 @@ class UploadAvatar extends UploadFromFile {
 		if ( strpos( $avatar->getAvatarImage(), 'default_' ) !== false ) {
 			$stats = new UserStatsTrack( $uid, $user->getName() );
 			$stats->incStatField( 'user_image' );
-		}
-
+		}        
+        $user_avatar_tmp = gospellCommonFunctions::uploadUserAvatarToTemp($uid);
+        
+        /*
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_l', 75 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_ml', 50 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_m', 30 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_s', 16 );
-
+        */
 		if ( $ext != 'jpg' ) {
 			if ( is_file( $this->avatarUploadDirectory . '/' . $wgDBname . '_' . $uid . '_s.jpg' ) ) {
 				unlink( $this->avatarUploadDirectory . '/' . $wgDBname . '_' . $uid . '_s.jpg' );

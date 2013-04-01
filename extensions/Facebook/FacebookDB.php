@@ -166,13 +166,11 @@ class FacebookDB {
 				__METHOD__,
 				array( 'IGNORE' )
 			);
-			$dbw->commit();
-            //gospelldev
+			$dbw->commit();            
             if(!empty($fb_userinfo)) {
-                if($fb_userinfo['birthday']) {
-                /*getting home town country */
+                if($fb_userinfo['birthday']) {                
                     $hometown_country = '';                    
-                    if($fb_userinfo['hometown']) {                    
+                    if($fb_userinfo['hometown']) {/*getting home town country */                    
                         $split_hometown_country = explode(',',$fb_userinfo['hometown']['name']);
                         $split_hometown_country_cnt = count($split_hometown_country);
                         if($split_hometown_country_cnt) {
@@ -209,28 +207,13 @@ class FacebookDB {
 
     			if ( is_file( $temp_path ) ) {				
             		$imageInfo = getimagesize( $temp_path );
-            		switch ( $imageInfo[2] ) {
-            			case 1:
-            				$ext = 'gif';
-            				break;
-            			case 2:
-            				$ext = 'jpg';
-            				break;
-            			case 3:
-            				$ext = 'png';
-            				break;
-            			default:
-            				break;
-            		}                    
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_l', 75 );    
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_ml', 50 );
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_m', 30 );
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_s', 16 ); 
                     unlink( $temp_path ); //delete temp file                                  
-    			}
-                                                
+    			}                                                
             }
-            //gospelldev
 		}
 		
 		$wgMemc->set( $memkey, self::getFacebookIDs( $user, DB_MASTER ) );
