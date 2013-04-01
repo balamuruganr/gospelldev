@@ -62,7 +62,47 @@ class UserBoard {
 
 		return $dbw->insertId();
 	}
+    
+    public function sendWallComment($message_id, $user_id, $user_name, $comment){
+        $dbw = wfGetDB( DB_MASTER );
+        
+        $message_id = stripslashes( $message_id );
+        $user_id = stripslashes( $user_id );
+        $user_name = stripslashes( $user_name );
+		$comment = stripslashes( $comment );
+        
+        $dbw->insert(
+			'user_wall_comments',
+			array(
+				'uwc_wallmessage_id' => $message_id,
+				'uwc_user_id' => $user_id,
+				'uwc_user_name' => $user_name,
+				'uwc_comment' => $comment,
+				'uwc_date' => date( 'Y-m-d H:i:s' ),
+			),
+			__METHOD__
+		);
+        
+        /*// Send e-mail notification (if user is not writing on own board)
+		if ( $user_id_from != $user_id_to ) {
+			$this->sendBoardNotificationEmail( $user_id_to, $user_name_from );
+			$this->incNewMessageCount( $user_id_to );
+		}
 
+		$stats = new UserStatsTrack( $user_id_to, $user_name_to );
+		if ( $message_type == 0 ) {
+			// public message count
+			$stats->incStatField( 'user_board_count' );
+		} else {
+			// private message count
+			$stats->incStatField( 'user_board_count_priv' );
+		}
+
+		$stats = new UserStatsTrack( $user_id_from, $user_name_from );
+		$stats->incStatField( 'user_board_sent' ); */
+      
+      return $dbw->insertId();  
+    }
 	/**
 	 * Sends an email to a user if someone wrote on their board
 	 *
@@ -285,7 +325,7 @@ class UserBoard {
 				$user_sql .= " OR (ub_user_id={$user_id} AND ub_user_id_from={$wgUser->getID() }" . ") ";
 			}
 		}
-//echo $user_sql."<br />";
+
 
 		$sql = "SELECT ub_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
 			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type
@@ -313,7 +353,51 @@ class UserBoard {
 		}
 		return $messages;
 	}
+    
+    public function getUserWallCommands( $message_id, $limit = 0, $page = 0 ) {
+		global $wgUser, $wgOut, $wgTitle;
+		$dbr = wfGetDB( DB_SLAVE );
 
+		if ( $limit > 0 ) {
+			$limitvalue = 0;
+			if ( $page ) {
+				$limitvalue = $page * $limit - ( $limit );
+			}
+			$limit_sql = " LIMIT {$limitvalue},{$limit} ";
+		}
+        
+        if ( $message_id ) {
+          $comment_sql = "( uwc_wallmessage_id ={$message_id} )"; 
+        }
+		
+		$sql = "SELECT uwc_id, uwc_wallmessage_id, uwc_user_id, uwc_user_name, uwc_comment,
+			uwc_pinned,UNIX_TIMESTAMP(uwc_date) AS unix_datetime, uwc_status
+			FROM {$dbr->tableName( 'user_wall_comments' )}
+            WHERE {$comment_sql}
+			ORDER BY uwc_id ASC
+			{$limit_sql}";
+           
+		$res = $dbr->query( $sql, __METHOD__ );
+		$comments = array();
+		foreach ( $res as $row ) {
+			$parser = new Parser();
+			$comment_text = $parser->parse( $row->uwc_comment, $wgTitle, $wgOut->parserOptions(), true );
+			$comment_text = $comment_text->getText();
+
+			$comments[] = array(
+				'comment_id' => $row->uwc_id,
+                'wall_message_id' =>$row->uwc_wallmessage_id,
+				'timestamp' => ( $row->unix_datetime ),
+				'user_id_from' => $row->uwc_user_id,
+				'user_name_from' => $row->uwc_user_name,
+				'user_id' => $wgUser->getID(),
+				'user_name' => $wgUser->getName(),
+				'comment_text' => $comment_text,
+				'status' => $row->uwc_status
+			);
+		}
+		return $comments;
+	}
 	/**
 	 * Get the amount of board-to-board messages sent between the users whose
 	 * IDs are $user_id and $user_id_2.
@@ -431,15 +515,28 @@ class UserBoard {
     			 
     				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
     				$avatar = new wAvatar( $message['user_id_from'], 'm' );
-    
+                    
+                    $comment_user = Title::makeTitle( NS_USER, $wgUser->getName() );
+                    $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
+                    
+                    $like_link = ''; 
+                    $command_link = ''; 
+                    
     				$board_to_board = '';
     				$board_link = '';
     				$message_type_label = '';
     				$delete_link = '';
-    
+                    
+                    $like_link .='<span class="user-wall-message-links">
+                       <a href="javascript:void(0);" onclick="javascript:like_wall('.$message['id'].','.$user_id.',1);">'.
+    								wfMsgHtml( 'user_wall_like' ) . '</a>
+                       </span>';
+                    $command_link .='<span class="user-wall-message-links">
+                       <a href="javascript:void(0);" onclick="javascript:show_comment_textarea(\''.$message['id'].'\');">'.
+    								wfMsgHtml( 'user_wall_comment' ) . '</a>
+                       </span>'; 
     				if ( $wgUser->getName() != $message['user_name_from'] ) {
-    					//$board_to_board = '<a href="' . UserBoard::getUserBoardToBoardURL( $message['user_name'], $message['user_name_from'] ) . '">' .
-    					//	wfMsgHtml( 'userboard_board-to-board' ) . '</a>'; //getUserBoardURL getUserWallURL
+    					
     					$board_link = '<a href="' . UserBoard::getUserWallURL( $message['user_name_from'] ) . '">' .
     						wfMsgHtml( 'userwall_sendmessage', $message['user_name_from'] ) . '</a>';
     				}
@@ -449,15 +546,11 @@ class UserBoard {
     								wfMsgHtml( 'userboard_delete' ) . '</a>
     						</span>';
     				}
-                    
-    				//if ( $message['type'] == 0 ) {
-    				//	$message_type_label = '( Public )';
-    				//}
-    
+                        
     				$message_text = $message['message_text'];
     				# $message_text = preg_replace_callback( "/(<a[^>]*>)(.*?)(<\/a>)/i", 'cut_link_text', $message['message_text'] );
     
-    				$output .= "<div class=\"user-board-message\">
+    				$output .= "<div class=\"user-board-message\" id=\"user-wall-message-{$message['id']}\">
     					<div class=\"user-board-message-from\">
     					<a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a> {$message_type_label}
     					</div>
@@ -474,11 +567,35 @@ class UserBoard {
     						<div class=\"cleared\"></div>
     					</div>
     					<div class=\"user-board-message-links\">
+                            {$like_link}
+                            {$command_link}
     						{$board_link}
     						{$board_to_board}
     						{$delete_link}
-    					</div>
-    				</div>";
+    					</div>";
+                         
+                        $is_comments_there = $this->displayWallcommands($message['id']); 
+                        
+                    $output .= '<div id="user-wall-comments" class="wall-comments-'.$message['id'].'"> ';
+                      $output .= $is_comments_there;                    
+                    $output .= '</div>';                     
+                    
+                    $output .='<div id="user-wall-comment-add"';
+                        if( strlen(trim($is_comments_there)) <=0 ){
+                          $output .=' style="display:none;"';   
+                        }
+                    $output .=" class=\"comment-add-{$message['id']}\">";
+                       
+                        $output .="<div class=\"user-wall-comment-block\">
+                                    <div class=\"user-wall-comment-image\">
+                                     <a href=\"{$comment_user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$avatar_comment->getAvatarURL()}</a>
+                                    </div>                                 
+                                    <textarea name=\"wall_comment_{$message['id']}\" id=\"wall_comment_{$message['id']}\" placeholder=\"Write a comment...\" onkeypress=\"add_comment(event,'wall_comment_{$message['id']}');\"></textarea>
+                                   </div>";
+                                                                                                          
+                       $output .='</div>';                
+                    
+				   $output .= '</div>';
                   } //if ends  
     			} 
 		  
@@ -491,6 +608,56 @@ class UserBoard {
 		}
 		return $output;
 	}
+    
+    public function displayWallcommands($message_id, $count = 10, $page = 0){
+        global $wgUser, $wgTitle;
+
+		$output = ''; // Prevent E_NOTICE
+        
+        $comments = $this->getUserWallCommands( $message_id, $count, $page );
+        
+        $comment_user = Title::makeTitle( NS_USER, $wgUser->getName() );
+        $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
+        
+        if ( $comments ) {		  
+    		     foreach ( $comments as $comment ) {
+    		        $user = Title::makeTitle( NS_USER, $comment['user_name_from'] );
+    				$avatar = new wAvatar( $comment['user_id_from'], 'm' );
+                                                            
+                    $like_link = '';
+                    $comment_time = '';
+                    
+                  $comment_text =   $comment['comment_text'];
+                 
+                  $comment_time .="<span style=\"color:#949494\">" .
+                                    wfMsgHtml( 'userwall_comment_posted_ago', $this->getTimeAgo( $comment['timestamp'] ) ) .
+                                   "</span>";
+                  
+                  $like_link .="<span class=\"user-wall-message-links\">
+                                 <a href=\"javascript:void(0);\" onclick=\"javascript:like_wall({$comment['comment_id']},user_on_line,1);\">".
+					              wfMsgHtml( 'user_wall_like' ) . "</a>
+                                </span>";
+                  
+                  $output .='<div class="user-wall-comment-block">';
+                  
+                   $output .="<div class=\"user-wall-comment-image\">
+                                 <a href=\"{$user->escapeFullURL()}\" title=\"{$comment['user_name_from']}\">{$avatar->getAvatarURL()}</a>
+                                 </div>";
+                   $output .="<div class=\"user-wall-comment-body\">
+                               <span class=\"user-wall-comment-user\"><strong>{$comment['user_name_from']}</strong></span><span class=\"user-wall-comment-txt\">{$comment_text}</span>
+                              </div>";                                           
+                   $output .="<div class=\"user-wall-comment-links\">
+                              {$comment_time}
+                              {$like_link}
+                              </div>";
+                                                                                        
+                  $output .='</div>';            
+    		     }
+        }
+        
+     return $output;           
+    }
+    
 	/**
 	 * Get the escaped full URL to Special:SendBoardBlast.
 	 * This is just a silly wrapper function.

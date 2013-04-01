@@ -75,6 +75,9 @@ Hey, want to stop getting e-mails from us?
 Click $4
 and change your settings to disable email notifications.',
 //======================= New Added By Mathi ====================
+'userwall_comment_posted_ago' => '$1 ago',
+'user_wall_like' => 'Like',
+'user_wall_comment' => 'Comment',
 'userwall_mywall' => 'My Wall',
 'wallsendbutton' => 'post wall blast',
 'userwall_nomessages' => 'No walls.',

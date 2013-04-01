@@ -307,9 +307,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( is_null( $user ) ) {
 			$user = $wgUser;
 		}
-        if($wgRequest->getVal( 'gender' )){
-            
-        }
+        
         if($wgRequest->getVal( 'birthday' )){
             $dob_arr = explode("/",$wgRequest->getVal( 'birthday' ));
             if(count($dob_arr)< 3 && count($dob_arr)==2){
@@ -326,11 +324,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_location_city' => $wgRequest->getVal( 'location_city' ),
 			'up_location_state' => $wgRequest->getVal( 'location_state' ),
 			'up_location_country' => $wgRequest->getVal( 'location_country' ),
-
 			'up_hometown_city' => $wgRequest->getVal( 'hometown_city' ),
 			'up_hometown_state' => $wgRequest->getVal( 'hometown_state' ),
 			'up_hometown_country' => $wgRequest->getVal( 'hometown_country' ),
-
 			'up_birthday' => self::formatBirthdayDB( $dob_str ),
 			'up_about' => $wgRequest->getVal( 'about' ),
 			'up_occupation' => $wgRequest->getVal( 'occupation' ),
@@ -339,7 +335,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_websites' => $wgRequest->getVal( 'websites' ),
 			'up_relationship' => $wgRequest->getVal( 'relationship' )
 		);
-        //print_r($basicProfileData);
+        
 		$dbw->update(
 			'user_profile',
 			/* SET */$basicProfileData,
@@ -637,7 +633,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$form .= '
 			<input type="submit" class="site-button" value="' . wfMsg( 'user-profile-update-button' ) . '" size="20" />
 			</div>
-		</form>';// onclick="document.profile.submit()"
+		</form>';
 
 		return $form;
 	}

@@ -305,6 +305,7 @@
 
 .user-board-message-image img {
 	border: 1px solid #dcdcdc;
+    min-height: 35px;
 }
 
 .user-board-message-body {
@@ -690,4 +691,43 @@
 }
 #changepwd-click {
   cursor: pointer;  
+}
+#user-wall-comment-add {
+    border: 0px solid red;
+    margin-left: 5px;    
+    width: 98%;  
+}
+#user-wall-comments {
+    border: 0px solid red;
+    margin-left: 5px;    
+    width: 98%;   
+}
+.user-wall-comment-block {
+  background:#f8f5f5;
+  min-height:30px;
+  font-size:12px;
+  border-bottom:1px solid #ffffff;  
+}
+
+.user-wall-comment-image {
+	float: left;
+	padding: 0px 10px 5px 0px;
+}
+
+.user-wall-comment-image img {
+	border: 1px solid #dcdcdc;
+    height:25px;
+}
+
+.user-wall-message-links a {
+    font-size: 11px;
+    margin: 0 10px 0 0;
+    text-decoration: none;
+}
+
+#user-wall-comment-add textarea {
+
+    border:1px solid #cccccc;
+    height:25px;
+    width:298px;
 }

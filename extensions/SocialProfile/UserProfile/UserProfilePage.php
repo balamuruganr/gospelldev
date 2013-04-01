@@ -82,15 +82,6 @@ class UserProfilePage extends Article {
 		}
 
 		$wgOut->addHTML( '</div>' );
-        /*/===========================
-        // middle side
-        wfDebug( "profile start middle\n" );
-        $wgOut->addHTML( '<div id="user-page-middle" class="clearfix">' );
-        if ( !wfRunHooks( 'UserProfileBeginLeft', array( &$this ) ) ) {
-			wfDebug( __METHOD__ . ": UserProfileBeginMiddle messed up profile!\n" );
-		}
-        $wgOut->addHTML( '</div>' );
-        //===========================*/
 		wfDebug( "profile start right\n" );
                 
 		// Right side
@@ -1510,7 +1501,7 @@ class UserProfilePage extends Article {
 								wfMsgHtml( 'userboard_private' ) .
 							'</option>
 						</select--><p>
-						<textarea name="message" id="message" cols="43" rows="4"/></textarea>
+						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message..."/></textarea>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:send_message();" />
 						</div>
@@ -1578,26 +1569,14 @@ class UserProfilePage extends Article {
 			'</div>
 			<div class="user-section-actions">
 				<div class="action-right">';
-		if ( $wgUser->getName() == $user_name ) {
-			/*if ( $friends ) { //UserBoard::getBoardBlastURL() 
-				$output .= '<a href="' .UserBoard::getWallBlastURL() .'">' .
-					wfMsg( 'user-send-wall-blast' ) . '</a>';
-			}
-			if ( $total > 10 ) {
-				$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
-			}*/
-		}
+		
 		if ( $total > 10 ) {
 			$output .= '<a href="' . UserBoard::getUserWallURL( $user_name ) . '">' .
 				wfMsg( 'user-view-all' ) . '</a>';
 		}
 		$output .= '</div>
 				<div class="action-left">';
-		//if ( $total > 10 ) {
-		//	$output .= wfMsg( 'user-count-separator', '10', $total );
-		//} elseif ( $total > 0 ) {
-		//	$output .= wfMsg( 'user-count-separator', $total, $total );
-		//}
+		
 		$output .= '</div>
 				<div class="cleared"></div>
 			</div>
@@ -1608,19 +1587,8 @@ class UserProfilePage extends Article {
 			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
 				$output .= '<div class="user-page-message-form">
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
-						<!--span class="profile-board-message-type">' .
-							wfMsgHtml( 'userboard_messagetype' ) .
-						'</span-->
-                        <input type="hidden" id="message_type_wall" value="0" />
-						<!--select id="message_type">
-							<option value="0">' .
-								wfMsgHtml( 'userboard_public' ) .
-							'</option>
-							<!--option value="1">' .
-								wfMsgHtml( 'userboard_private' ) .
-							'</option-->
-						</select--><p>
-						<textarea name="message_wall" id="message_wall" cols="43" rows="4"/></textarea>
+					    <input type="hidden" id="message_type_wall" value="0" />
+						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="Write on the wall..."/></textarea></p>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall();" />
 						</div>
@@ -1633,7 +1601,7 @@ class UserProfilePage extends Article {
 			}
 		//}
 
-		$output .= '<div id="user-page-wall" style="border:1px solid 1px;">';
+		$output .= '<div id="user-page-wall">';
 		$b = new UserBoard();
 		$output .= $b->displayWalls( $user_id, 0, 10);
 		$output .= '</div>';

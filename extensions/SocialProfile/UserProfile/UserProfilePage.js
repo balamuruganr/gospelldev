@@ -34,6 +34,49 @@ function send_wall() {
 	}
 }
 
+var wall_comment_posted = 0;
+function send_wall_comment(hook) {	
+	var encMsg = encodeURIComponent( document.getElementById( hook ).value );
+    var x = hook.split("_");
+    var msg_id = x[2];    
+	if( document.getElementById( hook ).value && !wall_comment_posted ) {
+		wall_comment_posted = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSendWallComment', [ msg_id, encMsg ], function( request ) {
+				//document.getElementById( 'user-wall-comments' ).innerHTML = request.responseText;
+                $('.wall-comments-'+msg_id).html(request.responseText);
+				wall_comment_posted = 0;
+				document.getElementById( hook ).value = '';
+			}
+		);
+	}
+}
+
+var wall_comment_displayed = 0;
+function display_wall_comment(msg_id) {    
+	if( !wall_comment_displayed ) {
+		wall_comment_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoWallComment', [ msg_id ], function( request ) {
+                $('.wall-comments-'+msg_id).html(request.responseText);
+				wall_comment_displayed = 0;
+			}
+		);
+	}
+}
+
+function show_comment_textarea(id){
+    $('.comment-add-'+ id).show();
+}
+function add_comment(e, id){
+   var code = e.keyCode || e.which;
+  
+    if (code === 13)
+     {
+        e.preventDefault(); 
+        send_wall_comment(id);             
+     }
+}
 function delete_message( id ) {
 	if( confirm( 'Are you sure you want to delete this message?' ) ) {
 		sajax_request_type = 'POST';
@@ -42,7 +85,14 @@ function delete_message( id ) {
 		} );
 	}
 }
-
+function like_wall( msg_id, user_id, like_state ) {
+	if( confirm( 'Are you sure you want to delete this message?' ) ) {
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDeleteBoardMessage', [ id ], function( request ) {
+			window.location.reload();
+		} );
+	}
+}
 var numReplaces = 0;
 var replaceID = 0;
 var replaceSrc = '';
@@ -120,3 +170,15 @@ function doHover( divID ) {
 function endHover( divID ) {
 	document.getElementById( divID ).style.backgroundColor = '';
 }
+
+(function() {
+    function runAuto(){
+       $('div[id*="user-wall-message"]').each(function(){
+        var msg_id = $(this).attr("id").split("-")[3];
+         display_wall_comment(msg_id);
+       });  
+     setTimeout(runAuto, 5000);     
+    }
+   runAuto();    
+})();
+    
