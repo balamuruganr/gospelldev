@@ -28,12 +28,12 @@ jQuery( function ( $ ) {
 
 jQuery("#wpCreateaccount").click(function() {
     if($('#wpFirstName2').val() == ''){
-//         $("#errfirstname2").text("required");
-//        return false;
+         $("#errfirstname2").text("required");
+        return false;
     }
     if($('#wpLastName2').val() == ''){   
-//        $("#errlastname2").text("required");
-//        return false;
+        $("#errlastname2").text("required");
+        return false;
     }
     if($('#wpName2').val() == ''){              
         $("#errname2").text("required");

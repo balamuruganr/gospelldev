@@ -45,7 +45,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $params ) {
-		global $wgUserProfileScripts,$wgUploadDirectory,$wgDBname;
+		global $wgUserProfileScripts,$wgUploadDirectory,$wgDBname,$wgUploadPath;
 
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             $x1 = $_REQUEST['x1'];
@@ -56,11 +56,15 @@ class SpecialUploadAvatar extends SpecialUpload {
             $m_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_m'.'.jpg';
             $s_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_s'.'.jpg';
             
-            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,160,160,$l_path);
-            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,50,50,$lm_path);
-            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,30,30,$m_path);
-            gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,16,16,$s_path);                                            
-            @unlink($wgUploadDirectory . '/temp/usr_tmp_avatar_'.$user_id.'.jpg'); //delete the main temporary uploaded file
+            if(gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,160,160,$l_path)) {
+                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,50,50,$lm_path);
+                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,30,30,$m_path);
+                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,16,16,$s_path);                                            
+                @unlink($wgUploadDirectory . '/temp/usr_tmp_avatar_'.$user_id.'.jpg'); //delete the main temporary uploaded file
+                echo '1||'.$wgUploadPath.'/avatars/'.$wgDBname.'_'.$user_id.'_';
+                die();
+            }
+            echo '0||';
             die();        
         }
 		$out = $this->getOutput();
@@ -168,7 +172,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 	 * @return HTML output
 	 */
 	protected function getUploadForm( $message = '', $sessionKey = '', $hideIgnoreWarning = false ) {
-		global $wgUseCopyrightUpload;
+		global $wgUseCopyrightUpload,$wgServer,$wgScriptPath;
 
 		if ( $message != '' ) {
 			$sub = wfMsg( 'uploaderror' );
@@ -195,6 +199,13 @@ class SpecialUploadAvatar extends SpecialUpload {
 		$output = '<h1>' . wfMsg( 'uploadavatar' ) . '</h1>';
 		$output .= UserProfile::getEditProfileNav( wfMsg( 'user-profile-section-picture' ) );
 		$output .= '<div class="profile-info">';
+		$output .= '<table>
+			<tr>
+				<td colspan=2>
+					<a href="'.$wgServer.$wgScriptPath.'/index.php/Special:UploadCoverPhoto">Upload Cover picture</a>
+				</td>
+			</tr>
+		</table>';
 
 		if ( $this->getAvatar( 'l' ) != '' ) {
 			$output .= '<table>
@@ -373,7 +384,7 @@ class UploadAvatar extends UploadFromFile {
 
 		$this->avatarUploadDirectory = $wgUploadDirectory . '/avatars';
 
-		$imageInfo = getimagesize( $this->mTempPath );
+		$imageInfo = getimagesize( $this->mTempPath );                
 		switch ( $imageInfo[2] ) {
 			case 1:
 				$ext = 'gif';
@@ -384,13 +395,19 @@ class UploadAvatar extends UploadFromFile {
 			case 3:
 				$ext = 'png';
 				break;
+			case 6:
+				$ext = 'bmp';
+				break;                
 			default:
-				return Status::newFatal( 'filetype-banned-type' );
+                $first_var = array("$1","$2");
+                $second_var  = array('these files','.gif, .jpg, .png, .bmp');                                
+				return Status::newFatal( str_replace($first_var, $second_var, wfMsgForContent( 'filetype-banned-type' )) );
 		}
 
 		$dest = $this->avatarUploadDirectory;
 
 		$uid = $user->getId();
+        gospellCommonFunctions::uploadUserAvatarToTemp($uid);//user avatar move to temp folder
 		$avatar = new wAvatar( $uid, 'l' );
 		// If this is the user's first custom avatar, update statistics (in
 		// case if we want to give out some points to the user for uploading
@@ -399,14 +416,13 @@ class UploadAvatar extends UploadFromFile {
 			$stats = new UserStatsTrack( $uid, $user->getName() );
 			$stats->incStatField( 'user_image' );
 		}        
-        $user_avatar_tmp = gospellCommonFunctions::uploadUserAvatarToTemp($uid);
         
-        /*
+/*//no need this code. we have implemented new crop tool                 
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_l', 75 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_ml', 50 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_m', 30 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgDBname . '_' . $uid . '_s', 16 );
-        */
+        
 		if ( $ext != 'jpg' ) {
 			if ( is_file( $this->avatarUploadDirectory . '/' . $wgDBname . '_' . $uid . '_s.jpg' ) ) {
 				unlink( $this->avatarUploadDirectory . '/' . $wgDBname . '_' . $uid . '_s.jpg' );
@@ -449,7 +465,7 @@ class UploadAvatar extends UploadFromFile {
 				unlink( $this->avatarUploadDirectory . '/' . $wgDBname . '_' . $uid . '_ml.png' );
 			}
 		}
-
+*/
 		$key = wfMemcKey( 'user', 'profile', 'avatar', $uid, 's' );
 		$data = $wgMemc->delete( $key );
 

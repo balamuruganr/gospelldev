@@ -84,6 +84,8 @@ $wgSpecialPages['UserBoard'] = 'SpecialViewUserBoard';
 $wgSpecialPages['ViewRelationshipRequests'] = 'SpecialViewRelationshipRequests';
 $wgSpecialPages['ViewRelationships'] = 'SpecialViewRelationships';
 $wgSpecialPages['UserStatus'] = 'SpecialUserStatus';
+$wgSpecialPages['UploadCoverPhoto'] = 'SpecialUploadCoverPhoto';
+$wgAutoloadClasses['SpecialUploadCoverPhoto'] = $dir . 'UserProfile/SpecialUploadCoverPhoto.php';
 
 // Special page groups for MW 1.13+
 $wgSpecialPageGroups['AddRelationship'] = 'users';
