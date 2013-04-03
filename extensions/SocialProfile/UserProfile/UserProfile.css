@@ -280,6 +280,7 @@
 .user-board-message-from {
 	background-color: #F8F5F5;
 	padding: 3px 0px 5px 5px;
+    cursor:pointer;
 }
 
 .user-board-message-from a {
@@ -709,6 +710,8 @@
   border-bottom:1px solid #ffffff;  
 }
 
+
+
 .user-wall-comment-image {
 	float: left;
 	padding: 0px 10px 5px 0px;
@@ -717,6 +720,12 @@
 .user-wall-comment-image img {
 	border: 1px solid #dcdcdc;
     height:25px;
+}
+
+.user-wall-comment-block textarea{
+    border:1px solid #cccccc;
+    height:35px;
+    width:298px;
 }
 
 .user-wall-message-links a {
@@ -730,4 +739,19 @@
     border:1px solid #cccccc;
     height:25px;
     width:298px;
+}
+#wall_comment_delete {
+   border:0px solid #ff0000;
+   float:right;
+   cursor:pointer;
+}
+#wall_comment_edit {
+   border:0px solid #ff0000;
+   float:right;
+   cursor:pointer;
+}
+#user-board-message-pin {
+    float:right;
+    cursor:pointer;
+    display:none;
 }

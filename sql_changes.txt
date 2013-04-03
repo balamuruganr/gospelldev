@@ -1,3 +1,5 @@
+ALTER TABLE `user_board` ADD `up_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_date`
+ 
 --
 -- Table structure for table `user_wall_comments`
 --

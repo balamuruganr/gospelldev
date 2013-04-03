@@ -17,6 +17,22 @@ function send_message() {
 		);
 	}
 }
+//Auto Display of Messages
+var messages_displayed = 0;
+function display_messages() {
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;	
+	if( !messages_displayed ) {
+		messages_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoBoardMessage', [ userTo, 10 ], function( request ) {
+				document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
+				messages_displayed = 0;
+			}
+		);
+	}
+ setTimeout(display_messages, 5000);   
+}
+
 var wall_posted = 0;
 function send_wall() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
@@ -33,16 +49,32 @@ function send_wall() {
 		);
 	}
 }
+// Auto display posted wall
+var wall_post_displayed= 0;
+function display_wall_post() {
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;	
+	if( !wall_post_displayed ) {
+		wall_post_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoWallPost', [ userTo, 10 ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+				wall_post_displayed = 0;
+			}
+		);
+	}
+ setTimeout(display_wall_post, 3000);        
+}
 
 var wall_comment_posted = 0;
 function send_wall_comment(hook) {	
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	var encMsg = encodeURIComponent( document.getElementById( hook ).value );
     var x = hook.split("_");
     var msg_id = x[2];    
 	if( document.getElementById( hook ).value && !wall_comment_posted ) {
 		wall_comment_posted = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfSendWallComment', [ msg_id, encMsg ], function( request ) {
+		sajax_do_call( 'wfSendWallComment', [ userTo, msg_id, encMsg ], function( request ) {
 				//document.getElementById( 'user-wall-comments' ).innerHTML = request.responseText;
                 $('.wall-comments-'+msg_id).html(request.responseText);
 				wall_comment_posted = 0;
@@ -51,22 +83,48 @@ function send_wall_comment(hook) {
 		);
 	}
 }
+var edit_comment_posted = 0;
+function send_edit_comment( uwc_id, ub_id){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	var encMsg = encodeURIComponent( document.getElementById( 'wall_comment_'+ ub_id ).value );
+    if( document.getElementById( 'wall_comment_'+ ub_id ).value && !edit_comment_posted ) {
+		edit_comment_posted = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSendEditWallComment', [ userTo, uwc_id, ub_id, encMsg ], function( request ) {
+				//document.getElementById( 'user-wall-comments' ).innerHTML = request.responseText;
+                $('.wall-comments-'+ub_id).html(request.responseText);
+				edit_comment_posted = 0;
+                runAuto();
+			}
+		);
+	}
+}
 
 var wall_comment_displayed = 0;
-function display_wall_comment(msg_id) {    
+function display_wall_comment(msg_id) { 
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	if( !wall_comment_displayed ) {
 		wall_comment_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallComment', [ msg_id ], function( request ) {
+		sajax_do_call( 'wfDisplayAutoWallComment', [ userTo, msg_id ], function( request ) {
                 $('.wall-comments-'+msg_id).html(request.responseText);
 				wall_comment_displayed = 0;
 			}
 		);
 	}
 }
+function delete_comment( uwc_id, ub_id ) {
+	if( confirm( 'Are you sure you want to delete this comment?' ) ) {
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDeleteWallComment', [ uwc_id, ub_id ], function( request ) {
+		   window.location.reload();
+		} );
+	}
+}
 
 function show_comment_textarea(id){
     $('.comment-add-'+ id).show();
+    $('#wall_comment_'+ id).focus();
 }
 function add_comment(e, id){
    var code = e.keyCode || e.which;
@@ -77,6 +135,16 @@ function add_comment(e, id){
         send_wall_comment(id);             
      }
 }
+function edit_wall_comment(e,uwc_id,ub_id){
+    var code = e.keyCode || e.which;
+  
+    if (code === 13)
+     {
+        e.preventDefault(); 
+        send_edit_comment( uwc_id, ub_id );             
+     }
+}
+
 function delete_message( id ) {
 	if( confirm( 'Are you sure you want to delete this message?' ) ) {
 		sajax_request_type = 'POST';
@@ -171,14 +239,68 @@ function endHover( divID ) {
 	document.getElementById( divID ).style.backgroundColor = '';
 }
 
-(function() {
-    function runAuto(){
+
+var comment_timer;
+function runAuto(){
        $('div[id*="user-wall-message"]').each(function(){
         var msg_id = $(this).attr("id").split("-")[3];
          display_wall_comment(msg_id);
        });  
-     setTimeout(runAuto, 5000);     
+      comment_timer = setTimeout(runAuto, 5000);       
+}
+function edit_comment(uwc_id, ub_id){
+                  
+          var div_obj = $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-body");
+          var x = $.trim($(div_obj).children(".user-wall-comment-txt").text());          
+          $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-body").remove();
+          $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-links").remove();         
+          $('#user-wall-comment-block-'+uwc_id).append('<textarea onkeypress="edit_wall_comment(event, ' + uwc_id + ', ' + ub_id + ');" id="wall_comment_' + ub_id + '" name="wall_comment_' + ub_id + '">' + x + '</textarea>');
+          
+          window.clearTimeout(comment_timer);         
+}
+//-------------- Like functions --------------------
+/*var posted = 0;
+function send_message() {
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	var encMsg = encodeURIComponent( document.getElementById( 'message' ).value );
+	var msgType = document.getElementById( 'message_type' ).value;
+	if( document.getElementById( 'message' ).value && !posted ) {
+		posted = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSendBoardMessage', [ userTo, encMsg, msgType, 10 ], function( request ) {
+				document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
+				posted = 0;
+				document.getElementById( 'message' ).value = '';
+			}
+		);
+	}
+}*/
+
+var liked = 0;
+function like_wall(ub_id, user_id, like_state){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    //userTo, encMsg, msgType, 10
+    if( !liked ) {
+      liked = 1;
+      sajax_request_type = 'POST';
+      sajax_do_call( 'wfSendWallLike', [ ub_id, user_id, like_state ], function( request ) {
+				document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
+				liked = 0;
+			}
+		);  
     }
-   runAuto();    
-})();
-    
+}
+
+(function() {    
+   //Autodisplay of Wall post//display_wall_post();   
+   //Autodisplay of Wall post's comments  
+    runAuto();    
+   //AutoDisplay Of Messages
+    display_messages();
+    $('.user-board-message-from').each(function(){
+        $(this).hover(
+          function(){ $(this).children("#user-board-message-pin").show(); },
+          function(){ $(this).children("#user-board-message-pin").hide(); }
+          );
+    });           
+})();    

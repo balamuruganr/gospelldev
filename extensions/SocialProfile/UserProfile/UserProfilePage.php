@@ -1603,7 +1603,7 @@ class UserProfilePage extends Article {
 
 		$output .= '<div id="user-page-wall">';
 		$b = new UserBoard();
-		$output .= $b->displayWalls( $user_id, 0, 10);
+		 $output .= $b->displayWalls($user_name, $user_id, 0, 10);
 		$output .= '</div>';
       $output .='</div>';
       

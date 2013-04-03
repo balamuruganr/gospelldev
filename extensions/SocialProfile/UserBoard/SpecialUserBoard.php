@@ -339,8 +339,16 @@ class SpecialViewUserBoard extends SpecialPage {
     						{$board_link}
     						{$board_to_board}
     						{$delete_link}
-    					</div>
-    				</div>";
+    					</div>";
+                      
+                      $is_comments_there = $b->displayWallcommands($ub_message['id']);
+                      
+                      $output .= '<div id="user-wall-comments" class="wall-comments-'.$ub_message['id'].'"> ';
+                       $output .= $is_comments_there;                    
+                      $output .= '</div>';  
+                    
+                        
+    				$output .= "</div>";
                     
                     }
                     
