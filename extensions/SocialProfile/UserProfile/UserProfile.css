@@ -753,5 +753,9 @@
 #user-board-message-pin {
     float:right;
     cursor:pointer;
-    display:none;
+}
+#user-board-message-pined {
+    float:right;
+    cursor:pointer;
+    display:block;
 }

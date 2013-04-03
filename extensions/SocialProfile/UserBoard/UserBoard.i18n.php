@@ -77,6 +77,7 @@ and change your settings to disable email notifications.',
 //======================= New Added By Mathi ====================
 'userwall_comment_posted_ago' => '$1 ago',
 'user_wall_like' => 'Like',
+'user_wall_unlike' => 'Unlike',
 'user_wall_comment' => 'Comment',
 'userwall_mywall' => 'My Wall',
 'wallsendbutton' => 'post wall blast',

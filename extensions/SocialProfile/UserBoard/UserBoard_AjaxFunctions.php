@@ -112,12 +112,55 @@ $wgAjaxExportList[] = 'wfDeleteWallComment';
 function wfDeleteWallComment( $uwc_id, $ub_id ) {
 	global $wgUser;
 
-	$b = new UserBoard();
-    
+	$b = new UserBoard();    
 	//if ( $b->doesUserOwnMessage( $wgUser->getID(), $ub_id ) || $wgUser->isAllowed( 'userboard-delete' ) ) {
 	//	$b->deleteWallComment( $uwc_id, $ub_id );
 	//}
-    //$b->deleteWallComment( $uwc_id, $ub_id );
-	return 'ok'.$uwc_id.'  == '.$ub_id;
+    $b->deleteWallComment( $uwc_id, $ub_id );
+	return 'ok';
 }
 
+$wgAjaxExportList[] = 'wfSetPinnedWall';
+function wfSetPinnedWall( $ub_id ) {
+	global $wgUser;
+
+	$b = new UserBoard();
+	$b->setPinnedWall( $ub_id );
+	return 'ok';
+}
+
+$wgAjaxExportList[] = 'wfSendWallLike';
+function wfSendWallLike( $ub_id ) {
+	global $wgUser;
+
+	$b = new UserBoard();
+	$b->sendWallLike( $ub_id, $wgUser->getID(), $wgUser->getName() );
+	return 'ok';
+}
+
+$wgAjaxExportList[] = 'wfSendWallUnLike';
+function wfSendWallUnLike( $ub_id ) {
+	global $wgUser;
+
+	$b = new UserBoard();
+	$b->sendWallUnLike( $ub_id, $wgUser->getID() );
+	return 'ok';
+} 
+
+$wgAjaxExportList[] = 'wfSendWallCommentLike';
+function wfSendWallCommentLike( $uwc_id ) {
+	global $wgUser;
+
+	$b = new UserBoard();
+	$b->sendWallCommentLike( $uwc_id, $wgUser->getID(), $wgUser->getName() );
+	return 'ok';
+}
+
+$wgAjaxExportList[] = 'wfSendWallCommentUnLike';
+function wfSendWallCommentUnLike( $uwc_id ) {
+	global $wgUser;
+
+	$b = new UserBoard();
+	$b->sendWallCommentUnLike( $uwc_id, $wgUser->getID() );
+	return 'ok';
+}

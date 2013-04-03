@@ -398,7 +398,7 @@ class UserBoard {
 			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type, up_pinned
 			FROM {$dbr->tableName( 'user_board' )}
 			WHERE {$user_sql}
-			ORDER BY ub_id, up_pinned DESC
+			ORDER BY ub_id DESC
 			{$limit_sql}";
 		$res = $dbr->query( $sql, __METHOD__ );
 		$messages = array();
@@ -650,10 +650,10 @@ class UserBoard {
 
 		$output = ''; // Prevent E_NOTICE
         
-		$messages = $this->getUserWallMessages( $user_id, $user_id_2, $count, $page );
+		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {		  
     		     foreach ( $messages as $message ) {    			 		     
-    			 
+    			 if( $message['type'] == 0 ){	
     				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
     				$avatar = new wAvatar( $message['user_id_from'], 'm' );
                     
@@ -661,6 +661,8 @@ class UserBoard {
                     $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
                     
                     $like_link = ''; 
+                    $unlike_link = '';
+                    
                     $command_link = ''; 
                     
     				$board_to_board = '';
@@ -670,16 +672,22 @@ class UserBoard {
                     $is_pinned = '';
                     
                     if ( $wgUser->getName() === $user_name ) {
-                      $is_pinned = "<span id=\"user-board-message-pin\" onclick=\"set_pinned('{$message['id']}');\"><img src=\"{$wgStylePath}/common/images/pin.png\" border=\"0\" title=\"Pin the post\"></span>";  
+                      $is_pinned .= "<span id=\"user-board-message-pin\" onclick=\"set_pinned('{$message['id']}');\"><img src=\"{$wgStylePath}/common/images/pin.png\" border=\"0\" title=\"Pin this post\"></span>";  
                     }                   
                     if($message['is_pinned']== 1){
-                       $is_pinned = ""; 
+                       $is_pinned .= "<span id=\"user-board-message-pined\"><img src=\"{$wgStylePath}/common/images/pined.png\" border=\"0\" title=\"This post has pinned\"></span>"; 
                     }
                     
-                    $like_link .='<span class="user-wall-message-links" id="wall-message-links-like-'.$message['id'].'">
-                       <a href="javascript:void(0);" onclick="javascript:like_wall('.$message['id'].','.$user_id.',1);">'.
+                    $like_link .='<span class="user-wall-message-links" id="wall-message-links-like-'.$message['id'].'" title="Like this post">
+                       <a href="javascript:void(0);" onclick="javascript:like_wall('.$message['id'].');">'.
     								wfMsgHtml( 'user_wall_like' ) . '</a>
                        </span>';
+                    
+                    $unlike_link .='<span class="user-wall-message-links" id="wall-message-links-unlike-'.$message['id'].'" title="Unlike this post">
+                       <a href="javascript:void(0);" onclick="javascript:unlike_wall('.$message['id'].');">'.
+    								wfMsgHtml( 'user_wall_unlike' ) . '</a>
+                       </span>';  
+                       
                     $command_link .='<span class="user-wall-message-links">
                        <a href="javascript:void(0);" onclick="javascript:show_comment_textarea(\''.$message['id'].'\');">'.
     								wfMsgHtml( 'user_wall_comment' ) . '</a>
@@ -716,10 +724,16 @@ class UserBoard {
     						</div>
     						<div class=\"cleared\"></div>
     					</div>
-    					<div class=\"user-board-message-links\">
-                            {$like_link}
+    					<div class=\"user-board-message-links\">";
+                    
+                    if($this->checkWallLike( $message['id'], $wgUser->getID() ))    
+                      $output .= "{$like_link}";
+                    else
+                      $output .= "{$unlike_link}";  
+                    
+                    $output .= "
                             {$command_link}
-    						{$board_link}
+                            {$board_link}
     						{$board_to_board}
     						{$delete_link}
     					</div>";
@@ -740,13 +754,13 @@ class UserBoard {
                                     <div class=\"user-wall-comment-image\">
                                      <a href=\"{$comment_user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$avatar_comment->getAvatarURL()}</a>
                                     </div>                                 
-                                    <textarea name=\"wall_comment_{$message['id']}\" id=\"wall_comment_{$message['id']}\" placeholder=\"Write a comment...\" onkeypress=\"add_comment(event,'wall_comment_{$message['id']}');\"></textarea>
+                                    <textarea name=\"wall_comment_{$message['id']}\" id=\"wall_comment_{$message['id']}\" placeholder=\"Write a comment...\" onkeypress=\"add_comment(event,'wall_comment_{$message['id']}');\" onfocus=\"javascript:stop_auto_load();\"></textarea>
                                    </div>";
                                                                                                           
                        $output .='</div>';                
                     
 				   $output .= '</div>';                   
-                   
+                  } //if ends here... 
     			}		  
 			
 		} elseif ( $wgUser->getName() == $wgTitle->getText() ) {
@@ -757,6 +771,233 @@ class UserBoard {
 		}
 		return $output;
 	}
+    
+    public function setPinnedWall($ub_id){
+       if ( $ub_id ) {
+			$dbw = wfGetDB( DB_MASTER );
+			$s = $dbw->selectRow(
+				'user_wall_comments',
+				array( 'uwc_user_id', 'uwc_user_name', 'uwc_status' ),
+				array( 'uwc_id' => $uwc_id, 'ub_type' => 1 ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->update(
+					'user_wall_comments',
+                    array( 'up_pinned' => 1 ),
+					array( 'uwc_id' => $uwc_id, 'ub_type' => 1 ),
+					__METHOD__
+				);
+
+				/*
+			array( 'uwc_comment' => $comment, 'uwc_date' => date( 'Y-m-d H:i:s' ) ),
+			array( 'uwc_id' => $uwc_id, 'uwc_wallmessage_id' => $message_id ),
+                $stats = new UserStatsTrack( $s->ub_user_id, $s->ub_user_name );
+				if ( $s->ub_type == 0 ) {
+					$stats->decStatField( 'user_board_count' );
+				} else {
+					$stats->decStatField( 'user_board_count_priv' );
+				}*/
+			}
+		} 
+    }
+    
+    public function sendWallLike( $ub_id, $user_id, $user_name ){
+        global $wgUser;
+              
+		$dbw = wfGetDB( DB_MASTER );
+        
+        $ub_id = stripslashes( $ub_id );
+        $user_id = stripslashes( $user_id );
+        $user_name = stripslashes( $user_name ); 
+        
+        $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_ub_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_ub_id' => $ub_id, 'ul_user_id' => $user_id ),
+				__METHOD__
+			);
+            
+            if ($s !== false ){
+                $dbw->update(
+					'user_likes',
+                    array( 'ul_like_state' => 1 ),
+					array( 'ul_ub_id' => $ub_id, 'ul_user_id' => $user_id ),
+					__METHOD__
+				);
+            } else {
+              $dbw->insert(
+        			'user_likes',
+        			array(
+        				'ul_ub_id' => $ub_id,
+        				'ul_user_id' => $user_id,
+        				'ul_user_name' => $user_name,
+        				'ul_like_state' => 1,
+        				'ul_date' => date( 'Y-m-d H:i:s' ),
+        			),
+        			__METHOD__
+        		);  
+           }
+                           
+        /*// Send e-mail notification (if user is not writing on own board)
+		if ( $user_id_from != $user_id_to ) {
+			$this->sendBoardNotificationEmail( $user_id_to, $user_name_from );
+			$this->incNewMessageCount( $user_id_to );
+		}
+
+		$stats = new UserStatsTrack( $user_id_to, $user_name_to );
+		if ( $message_type == 0 ) {
+			// public message count
+			$stats->incStatField( 'user_board_count' );
+		} else {
+			// private message count
+			$stats->incStatField( 'user_board_count_priv' );
+		}
+
+		$stats = new UserStatsTrack( $user_id_from, $user_name_from );
+		$stats->incStatField( 'user_board_sent' ); */
+              
+    }
+    
+    public function sendWallUnLike( $ub_id, $user_id ){
+       if ( $ub_id ) {
+          $dbw = wfGetDB( DB_MASTER );
+          
+            $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_ub_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_ub_id' => $ub_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+				__METHOD__
+			);
+            if ($s !== false ){
+                $dbw->update(
+					'user_likes',
+                    array( 'ul_like_state' => 0 ),
+					array( 'ul_ub_id' => $ub_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+					__METHOD__
+				);
+            }
+       }	       
+    }
+    
+    public function checkWallLike( $ub_id, $user_id ){
+        global $wgUser;
+        
+        if($ub_id){
+            $dbw = wfGetDB( DB_MASTER );
+            $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_ub_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_ub_id' => $ub_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+				__METHOD__
+			);
+                        
+			if ($s !== false )
+             return false;
+            else
+             return true;				
+       }      
+    }
+    
+    
+    public function sendWallCommentLike( $uwc_id, $user_id, $user_name ){
+        global $wgUser;
+              
+		$dbw = wfGetDB( DB_MASTER );
+        
+        $uwc_id = stripslashes( $uwc_id );
+        $user_id = stripslashes( $user_id );
+        $user_name = stripslashes( $user_name ); 
+        
+        $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_uwc_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_uwc_id' => $uwc_id, 'ul_user_id' => $user_id ),
+				__METHOD__
+			);
+            
+            if ($s !== false ){
+                $dbw->update(
+					'user_likes',
+                    array( 'ul_like_state' => 1 ),
+					array( 'ul_uwc_id' => $uwc_id, 'ul_user_id' => $user_id ),
+					__METHOD__
+				);
+            } else {
+              $dbw->insert(
+        			'user_likes',
+        			array(
+        				'ul_uwc_id' => $uwc_id,
+        				'ul_user_id' => $user_id,
+        				'ul_user_name' => $user_name,
+        				'ul_like_state' => 1,
+        				'ul_date' => date( 'Y-m-d H:i:s' ),
+        			),
+        			__METHOD__
+        		);  
+           }
+            
+        
+                
+        /*// Send e-mail notification (if user is not writing on own board)
+		if ( $user_id_from != $user_id_to ) {
+			$this->sendBoardNotificationEmail( $user_id_to, $user_name_from );
+			$this->incNewMessageCount( $user_id_to );
+		}
+
+		$stats = new UserStatsTrack( $user_id_to, $user_name_to );
+		if ( $message_type == 0 ) {
+			// public message count
+			$stats->incStatField( 'user_board_count' );
+		} else {
+			// private message count
+			$stats->incStatField( 'user_board_count_priv' );
+		}
+
+		$stats = new UserStatsTrack( $user_id_from, $user_name_from );
+		$stats->incStatField( 'user_board_sent' ); */
+              
+    }
+    
+    public function sendWallCommentUnLike( $uwc_id, $user_id ){
+       if ( $uwc_id ) {
+          $dbw = wfGetDB( DB_MASTER );
+          
+            $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_uwc_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_uwc_id' => $uwc_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+				__METHOD__
+			);
+            if ($s !== false ){
+                $dbw->update(
+					'user_likes',
+                    array( 'ul_like_state' => 0 ),
+					array( 'ul_uwc_id' => $uwc_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+					__METHOD__
+				);
+            }
+       }	       
+    }
+    
+    public function checkWallCommentLike( $uwc_id, $user_id ){
+        global $wgUser;
+        
+        if($uwc_id){
+            $dbw = wfGetDB( DB_MASTER );
+            $s = $dbw->selectRow(
+				'user_likes',
+				array( 'ul_uwc_id', 'ul_user_id', 'ul_user_name', 'ul_like_state' ),
+				array( 'ul_uwc_id' => $uwc_id, 'ul_user_id' => $user_id, 'ul_like_state' => 1 ),
+				__METHOD__
+			);
+                        
+			if ($s !== false )
+             return false;
+            else
+             return true;				
+       }      
+    }
     
     public function displayWallcommands($user_name, $message_id, $count = 10, $page = 0){
         global $wgUser, $wgTitle, $wgStylePath;
@@ -775,6 +1016,7 @@ class UserBoard {
                     
                     $close_edit_link ='';                                        
                     $like_link = '';
+                    $unlike_link = '';
                     $comment_time = '';
                     
                   $comment_text =   $comment['comment_text'];
@@ -791,10 +1033,16 @@ class UserBoard {
                                     wfMsgHtml( 'userwall_comment_posted_ago', $this->getTimeAgo( $comment['timestamp'] ) ) .
                                    "</span>";
                   
-                  $like_link .="<span class=\"user-wall-message-links\">
-                                 <a href=\"javascript:void(0);\" onclick=\"javascript:like_wall({$comment['comment_id']},user_on_line,1);\">".
-					              wfMsgHtml( 'user_wall_like' ) . "</a>
-                                </span>";
+                  $like_link .='<span class="user-wall-message-links" id="wall-comment-links-like-'.$comment['comment_id'].'" title="Like this comment">
+                       <a href="javascript:void(0);" onclick="javascript:like_wall_comment('.$comment['comment_id'].');">'.
+    								wfMsgHtml( 'user_wall_like' ) . '</a>
+                       </span>';
+                    
+                  $unlike_link .='<span class="user-wall-message-links" id="wall-comment-links-unlike-'.$comment['comment_id'].'" title="Unlike this comment">
+                       <a href="javascript:void(0);" onclick="javascript:unlike_wall_comment('.$comment['comment_id'].');">'.
+    								wfMsgHtml( 'user_wall_unlike' ) . '</a>
+                       </span>';
+                                     
                   
                   $output .='<div class="user-wall-comment-block" id="user-wall-comment-block-' .$comment['comment_id']. '">';
                   
@@ -806,7 +1054,14 @@ class UserBoard {
                               </div>";                                           
                    $output .="<div class=\"user-wall-comment-links\">
                               {$comment_time}
-                              {$like_link}
+                              ";
+                    
+                    if($this->checkWallCommentLike( $comment['comment_id'], $wgUser->getID() ))    
+                      $output .= "{$like_link}";
+                    else
+                      $output .= "{$unlike_link}";
+                              
+                   $output .="
                               {$close_edit_link}
                               </div>";
                                                                                         
