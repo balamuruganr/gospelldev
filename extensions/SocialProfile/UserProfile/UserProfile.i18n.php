@@ -68,8 +68,8 @@ $messages['en'] = array(
 	'profile-updated-personal' => 'Update your profile',
 	'profile-not-provided' => 'Not provided',
 	'populate-user-profile-done' => 'Added $1 {{PLURAL:$1|profile|profiles}}',
-	'user-board-title' => 'Board',
-	'user-send-board-blast' => 'Send board blast',
+	'user-board-title' => 'Messages', //Board
+	'user-send-board-blast' => 'Send Messages', //Send board blast
 	'user-personal-info-title' => 'Personal information',
 	'user-no-personal-info' => 'No personal information',
 	'user-personal-info-real-name' => 'Real name',
@@ -106,6 +106,8 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 	'user-profile-section-interests' => 'Other information',
 	'user-profile-section-picture' => 'Avatar',
 	'user-profile-section-preferences' => 'Preferences',
+    'user-profile-section-books' => 'Books',
+    'user-profile-section-wall' => 'Wall',
 	'user-profile-personal-info' => 'Info',
 	'user-profile-personal-name' => 'Name',
 	'user-profile-personal-email' => 'E-mail',
@@ -181,7 +183,9 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 * Special:UpdateProfile/personal|Other information
 * Special:UpdateProfile/custom|Custom information
 * Special:UploadAvatar|Avatar
-* Special:UpdateProfile/preferences|Preferences',
+* Special:UpdateProfile/preferences|Preferences
+* Special:UpdateProfile/books|Books
+* Special:UpdateProfile/wall|Wall',
 	'user-type-toggle-old' => 'Use wiki userpage',
 	'user-type-toggle-new' => 'Use social userpage',
 	'user-board-login-message' => 'You must be <a href="$1">logged in</a> to post messages to other users',
@@ -463,6 +467,9 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
     'userprofile-gender-list' =>'
 *Male
 *Female',
+'user-wall' => "Wall",
+'user-books' => "Books",
+'user-wall-login-message' => 'You must be <a href="$1">logged in</a> to post wall',
 );
 
 /** Message documentation (Message documentation)

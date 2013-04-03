@@ -20,6 +20,10 @@
 	margin: 5px 0px 10px 0px;
 }
 
+#user-page-wall {
+	margin: 5px 0px 10px 0px;
+}
+
 .user-board-top-links {
 	font-weight: bold;
 	margin: 15px 0px 0px 0px;
@@ -111,4 +115,10 @@ select#message_type {
 
 .user-board-message-type {
 	color: #797979;
+}
+
+#user-wall-comments {
+    border: 0px solid red;
+    margin-left: 5px;    
+    width: 98%;   
 }

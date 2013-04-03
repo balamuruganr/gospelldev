@@ -17,7 +17,7 @@ $messages['en'] = array(
 	'boardblastlogintitle' => 'You must be logged in to send board blasts',
 	'boardblastlogintext' => 'In order to send board blasts, you must be [[Special:UserLogin|logged in]].',
 	'messagesenttitle' => 'Messages sent',
-	'boardblasttitle' => 'Send board blast',
+	'boardblasttitle' => 'Send Message blast',//board
 	'boardblaststep1' => 'Step 1 - Write your message',
 	'boardblastprivatenote'	=> 'All messages will be sent as private messages',
 	'boardblaststep2' => 'Step 2 - Select who you want to send your message to',
@@ -27,7 +27,7 @@ $messages['en'] = array(
 	'boardlinkunselectfriends' => 'Unselect friends',
 	'boardlinkselectfoes' => 'Select foes',
 	'boardlinkunselectfoes' => 'Unselect foes',
-	'boardsendbutton' => 'Send board blast',
+	'boardsendbutton' => 'Send message blast',//board
 	'boardnofriends' => 'You have no friends to send a message to!',
 	'messagesentsuccess' => 'Your message was successfully sent',
 	'userboard' => 'User board',
@@ -36,11 +36,11 @@ $messages['en'] = array(
 	'userboard_noexist' => 'The user you are trying to view does not exist.',
 	'userboard_yourboard' => 'Your board',
 	'userboard_owner' => '$1\'s board',
-	'userboard_yourboardwith' => 'Your board-to-board with $1',
-	'userboard_otherboardwith' => '$1\'s board-to-board with $2',
+	'userboard_yourboardwith' => 'Your message-to-message with $1',//board-to-board
+	'userboard_otherboardwith' => '$1\'s message-to-message with $2', //board-to-board
 	'userboard_backprofile' => 'Back to $1\'s profile',
 	'userboard_backyourprofile' => 'Back to your profile',
-	'userboard_boardtoboard' => 'Board-to-board',
+	'userboard_boardtoboard' => 'Message-to-message', //Board-to-board
 	'userboard_confirmdelete' => 'Are you sure you want to delete this message?',
 	'userboard_sendmessage' => 'Send $1 a message',
 	'userboard_myboard' => 'My board',
@@ -73,7 +73,23 @@ $3
 Hey, want to stop getting e-mails from us?
 
 Click $4
-and change your settings to disable email notifications.'
+and change your settings to disable email notifications.',
+//======================= New Added By Mathi ====================
+'userwall_comment_posted_ago' => '$1 ago',
+'user_wall_like' => 'Like',
+'user_wall_comment' => 'Comment',
+'userwall_mywall' => 'My Wall',
+'wallsendbutton' => 'post wall blast',
+'userwall_nomessages' => 'No walls.',
+'userwall_loggedout' => 'You must be <a href="$1">logged in</a> to post messages to other users.',
+'userwall_showingmessages' => 'Showing {{PLURAL:$4|wall $3|walls $2-$3}} of {{PLURAL:$1|$1 wall|$1 walls}}.',
+'userwall_yourwall' => 'Your wall',
+'userwall_owner' => '$1\'s wall',
+'userwall_sendmessage' => 'Write on $1\'s wall',//$1 a message
+'user-wall-title' => 'Wall',
+'user-send-wall-blast' => 'Send wall',
+'userwall_sendbutton'  => 'Post',
+'wallblasttitle' => 'Post Wall blast',
 );
 
 /** Message documentation (Message documentation)

@@ -1,3 +1,21 @@
+ALTER TABLE `user_board` ADD `up_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_date`
+ 
+--
+-- Table structure for table `user_wall_comments`
+--
+
+CREATE TABLE IF NOT EXISTS `user_wall_comments` (
+  `uwc_id` int(111) unsigned NOT NULL AUTO_INCREMENT,
+  `uwc_wallmessage_id` int(111) NOT NULL,
+  `uwc_user_id` int(111) NOT NULL,
+  `uwc_user_name` varchar(255) NOT NULL,
+  `uwc_comment` text NOT NULL,
+  `uwc_pinned` tinyint(1) NOT NULL DEFAULT '0',
+  `uwc_date` datetime DEFAULT NULL,
+  `uwc_status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`uwc_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
 --
 -- sex coloumn added
 --
