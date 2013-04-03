@@ -159,6 +159,7 @@ class UsercreateTemplate extends QuickTemplate {
 			'tabindex' => '5',
 			'size' => '20'
 		) ); ?>
+					<span id="erremail" class="error"></span>
 					<div class="prefsectiontip">
 						<?php  // duplicated in Preferences.php profilePreferences()
 							if( $this->data['emailrequired'] ) {
@@ -169,7 +170,7 @@ class UsercreateTemplate extends QuickTemplate {
 							if( $this->data['emailothers'] ) {
 								$this->msgWiki('prefs-help-email-others');
 							} ?>
-					</div>
+					</div>					
 				</td>
 			<?php } ?>
 			<?php if( $this->data['usereason'] ) { ?>

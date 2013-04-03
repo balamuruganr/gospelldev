@@ -383,7 +383,7 @@ class UploadAvatar extends UploadFromFile {
 		global $wgUploadDirectory, $wgDBname, $wgMemc, $IP;
 
 		$this->avatarUploadDirectory = $wgUploadDirectory . '/avatars';
-
+        if($this->mTempPath) {
 		$imageInfo = getimagesize( $this->mTempPath );                
 		switch ( $imageInfo[2] ) {
 			case 1:
@@ -403,7 +403,7 @@ class UploadAvatar extends UploadFromFile {
                 $second_var  = array('these files','.gif, .jpg, .png, .bmp');                                
 				return Status::newFatal( str_replace($first_var, $second_var, wfMsgForContent( 'filetype-banned-type' )) );
 		}
-
+        }
 		$dest = $this->avatarUploadDirectory;
 
 		$uid = $user->getId();

@@ -13,6 +13,7 @@ if ( is_file( $wgUploadDirectory . '/temp/' . 'usr_tmp_avatar_' . $user->getId()
     $output .= '<div id="img_target_container"><img src="' . $tmp_usr_img_path.'?ts=' . rand() . '" alt="" border="0" id="target" /></div>';
 
     $output .= '<form id="user_avatar_upload" method="post" enctype="multipart/form-data" action="">';
+    $output .= '<input type="hidden" id="uploadavatar_link" value='.$upload_avatar_link = SpecialPage::getTitleFor( 'UploadAvatar' )->getFullURL().' />';
     $output .= '<input type="hidden" id="x1" name="x1" />';
     $output .= '<input type="hidden" id="y1" name="y1" />';
     $output .= '<input type="hidden" id="x2" name="x2" />';

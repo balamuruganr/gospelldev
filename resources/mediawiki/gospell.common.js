@@ -46,5 +46,9 @@ jQuery("#wpCreateaccount").click(function() {
         $("#errretype").text("password must match");
         return false;
     }
+    if($('#wpEmail').val() == ''){   
+        $("#erremail").text("required");
+        return false;
+    }        
     return true;
 });        
