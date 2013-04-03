@@ -29,8 +29,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
             array( 'LIMIT' => '1' )
     	);        
     	foreach ( $res as $row ) {
-    	 if(isset($row->user_name)){    
-    	   echo $user_first_last_name;
+    	 if(isset($row->user_name)){        	   
     	     if(!empty($user_first_last_name)) {
     	           //$suggest_user_name = $user_first_last_name.gospellCommonFunctions::generateRandomString();
     	         echo '1||'.$user_first_last_name.gospellCommonFunctions::generateRandomString();

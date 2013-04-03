@@ -24,7 +24,7 @@ class SpecialUploadCoverPhoto extends SpecialUpload {
 	protected function loadRequest() {
 		$request = $this->getRequest();
 		parent::loadRequest( $request );
-		$this->mUpload = new UploadAvatar();
+		$this->mUpload = new UploadCoverPhoto();
 		$this->mUpload->initializeFromRequest( $request );
 	}
 
@@ -173,7 +173,7 @@ class SpecialUploadCoverPhoto extends SpecialUpload {
 		$output .= '<table>
 			<tr>
 				<td colspan=2>
-					<a href="'.$wgServer.$wgScriptPath.'/index.php/Special:UploadAvatar">Upload Display picture</a>
+					<a href="'.SpecialPage::getTitleFor( 'UploadAvatar' )->getFullURL().'">Upload Display picture</a>
 				</td>
 			</tr>
 		</table>';
@@ -243,7 +243,7 @@ class SpecialUploadCoverPhoto extends SpecialUpload {
 
 }
 
-class UploadAvatar extends UploadFromFile {
+class UploadCoverPhoto extends UploadFromFile {
 	public $mExtension;
 
 	/**

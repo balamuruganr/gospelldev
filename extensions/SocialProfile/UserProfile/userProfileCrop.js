@@ -1,5 +1,5 @@
 
-jQuery(function($){
+jQuery(function($){    
     var jcrop_api;
     initJcrop();    
     function initJcrop()
@@ -27,10 +27,9 @@ jQuery(function($){
 });
 
 $('#user_avatar_sub').click(function() {          
-    var param = 'x1='+$('#x1').val()+'&y1='+$('#y1').val();
-    var url = $('#uploadavatar_link').val();
+    var param = '&x1='+$('#x1').val()+'&y1='+$('#y1').val();     
     $.ajax({
-    url: url+'?'+param ,
+    url: '?title='+window.wgPageName+param ,
     cache: false
     }).done(function( html ) {            
         var userExist = html.split('||');            

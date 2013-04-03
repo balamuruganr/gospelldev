@@ -28,9 +28,9 @@ jQuery(function($){
 });
 
 $('#user_avatar_sub').click(function() {          
-    var param = 'x1='+$('#x1').val()+'&y1='+$('#y1').val()+'&h='+$('#h').val()+'&w='+$('#w').val();
+    var param = '&x1='+$('#x1').val()+'&y1='+$('#y1').val()+'&h='+$('#h').val()+'&w='+$('#w').val();
     $.ajax({
-    url: '?'+param ,
+    url: '?title='+window.wgPageName+param ,
     cache: false
     }).done(function( html ) {            
         var userExist = html.split('||');            

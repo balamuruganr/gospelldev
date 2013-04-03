@@ -44,29 +44,11 @@ class SpecialUploadAvatar extends SpecialUpload {
 	 *
 	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute( $params ) {
-		global $wgUserProfileScripts,$wgUploadDirectory,$wgDBname,$wgUploadPath;
-
+	public function execute( $params ) {	   
+		global $wgUserProfileScripts,$wgUploadDirectory,$wgDBname,$wgUploadPath,$IP;
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            $x1 = $_REQUEST['x1'];
-            $y1 = $_REQUEST['y1'];
-            $user_id = $this->getUser()->getId();
-            $l_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_l'.'.jpg';
-            $lm_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_ml'.'.jpg';
-            $m_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_m'.'.jpg';
-            $s_path = $wgUploadDirectory.'/avatars/'.$wgDBname.'_'.$user_id.'_s'.'.jpg';
-            
-            if(gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,160,160,$l_path)) {
-                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,50,50,$lm_path);
-                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,30,30,$m_path);
-                gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,16,16,$s_path);                                            
-                @unlink($wgUploadDirectory . '/temp/usr_tmp_avatar_'.$user_id.'.jpg'); //delete the main temporary uploaded file
-                echo '1||'.$wgUploadPath.'/avatars/'.$wgDBname.'_'.$user_id.'_';
-                die();
-            }
-            echo '0||';
-            die();        
-        }
+            require_once("$IP/extensions/SocialProfile/UserProfile/gospellSpUpInclude.php");
+        }        
 		$out = $this->getOutput();
         
 		$out->addExtensionStyle( $wgUserProfileScripts . '/UserProfile.css' );
@@ -154,11 +136,8 @@ class SpecialUploadAvatar extends SpecialUpload {
 		</tr>';
 		$output .= '</table>';                
 		$output .= '</div>';
-  
-        //if(is_file($wgUploadDirectory.'/temp/usr_tmp_avatar_'.$uid)){
-            require_once("$IP/extensions/SocialProfile/UserProfile/gospellSpUpInclude.php");
-        //}
-        
+        $_REQUEST['gospell_include_var'] = 'specialuploadavatar_showsuccess';
+        require_once("$IP/extensions/SocialProfile/UserProfile/gospellSpUpInclude.php");
 		$this->getOutput()->addHTML( $output );
 	}
 
@@ -199,10 +178,11 @@ class SpecialUploadAvatar extends SpecialUpload {
 		$output = '<h1>' . wfMsg( 'uploadavatar' ) . '</h1>';
 		$output .= UserProfile::getEditProfileNav( wfMsg( 'user-profile-section-picture' ) );
 		$output .= '<div class="profile-info">';
+        
 		$output .= '<table>
 			<tr>
 				<td colspan=2>
-					<a href="'.$wgServer.$wgScriptPath.'/index.php/Special:UploadCoverPhoto">Upload Cover picture</a>
+					<a href="'.SpecialPage::getTitleFor( 'UploadCoverPhoto' )->getFullURL().'">Upload Cover picture</a>
 				</td>
 			</tr>
 		</table>';
