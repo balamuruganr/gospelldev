@@ -15,8 +15,7 @@ CREATE TABLE IF NOT EXISTS `user_likes` (
   PRIMARY KEY (`ul_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
-
-ALTER TABLE `user_board` ADD `up_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_date`
+ALTER TABLE `user_board` ADD `up_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_date`;
  
 --
 -- Table structure for table `user_wall_comments`
@@ -38,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `user_wall_comments` (
 -- sex coloumn added
 --
 
-ALTER TABLE `user_profile` ADD `up_gender` CHAR( 6 ) NOT NULL AFTER `up_user_id` 
+ALTER TABLE `user_profile` ADD `up_gender` CHAR( 6 ) NOT NULL AFTER `up_user_id` ;
 
 --
 -- SQL schema for FBConnect extension

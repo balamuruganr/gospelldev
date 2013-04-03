@@ -166,16 +166,34 @@ class FacebookDB {
 				__METHOD__,
 				array( 'IGNORE' )
 			);
-			$dbw->commit();
-            //gospelldev
+			$dbw->commit();            
             if(!empty($fb_userinfo)) {
-                if($fb_userinfo['birthday']) {                    
+                if($fb_userinfo['birthday']) {                
+                    $hometown_country = '';                    
+                    if($fb_userinfo['hometown']) {/*getting home town country */                    
+                        $split_hometown_country = explode(',',$fb_userinfo['hometown']['name']);
+                        $split_hometown_country_cnt = count($split_hometown_country);
+                        if($split_hometown_country_cnt) {
+                            $hometown_country = $split_hometown_country[$split_hometown_country_cnt-1];
+                        }  
+                    }
+                    $location_country = '';                    
+                    if($fb_userinfo['location']) {                    
+                        $split_location_country = explode(',',$fb_userinfo['location']['name']);
+                        $split_location_country_cnt = count($split_location_country);
+                        if($split_location_country_cnt) {
+                            $location_country = $split_location_country[$split_location_country_cnt-1];
+                        }  
+                    }                  
+                                      
                     $expl_bday = explode('/',$fb_userinfo['birthday']); 
                     $new_bday = $expl_bday[2].'-'.$expl_bday[0].'-'.$expl_bday[1];                    
     				$dbw->insert(
     					"{$prefix}user_profile",
     					array(
     						'up_user_id' => $user->getId(),
+                            'up_location_country' => trim($location_country),
+                            'up_hometown_country' => trim($hometown_country),
     						'up_birthday' => $new_bday
     					),
     					__METHOD__
@@ -189,28 +207,13 @@ class FacebookDB {
 
     			if ( is_file( $temp_path ) ) {				
             		$imageInfo = getimagesize( $temp_path );
-            		switch ( $imageInfo[2] ) {
-            			case 1:
-            				$ext = 'gif';
-            				break;
-            			case 2:
-            				$ext = 'jpg';
-            				break;
-            			case 3:
-            				$ext = 'png';
-            				break;
-            			default:
-            				break;
-            		}                    
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_l', 75 );    
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_ml', 50 );
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_m', 30 );
                     self::createThumbnail( $temp_path, $imageInfo, $wgDBname . '_' . $user->getId() . '_s', 16 ); 
                     unlink( $temp_path ); //delete temp file                                  
-    			}
-                                                
+    			}                                                
             }
-            //gospelldev
 		}
 		
 		$wgMemc->set( $memkey, self::getFacebookIDs( $user, DB_MASTER ) );

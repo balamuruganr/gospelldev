@@ -26,6 +26,7 @@
  *
  * @ingroup SpecialPage
  */
+require_once("$IP/includes/gospellCommonClass.php"); 
 class LoginForm extends SpecialPage {
 
 	const SUCCESS = 0;
@@ -145,47 +146,13 @@ class LoginForm extends SpecialPage {
 	}
 
 	public function execute( $par ) {
+	   global $IP;
 		if ( session_id() == '' ) {
 			wfSetupSession();
 		}
         
-		$this->load();
-        //gospell                
-        if(isset($_REQUEST['checkuser'])){
-            $user_first_last_name = '';
-            if(isset($_REQUEST['uname'])){
-                $user_name = substr($_REQUEST['uname'], 0, -4);
-                $split_user_name = explode('|||',$user_name);
-                $user_name = $split_user_name[0];
-                $user_first_last_name = $split_user_name[1]; 
-            }            
-            if($user_name == ''){
-                echo '0||';
-                die();
-            }                        
-            $dbw = wfGetDB( DB_SLAVE );
-            $res = $dbw->select(
-				'user',
-				array( 'user_name' ),
-				array( 'user_name' => ucfirst( $user_name )),
-				__METHOD__
-			);
-            
-			foreach ( $res as $row ) {
-			 if(isset($row->user_name)){
-			     if(!empty($user_first_last_name)){
-			         echo '1||'.$user_first_last_name.$this->generateRandomString();
-                 }else{
-                    echo '1||'.$user_name.$this->generateRandomString();
-                 }
-                 die();
-			 }
-			}            
-            echo '0||';
-            die();                                    
-        }
-        //gospell
-        
+		$this->load();        
+        require_once("$IP/includes/gospellIncludeCode.php");                
 		$this->setHeaders();
 
 		if ( $par == 'signup' ) { # Check for [[Special:Userlogin/signup]]
@@ -1366,18 +1333,4 @@ class LoginForm extends SpecialPage {
 			$query
 		);
 	}
-    /**
-	 * Create random text generation 
-	 * gospell rajaraman
-	 *
-	 * @param $length int
-	 */        
-    function generateRandomString($length = 5) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzgospell';
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, strlen($characters) - 1)];
-        }
-        return $randomString;
-    }    
 }

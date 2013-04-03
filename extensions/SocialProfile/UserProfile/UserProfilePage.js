@@ -63,7 +63,7 @@ function display_wall_post() {
 			}
 		);
 	}
- display_wall_post_timer = setTimeout(display_wall_post, 3000);        
+ display_wall_post_timer = setTimeout(display_wall_post, 20000);        
 }
 
 var wall_comment_posted = 0;
