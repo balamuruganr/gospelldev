@@ -241,7 +241,7 @@ class gospellCommonFunctions {
             $loc_country = ($user_profile_data['hometown_country']) ? $user_profile_data['hometown_country'] : '';
             $home_country = ($user_profile_data['hometown_country']) ? $user_profile_data['hometown_country'] : '';         
             $aboutme = ($user_profile_data['aboutme']) ? $user_profile_data['aboutme'] : '';
-            $bday = ($user_profile_data['birthday']) ? $user_profile_data['birthday'] : '';                     
+            $bday = ($user_profile_data['birthday']) ? $user_profile_data['birthday'] : '00/00/0000';                                 
             $exp = explode('/',$bday); 
             $bday = $exp[2].'-'.$exp[0].'-'.$exp[1];
             

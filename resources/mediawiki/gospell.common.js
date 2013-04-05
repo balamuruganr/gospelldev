@@ -20,7 +20,7 @@ jQuery( function ( $ ) {
         });    
     });     
     
-    $('#wpName2').change(function() {
+    $('#wpName2').change(function() {        
         var fname = $.trim($('#wpFirstName2').val());
         var lname = $.trim($('#wpLastName2').val());
         var uname = $.trim($('#wpName2').val());        
@@ -31,16 +31,17 @@ jQuery( function ( $ ) {
         uname = uname+'|||'+fname+lname        
         $.ajax({
         url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&checkuser=1&uname='+uname ),
-        cache: false
-        }).done(function( html ) {
+        cache: false,
+        success: function (html) {
             var userExist = html.split('||');
             if(userExist[0] == 0){
                 $('#uNameExists').html('');
             }                        
             if(userExist[0] == 1){                
                 $('#uNameExists').html('Someone already has that username. Try another? <br> Available : '+userExist[1]);
-            }
-        });    
+            }                        
+        }                
+        }).done();    
     });     
 } );
 

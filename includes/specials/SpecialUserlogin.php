@@ -153,11 +153,13 @@ class LoginForm extends SpecialPage {
         
 		$this->load();
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {            
-            if($_REQUEST['user_search']) {
+            if(isset($_REQUEST['user_search'])) {
                  gospellCommonFunctions::searchUserList($_REQUEST['user_search']); 
                  die();  
-            }                      
-            require_once("$IP/includes/gospellIncludeCode.php");
+            }
+            if(isset($_REQUEST['checkuser'])) {                      
+                require_once("$IP/includes/gospellIncludeCode.php");
+            }
         }                
 		$this->setHeaders();
 
