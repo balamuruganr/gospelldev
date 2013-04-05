@@ -152,7 +152,11 @@ class LoginForm extends SpecialPage {
 		}
         
 		$this->load();
-        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {        
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {            
+            if($_REQUEST['user_search']) {
+                 gospellCommonFunctions::searchUserList($_REQUEST['user_search']); 
+                 die();  
+            }                      
             require_once("$IP/includes/gospellIncludeCode.php");
         }                
 		$this->setHeaders();
@@ -164,10 +168,12 @@ class LoginForm extends SpecialPage {
 		if ( !is_null( $this->mCookieCheck ) ) {
 			$this->onCookieRedirectCheck( $this->mCookieCheck );
 			return;
-		} elseif( $this->mPosted && gospellCommonFunctions::checkUserProfileData($_POST)) {
+		} elseif( $this->mPosted ) {
 			if( $this->mCreateaccount ) {
+			 if(gospellCommonFunctions::checkUserProfileData($_POST)) {
 				$this->addNewAccount();
 				return;
+                }                
 			} elseif ( $this->mCreateaccountMail ) {
 				$this->addNewAccountMailPassword();
 				return;

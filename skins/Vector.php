@@ -454,7 +454,7 @@ class VectorTemplate extends BaseTemplate {
 				break;
 				case 'SEARCH':
 ?>
-<div id="p-search">
+<div id="p-search">		
 	<h5<?php $this->html( 'userlangattributes' ) ?>><label for="searchInput"><?php $this->msg( 'search' ) ?></label></h5>
 	<form action="<?php $this->text( 'wgScript' ) ?>" id="searchform">
 		<?php if ( $wgVectorUseSimpleSearch && $this->getSkin()->getUser()->getOption( 'vector-simplesearch' ) ): ?>
@@ -468,6 +468,8 @@ class VectorTemplate extends BaseTemplate {
 			<?php endif; ?>
 		<?php else: ?>
 		<div>
+		<input type="text" name="user_search" id="user_search" placeholder="search by user name" />
+		<span id="js_user_search_result"></span>		
 			<?php echo $this->makeSearchInput( array( 'id' => 'searchInput' ) ); ?>
 			<?php echo $this->makeSearchButton( 'go', array( 'id' => 'searchGoButton', 'class' => 'searchButton' ) ); ?>
 			<?php echo $this->makeSearchButton( 'fulltext', array( 'id' => 'mw-searchButton', 'class' => 'searchButton' ) ); ?>

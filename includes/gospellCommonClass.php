@@ -263,7 +263,7 @@ class gospellCommonFunctions {
         }         
     }
     
-    public static function checkUserProfileData ( $post_data ) {
+    public static function checkUserProfileData ( $post_data ) {        
         //TODO: need to check min max lenght and set error type
         //here only checked not empty                               
          if( empty( $post_data['wpRealName'] ) || strlen( trim( $post_data['wpRealName'] ) ) <= 0 ) {               
@@ -286,6 +286,28 @@ class gospellCommonFunctions {
          }
          return true; 
     }
+    //user name search 
+    public static function searchUserList($user_name) {      
+         if(isset($user_name)) {
+            $user_name = substr($user_name, 0, -4);//strip .php  
+            $user_name = strtolower( $user_name );    
+                      
+            $dbw = wfGetDB( DB_SLAVE);  
+            $res = $dbw->query("SELECT user_name FROM user
+                                WHERE LOWER(CONVERT(user_name USING latin1))  LIKE '".$user_name."%'
+                                OR LOWER(CONVERT(user_real_name USING latin1))  LIKE '".$user_name."%'
+                                LIMIT 50");   
+                                
+            $usr_ary = array();            
+            foreach ( $res as $row ) {
+                $usr_ary[] = $row->user_name;
+        	}  
+            header('Content-type:application/json');          
+            echo json_encode($usr_ary);            
+            die();                                    
+        }              
+    }
 }
+
 
 ?>

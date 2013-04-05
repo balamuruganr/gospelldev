@@ -1,7 +1,25 @@
 /**
  * check user name exists and suggest uer name
  */
-jQuery( function ( $ ) {	
+jQuery( function ( $ ) {    
+    $('#user_search').keyup(function() {            
+        var uname = $.trim($('#user_search').val());                
+        if(uname == ''){
+            return false;
+        }            
+        $.ajax({
+        url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&user_search='+uname ),
+        cache: false
+        }).done(function( html ) {              
+            var res = '<ul>';
+            $.each(html, function(i, field){        
+                res = res + '<li><a href="'+window.wgScript+'?title=user:'+field+'">'+field+'</a>';     
+            });    
+            res = res + '</ul>';
+            $('#js_user_search_result').html(res);                  
+        });    
+    });     
+    
     $('#wpName2').change(function() {
         var fname = $.trim($('#wpFirstName2').val());
         var lname = $.trim($('#wpLastName2').val());
