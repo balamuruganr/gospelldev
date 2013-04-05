@@ -42,6 +42,7 @@ class UsercreateTemplate extends QuickTemplate {
 	}
 	
 	function execute() {
+	   global $wgGospellSettingsProfileAboutMaxLenth;
 		if( $this->data['message'] ) {
 ?>
 	<div class="<?php $this->text('messagetype') ?>box">
@@ -66,14 +67,13 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-input">
 				<?php
 			echo Html::input( 'wpFirstName', $this->data['firstname'], 'text', array(
-				'class' => 'loginText',
+				'class' => 'loginText required',
 				'id' => 'wpFirstName2',
 				'tabindex' => '1',
 				'size' => '20',
-				'required',
+				'required '  => 'required',
 				'autofocus'
-			) ); ?>
-            <span id="errfirstname2" class="error"></span>            
+			) ); ?>                
 			</td>
 		</tr>    
 		<tr>
@@ -81,29 +81,47 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-input">
 				<?php
 			echo Html::input( 'wpLastName', $this->data['lastname'], 'text', array(
-				'class' => 'loginText',
+				'class' => 'loginText required',
 				'id' => 'wpLastName2',
-				'tabindex' => '1',
+				'tabindex' => '2',
 				'size' => '20',
-				'required',
-				'autofocus'
-			) ); ?>            
-			<span id="errlastname2" class="error"></span>
+				'required '  => 'required'				
+			) ); ?>            			
             </td>
-		</tr>            
+		</tr>
+		<tr>
+			<td class="mw-label"><label for='wpGender2'><?php echo wfMsg( 'user-profile-personal-gender' ); ?></label></td>
+			<td class="mw-input">
+            <select name="wpGender2" id="wpGender2" class="required" title="<?php echo wfMsg( 'user-profile-personal-gender' ); ?>" required="required" tabindex="3">
+            <option value="">-Select Gender-</option>
+            <?php
+            $genders = explode( "\n*", wfMsgForContent( 'userprofile-gender-list' ) );
+            array_shift( $genders );              
+            foreach ( $genders as $gendr ) {
+            	 echo  "<option value=\"{$gendr}\" >{$gendr}</option>";			 
+            }        
+            ?>
+            </select>  
+            </td>
+		</tr>
+		<tr>
+			<td class="mw-label"><label for='birthday'><?php echo wfMsg( 'user-profile-personal-birthday' ); ?></label></td>
+			<td class="mw-input">
+            <input type="text" class="long-birthday required" required="required" size="25" name="birthday" id="birthday" title="<?php echo wfMsg( 'user-profile-personal-birthday' ); ?>"  tabindex="4"/>
+            </td>
+		</tr>                  
+                    
 		<tr>
 			<td class="mw-label"><label for='wpName2'><?php $this->msg('yourname') ?></label></td>
 			<td class="mw-input">
 				<?php
 			echo Html::input( 'wpName', $this->data['name'], 'text', array(
-				'class' => 'loginText',
+				'class' => 'loginText required',
 				'id' => 'wpName2',
-				'tabindex' => '1',
+				'tabindex' => '5',
 				'size' => '20',
-				'required',
-				'autofocus'
-			) ); ?>
-            <span id="errname2" class="error"></span>
+				'required '  => 'required'				
+			) ); ?>            
             <div id="uNameExists" style="color: red;"></div>
 			</td>
 		</tr>
@@ -112,11 +130,14 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-input">
 <?php
 			echo Html::input( 'wpPassword', null, 'password', array(
-				'class' => 'loginPassword',
+				'class' => 'loginPassword required',
 				'id' => 'wpPassword2',
-				'tabindex' => '2',
+				'tabindex' => '6',
+                'required '  => 'required',                
 				'size' => '20'
 			) + User::passwordChangeInputAttribs() ); ?>
+            <span id="errpassword2" class="error"></span>
+            <span id="pwd_strength"></span>            
 			</td>
 		</tr>
 	<?php if( $this->data['usedomain'] ) {
@@ -129,7 +150,7 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-label"><?php $this->msg( 'yourdomainname' ) ?></td>
 			<td class="mw-input">
 				<select name="wpDomain" value="<?php $this->text( 'domain' ) ?>"
-					tabindex="3">
+					tabindex="5">
 					<?php echo $doms ?>
 				</select>
 			</td>
@@ -140,9 +161,10 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-input">
 				<?php
 		echo Html::input( 'wpRetype', null, 'password', array(
-			'class' => 'loginPassword',
+			'class' => 'loginPassword required',
 			'id' => 'wpRetype',
-			'tabindex' => '4',
+			'tabindex' => '7',
+            'required '  => 'required',
 			'size' => '20'
 		) + User::passwordChangeInputAttribs() ); ?>
 			<span id="errretype" class="error"></span>     
@@ -154,14 +176,16 @@ class UsercreateTemplate extends QuickTemplate {
 				<td class="mw-input">
 					<?php
 		echo Html::input( 'wpEmail', $this->data['email'], 'email', array(
-			'class' => 'loginText',
+			'class' => 'loginText required',
 			'id' => 'wpEmail',
-			'tabindex' => '5',
-			'size' => '20'
-		) ); ?>
-					<span id="erremail" class="error"></span>
+			'tabindex' => '8',
+			'size' => '20',
+            'type' => 'email',
+            'required ' => 'required',
+            'placeholder ' => 'Email Address'
+		) ); ?>					
 					<div class="prefsectiontip">
-						<?php  // duplicated in Preferences.php profilePreferences()
+						<?php /* // duplicated in Preferences.php profilePreferences()
 							if( $this->data['emailrequired'] ) {
 								$this->msgWiki('prefs-help-email-required');
 							} else {
@@ -169,7 +193,7 @@ class UsercreateTemplate extends QuickTemplate {
 							}
 							if( $this->data['emailothers'] ) {
 								$this->msgWiki('prefs-help-email-others');
-							} ?>
+							} */ ?>
 					</div>					
 				</td>
 			<?php } ?>
@@ -184,6 +208,27 @@ class UsercreateTemplate extends QuickTemplate {
 					</td>
 			<?php } ?>
 		</tr>
+        <tr>
+		<td class="mw-label"><label for='hometown_country'>Country</label></td>
+		<td class="mw-input">
+        <?php 
+            $countries = explode( "\n*", wfMsgForContent( 'userprofile-country-list' ) );            
+            array_shift( $countries );            
+            echo "<select class='required' required='required' name=\"hometown_country\" id=\"hometown_country\" class=\"required\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"  tabindex='9'>
+            <option value=\"\">-Select Country-</option>";
+            foreach ( $countries as $country ) {
+    			echo "<option value=\"{$country}\" >{$country}</option>";
+		    }           
+            echo '</select>';         
+        ?>
+        </tr>        
+		<tr>
+			<td class="mw-label"><label for='aboutme'><?php echo wfMsg( 'user-profile-personal-aboutme' ); ?></label></td>
+			<td class="mw-input">
+                <textarea class="required" required="required" maxlength="<?php echo $wgGospellSettingsProfileAboutMaxLenth; ?>" name="aboutme" id="aboutme" tabindex="10"></textarea>
+            </td>
+		</tr>                  
+        
 		<?php if( $this->data['canremember'] ) { ?>
 		<tr>
 			<td></td>

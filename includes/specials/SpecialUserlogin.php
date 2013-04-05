@@ -151,8 +151,10 @@ class LoginForm extends SpecialPage {
 			wfSetupSession();
 		}
         
-		$this->load();        
-        require_once("$IP/includes/gospellIncludeCode.php");                
+		$this->load();
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {        
+            require_once("$IP/includes/gospellIncludeCode.php");
+        }                
 		$this->setHeaders();
 
 		if ( $par == 'signup' ) { # Check for [[Special:Userlogin/signup]]
@@ -162,7 +164,7 @@ class LoginForm extends SpecialPage {
 		if ( !is_null( $this->mCookieCheck ) ) {
 			$this->onCookieRedirectCheck( $this->mCookieCheck );
 			return;
-		} elseif( $this->mPosted ) {
+		} elseif( $this->mPosted && gospellCommonFunctions::checkUserProfileData($_POST)) {
 			if( $this->mCreateaccount ) {
 				$this->addNewAccount();
 				return;
@@ -244,7 +246,7 @@ class LoginForm extends SpecialPage {
 
 		# Save settings (including confirmation token)
 		$u->saveSettings();
-
+        gospellCommonFunctions::saveProfileInfo($u->getId(),$_POST);
 		# If not logged in, assume the new account as the current one and set
 		# session cookies then show a "welcome" message or a "need cookies"
 		# message as needed
@@ -599,7 +601,7 @@ class LoginForm extends SpecialPage {
 		} elseif ( $wgBlockDisablesLogin && $u->isBlocked() ) {
 			// If we've enabled it, make it so that a blocked user cannot login
 			$retval = self::USER_BLOCKED;
-		} else {
+		} else {		  
 			$wgAuth->updateUser( $u );
 			$wgUser = $u;
 			// This should set it for OutputPage and the Skin

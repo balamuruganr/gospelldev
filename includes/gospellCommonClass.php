@@ -215,7 +215,77 @@ class gospellCommonFunctions {
     
      return $res;
     }
-
+    
+	public static function sharedDB() {
+		global $wgExternalSharedDB;
+		if ( !empty( $wgExternalSharedDB ) ) {
+			return $wgExternalSharedDB;
+		}
+		return false;
+	}
+    
+    public static function saveProfileInfo($user_id,$user_profile_data = array()) {
+        global $wgDBprefix;
+		$prefix = $wgDBprefix;
+        if(empty($user_profile_data) || empty($user_id)) {
+            return false;
+        }
+        else 
+        {            
+            $gender = ($user_profile_data['wpGender2']) ? $user_profile_data['wpGender2'] : '';
+            $genders = explode( "\n*", wfMsgForContent( 'userprofile-gender-list' ) );
+            array_shift( $genders );              
+            if (!in_array($gender, $genders)) {
+                $gender = 'Male';
+            }            
+            $loc_country = ($user_profile_data['hometown_country']) ? $user_profile_data['hometown_country'] : '';
+            $home_country = ($user_profile_data['hometown_country']) ? $user_profile_data['hometown_country'] : '';         
+            $aboutme = ($user_profile_data['aboutme']) ? $user_profile_data['aboutme'] : '';
+            $bday = ($user_profile_data['birthday']) ? $user_profile_data['birthday'] : '';                     
+            $exp = explode('/',$bday); 
+            $bday = $exp[2].'-'.$exp[0].'-'.$exp[1];
+            
+    		$dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+    		$dbw->insert(
+    			"{$prefix}user_profile",
+    			array(
+    				'up_user_id' => $user_id,
+    				'up_gender' => $gender,
+                    'up_location_country' => $loc_country,
+                    'up_hometown_country' => $home_country,
+                    'up_birthday' => $bday,
+                    'up_about' => $aboutme
+    			),
+    			__METHOD__,
+    			array( 'IGNORE' )
+    		);
+    		$dbw->commit();
+        }         
+    }
+    
+    public static function checkUserProfileData ( $post_data ) {
+        //TODO: need to check min max lenght and set error type
+        //here only checked not empty                               
+         if( empty( $post_data['wpRealName'] ) || strlen( trim( $post_data['wpRealName'] ) ) <= 0 ) {               
+            return false;
+         }
+         if( empty( $post_data['wpLastName'] ) || strlen( trim( $post_data['wpLastName'] ) ) <= 0 ) {
+            return false;
+         }
+         if( empty( $post_data['wpGender2'] ) || strlen( trim( $post_data['wpGender2'] ) ) <= 0 ) {        
+            return false;
+         }
+         if( empty( $post_data['birthday'] ) && strlen( trim( $post_data['birthday'] ) ) <= 0 ) {
+            return false;
+         }
+         if( empty( $post_data['hometown_country'] ) && strlen( trim( $post_data['hometown_country'] ) ) <= 0 ) {
+            return false;
+         }
+         if( empty( $post_data['aboutme'] ) && strlen( trim( $post_data['aboutme'] ) ) <= 0 ) {        
+            return false;
+         }
+         return true; 
+    }
 }
 
 ?>
