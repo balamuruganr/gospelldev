@@ -113,6 +113,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
                     if(strlen(trim($wgRequest->getVal( 'hometown_city' )))<=0): $valid_hometown_city = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'hometown_country' )))<=0): $valid_hometown_country = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'birthday' )))<=0): $valid_birth_date  = false; endif;
+                    if(strlen(trim($wgRequest->getVal( 'birthday' )))<=0): $valid_birth_date  = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'about' )))<=0): $valid_about_text  = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'about' ))) > $wgGospellSettingsProfileAboutMaxLenth):$valid_about_text_limit= false; endif;
                     

@@ -42,9 +42,9 @@ $messages['en'] = array(
 	'userboard_backyourprofile' => 'Back to your profile',
 	'userboard_boardtoboard' => 'Message-to-message', //Board-to-board
 	'userboard_confirmdelete' => 'Are you sure you want to delete this message?',
-	'userboard_sendmessage' => 'Send $1 a message',
+	'userboard_sendmessage' => 'Send a message to $1',
 	'userboard_myboard' => 'My board',
-	'userboard_posted_ago' => 'posted $1 ago',
+	'userboard_posted_ago' => 'Message sent $1 ago',
 	'userboard_private' => 'private',
 	'userboard_public' => 'public',
 	'userboard_messagetype' => 'Message type',
@@ -75,13 +75,14 @@ Hey, want to stop getting e-mails from us?
 Click $4
 and change your settings to disable email notifications.',
 //======================= New Added By Mathi ====================
-'userwall_comment_posted_ago' => '$1 ago',
+'userwall_posted_ago' => 'Posted $1 ago',
+'userwall_comment_posted_ago' => 'Posted $1 ago',
 'user_wall_like' => 'Like',
 'user_wall_unlike' => 'Unlike',
 'user_wall_comment' => 'Comment',
 'userwall_mywall' => 'My Wall',
 'wallsendbutton' => 'post wall blast',
-'userwall_nomessages' => 'No walls.',
+'userwall_nomessages' => 'No wall posts.',
 'userwall_loggedout' => 'You must be <a href="$1">logged in</a> to post messages to other users.',
 'userwall_showingmessages' => 'Showing {{PLURAL:$4|wall $3|walls $2-$3}} of {{PLURAL:$1|$1 wall|$1 walls}}.',
 'userwall_yourwall' => 'Your wall',

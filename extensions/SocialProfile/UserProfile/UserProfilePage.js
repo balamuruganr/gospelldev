@@ -10,12 +10,49 @@ function send_message() {
 		posted = 1;
 		sajax_request_type = 'POST';
 		sajax_do_call( 'wfSendBoardMessage', [ userTo, encMsg, msgType, 10 ], function( request ) {
-				document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
-				posted = 0;
-				document.getElementById( 'message' ).value = '';
+				//document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
+                //call to upload files
+                send_files_also(userTo);
+				posted = 0;				
 			}
 		);
 	}
+}
+//sendMessageFiles
+function send_files_also( userTo ){
+    
+        var input = document.getElementById("file_upload"), 
+		formdata = false;
+                
+        if (window.FormData) {
+  		 formdata = new FormData();
+	    }
+        
+    formdata.append("user_name", userTo);  
+    
+    var i = 0, len = input.files.length, file;
+    
+    for ( ; i < len; i++ ) {
+			file = input.files[i];			
+				if (formdata) {
+					formdata.append("up_files[]", file);
+				}
+				
+		}
+     if (formdata) {
+        $.ajax({
+				url: '?title='+window.wgPageName,
+				type: "POST",
+				data: formdata,
+				processData: false,
+				contentType: false,
+				success: function (res) {
+				 $('#file-attach-block').find('.file-block').html("<input type=\"file\" name=\"file_upload\" id=\"file_upload\" multiple>");
+                 document.getElementById( 'message' ).value = '';
+                 display_messages();	
+				}
+			});
+	 }   
 }
 //Auto Display of Messages
 var messages_displayed = 0;
@@ -264,8 +301,8 @@ function like_wall( ub_id ){
     if( !liked ) {
       liked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallLike', [ ub_id ], function( request ) {
-				window.location.reload();
+      sajax_do_call( 'wfSendWallLike', [ userTo, ub_id ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				liked = 0;
 			}
 		);  
@@ -278,8 +315,8 @@ function unlike_wall( ub_id ){
     if( !unliked ) {
       unliked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallUnLike', [ ub_id ], function( request ) {
-				window.location.reload();
+      sajax_do_call( 'wfSendWallUnLike', [ userTo, ub_id ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				unliked = 0;
 			}
 		);  
@@ -287,28 +324,28 @@ function unlike_wall( ub_id ){
 }
 
 var wall_comment_liked = 0;
-function like_wall_comment(uwc_id){
+function like_wall_comment(ub_id, uwc_id){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     //userTo, encMsg, msgType, 10
     if( !wall_comment_liked ) {
       wall_comment_liked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallCommentLike', [ uwc_id ], function( request ) {
-				window.location.reload();
+      sajax_do_call( 'wfSendWallCommentLike', [ userTo, ub_id, uwc_id ], function( request ) {
+				$('.wall-comments-'+ub_id).html(request.responseText);
 				wall_comment_liked = 0;
 			}
 		);  
     }
 }
 var wall_comment_unliked = 0;
-function unlike_wall_comment(uwc_id){
+function unlike_wall_comment(ub_id, uwc_id){
    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     //userTo, encMsg, msgType, 10
     if( !wall_comment_unliked ) {
       wall_comment_unliked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallCommentUnLike', [ uwc_id ], function( request ) {
-				window.location.reload();
+      sajax_do_call( 'wfSendWallCommentUnLike', [ userTo, ub_id, uwc_id ], function( request ) {
+				$('.wall-comments-'+ub_id).html(request.responseText);
 				wall_comment_unliked = 0;
 			}
 		);  
@@ -321,7 +358,7 @@ function set_pinned(ub_id){
       pinned = 1;
       sajax_request_type = 'POST';
       sajax_do_call( 'wfSetPinnedWall', [ ub_id ], function( request ) {
-				window.location.reload();
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				pinned = 0;
 			}
 		);   
@@ -330,6 +367,7 @@ function set_pinned(ub_id){
 function stop_auto_load(){
    window.clearTimeout(display_wall_post_timer);  
 }
+
 (function() { 
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post

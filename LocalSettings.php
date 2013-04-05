@@ -137,9 +137,18 @@ $wgGroupPermissions['user']['edit'] = true;
 $wgGroupPermissions['sysop']['edit'] = true;
 
 $wgGospellSettingsProfileAboutMaxLenth = 512;
-$wgLegacyJavaScript = true;
+$wgGospellSettingsUserProfileAgeLimit  = 13;
+$wgGospellSettingsUserBordMessageFileSize = 2097152; //2097152 = 2 mb in bytes;
 
-                     //////////// Updated By Mathivanan ///////////////////
+$wgLegacyJavaScript = true;
+$wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
+
+# Allow users to use Uploadify
+//$wgGroupPermissions['user']['uploadify'] = true;
+# Load the extension
+require_once("$IP/extensions/Uploadify/Uploadify.php");
+
+                     //////////// Updated By Mathivanan /////////////////// 
 //==========================================================================================//
 
 # Enabled Extensions. Most extensions are enabled by including the base extension file here

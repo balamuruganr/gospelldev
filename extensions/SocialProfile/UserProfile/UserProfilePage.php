@@ -44,7 +44,7 @@ class UserProfilePage extends Article {
 			parent::view();
 			return '';
 		}
-
+         
 		$wgOut->addHTML( '<div id="profile-top">' );
 		$wgOut->addHTML( $this->getProfileTop( $this->user_id, $this->user_name ) );
 		$wgOut->addHTML( '<div class="cleared"></div></div>' );
@@ -102,6 +102,9 @@ class UserProfilePage extends Article {
         $wgOut->addHTML( $this->getUserWall( $this->user_id, $this->user_name ) );
         //Customized ends ///////////////////////////
 		$wgOut->addHTML( $this->getUserBoard( $this->user_id, $this->user_name ) );
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+          $wgOut->addHTML( $this->sendAjaxReqforUserBordMessageFiles() );
+        }
 
 		if ( !wfRunHooks( 'UserProfileEndRight', array( &$this ) ) ) {
 			wfDebug( __METHOD__ . ": UserProfileEndRight messed up profile!\n" );
@@ -1413,7 +1416,12 @@ class UserProfilePage extends Article {
 
 		return $output;
 	}
-
+    
+    function sendAjaxReqforUserBordMessageFiles(){        
+        $b = new UserBoard();       
+        $b->sendUserBoardMessageFiles();
+    }
+    
 	/**
 	 * Get the user board for a given user.
 	 *
@@ -1488,6 +1496,7 @@ class UserProfilePage extends Article {
 		if ( $wgUser->getName() !== $user_name ) {
 			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
 				$output .= '<div class="user-page-message-form">
+                       
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
 						<!--span class="profile-board-message-type">' .
 							wfMsgHtml( 'userboard_messagetype' ) .
@@ -1501,10 +1510,16 @@ class UserProfilePage extends Article {
 								wfMsgHtml( 'userboard_private' ) .
 							'</option>
 						</select--><p>
-						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message..."/></textarea>
+						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'"/></textarea>                        
+                        <div class="cleared"></div>
+                        <form name="upload_file_frm" id="upload_file_frm" action="" enctype="multipart/form-data">
+                         <div id="file-attach-block"><span class="add_files"><a>Attach files with message</a></span><div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div></div>
+                         <div class="cleared"></div>
+                        </form>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:send_message();" />
 						</div>
+                        
 					</div>';
 			} else {
 				$login_link = SpecialPage::getTitleFor( 'Userlogin' );

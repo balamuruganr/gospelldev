@@ -759,3 +759,10 @@
     cursor:pointer;
     display:block;
 }
+
+.add_files a{ cursor:pointer; text-decoration: none; }
+#file-attach-block {
+    border:0px solid #ff0000;    
+}
+.file-block { display: block; }
+.remove-file-block  {cursor:pointer;color: #0645AD; text-decoration: none;}

@@ -63,6 +63,100 @@ class UserBoard {
 		return $dbw->insertId();
 	}
     
+    public function getLastInsertedMessageId($user_id_from, $user_name_from, $user_id_to, $user_name_to){
+        global $wgUser, $wgOut, $wgTitle;
+        
+		$dbr = wfGetDB( DB_SLAVE );
+        
+        $where = " ub_user_id_from={$user_id_from} AND ub_user_id={$user_id_to} AND ub_type=1";
+        
+        $limit_sql =" LIMIT 0, 1";
+        
+        $sql = "SELECT ub_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
+			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type, up_pinned
+			FROM {$dbr->tableName( 'user_board' )} WHERE{$where} ORDER BY ub_id DESC{$limit_sql}";
+            
+		$res = $dbr->query( $sql, __METHOD__ );
+		$messages = array();
+		foreach ( $res as $row ) {
+			$parser = new Parser();
+			$message_text = $parser->parse( $row->ub_message, $wgTitle, $wgOut->parserOptions(), true );
+			$message_text = $message_text->getText();
+
+			$messages[] = array(
+				'ub_id' => $row->ub_id,
+				'timestamp' => ( $row->unix_time ),
+				'user_id_from' => $row->ub_user_id_from,
+				'user_name_from' => $row->ub_user_name_from,
+				'user_id' => $row->ub_user_id,
+				'user_name' => $row->ub_user_name,
+				'message_text' => $message_text,
+				'type' => $row->ub_type,
+                'is_pinned' => $row->up_pinned
+                
+			);
+		}
+        
+     return $messages[0]['ub_id'];   
+    }
+    
+    public function sendUploadUserBoardFiles($ub_id, $fname){
+        $dbw = wfGetDB( DB_MASTER );
+
+		$ub_id = stripslashes( $ub_id );
+		$fname = stripslashes( $fname );
+
+		$dbw->insert(
+			'user_bord_files',
+			array(
+				'ubf_ub_id' => $ub_id,
+				'ubf_file_name' => $fname,
+			),
+			__METHOD__
+		);
+       
+       return $dbw->insertId();   
+    }
+    
+    public function sendUserBoardMessageFiles() {
+      global $wgUser, $wgUploadDirectory, $wgFileExtensions, $wgGospellSettingsUserBordMessageFileSize;
+      
+        $user_name = stripslashes( $_POST['user_name'] );
+	    $user_name = urldecode( $user_name );
+	    $user_id_to = User::idFromName( $user_name );
+        
+        $ub_id = $this->getLastInsertedMessageId($wgUser->getID(), $wgUser->getName(), $user_id_to, $user_name);
+        
+        if (!empty($_FILES)) { //File Array Check
+           foreach($_FILES["up_files"]["name"] as $key => $val){
+            
+            $fileParts  = pathinfo($_FILES['up_files']['name'][$key]);
+            // Check if extension is valid
+			if (in_array($fileParts['extension'],$wgFileExtensions)) {
+			 // Check file size is valid
+			  if($_FILES['up_files']['size'][$key] <= $wgGospellSettingsUserBordMessageFileSize){	     
+			  
+			  $fname = str_replace(".","",microtime(true)).".".$fileParts['extension'];
+              $file_up = move_uploaded_file( $_FILES["up_files"]["tmp_name"][$key], $wgUploadDirectory."/user_files/" . $fname);
+              if($file_up)
+               {
+                 $insert = $this->sendUploadUserBoardFiles($ub_id, $fname);
+                 if(!$insert){
+                  @unlink($wgUploadDirectory."/user_files/" . $fname);   
+                 }                 
+               }
+               usleep(1000000);
+               
+              } // Check file size ends
+              
+			} //Check if extension ends //@unlink($_FILES["up_files"]["tmp_name"][$key]);
+                           
+           } //loop ends
+            
+        } //File Array Check ends
+      //$b->displayMessages( $user_id_to, 0, $count )      
+    }
+    
     public function sendWallComment($message_id, $user_id, $user_name, $comment){
         $dbw = wfGetDB( DB_MASTER );
         
@@ -423,6 +517,41 @@ class UserBoard {
 		return $messages;
 	}
     
+    public function getUserBoardMessageFiles( $ub_id, $limit = 0, $page = 0){
+        global $wgUser, $wgOut, $wgTitle;
+		$dbr = wfGetDB( DB_SLAVE );
+        $limit_sql="";
+        if ( $limit > 0 ) {
+			$limitvalue = 0;
+			if ( $page ) {
+				$limitvalue = $page * $limit - ( $limit );
+			}
+			$limit_sql = " LIMIT {$limitvalue},{$limit} ";
+		}
+        
+        if ( $ub_id ) {
+           $ub_sql = "ubf_ub_id ={$ub_id}"; 
+        }
+        
+        $sql = "SELECT ubf_file_id, ubf_ub_id, ubf_file_name, ubf_status FROM {$dbr->tableName( 'user_bord_files' )}
+			WHERE {$ub_sql} ORDER BY ubf_file_id DESC {$limit_sql}";
+        
+        $res = $dbr->query( $sql, __METHOD__ );
+		$files = array();
+        
+        foreach ( $res as $row ) {
+			//$parser = new Parser();
+			//$message_text = $parser->parse( $row->ubf_file_name, $wgTitle, $wgOut->parserOptions(), true );
+			//$message_text = $message_text->getText();
+            $files[] = array(
+				'file_id' => $row->ubf_file_id,
+				'ub_id' => $row->ubf_ub_id,
+				'file_name' => $row->ubf_file_name                
+			);
+        }
+     return $files;          
+    }
+    
     /**
 	 * Get the user board messages for the user with the ID $user_id.
 	 *
@@ -496,7 +625,7 @@ class UserBoard {
 		return $messages;
 	}
     
-    public function getUserWallCommands( $message_id, $limit = 0, $page = 0 ) {
+    public function getUserWallComments( $message_id, $limit = 0, $page = 0 ) {
 		global $wgUser, $wgOut, $wgTitle;
 		$dbr = wfGetDB( DB_SLAVE );
 
@@ -571,17 +700,35 @@ class UserBoard {
 		}
 		return $count;
 	}
+    
+    public function displayUserBoardMessageFiles( $ub_id ){      
+      global $wgUser, $wgTitle, $wgScriptPath, $wgFileExtensions;  
+      $output = ''; // Prevent E_NOTICE
+      
+      $files = $this->getUserBoardMessageFiles( $ub_id, 0 );
+       
+       //
+      foreach ( $files as $file ) {
+        
+         $output .= "<div class=\"user-board-message-eachfile\">
+                      <a href=\"$wgScriptPath/images/user_files/{$file['file_name']}\" target=\"_block\">{$file['file_name']}</a>                      
+                     </div>";
+       }
+     return $output;  
+    }
 
 	public function displayMessages( $user_id, $user_id_2 = 0, $count = 10, $page = 0 ) {
 		global $wgUser, $wgTitle;
 
 		$output = ''; // Prevent E_NOTICE
+        $isThereAnyMsg=0;
         
 		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {
 		  
     		     foreach ( $messages as $message ) {
-    			  if( $message['type'] == 1 ){	
+    			  if( $message['type'] == 1 ){
+    			    $isThereAnyMsg = 1;
     				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
     				$avatar = new wAvatar( $message['user_id_from'], 'm' );
     
@@ -625,6 +772,9 @@ class UserBoard {
     							{$message_text}
     						</div>
     						<div class=\"cleared\"></div>
+                             <div class=\"user-board-message-files\">";
+                 $output .= $this->displayUserBoardMessageFiles($message['id']);           
+                 $output .= "</div>
     					</div>
     					<div class=\"user-board-message-links\">
     						{$board_link}
@@ -636,12 +786,14 @@ class UserBoard {
     			} 
 		  
 			
-		} elseif ( $wgUser->getName() == $wgTitle->getText() ) {
-			$output .= '<div class="no-info-container">' .
-				wfMsgHtml( 'userboard_nomessages' ) .
-			'</div>';
-
 		}
+       if(!$isThereAnyMsg)
+        { //if ( $wgUser->getName() == $wgTitle->getText() )
+          $output .= '<div class="no-info-container">' .
+				wfMsgHtml( 'userboard_nomessages' ) .
+			'</div>';  
+        } 
+        
 		return $output;
 	}
     
@@ -649,11 +801,13 @@ class UserBoard {
 		global $wgUser, $wgTitle, $wgStylePath;
 
 		$output = ''; // Prevent E_NOTICE
+        $isThereAnyPost = 0;
         
 		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {		  
     		     foreach ( $messages as $message ) {    			 		     
     			 if( $message['type'] == 0 ){	
+    			     $isThereAnyPost = 1;
     				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
     				$avatar = new wAvatar( $message['user_id_from'], 'm' );
                     
@@ -713,7 +867,7 @@ class UserBoard {
                          {$is_pinned}
     					</div>
     					<div class=\"user-board-message-time\">" .
-    						wfMsgHtml( 'userboard_posted_ago', $this->getTimeAgo( $message['timestamp'] ) ) .
+    						wfMsgHtml( 'userwall_posted_ago', $this->getTimeAgo( $message['timestamp'] ) ) .
     					"</div>
     					<div class=\"user-board-message-content\">
     						<div class=\"user-board-message-image\">
@@ -738,7 +892,7 @@ class UserBoard {
     						{$delete_link}
     					</div>";
                          
-                        $is_comments_there = $this->displayWallcommands($user_name, $message['id']); 
+                        $is_comments_there = $this->displayWallcomments($user_name, $message['id']); 
                         
                     $output .= '<div id="user-wall-comments" class="wall-comments-'.$message['id'].'"> ';
                       $output .= $is_comments_there;                    
@@ -763,12 +917,13 @@ class UserBoard {
                   } //if ends here... 
     			}		  
 			
-		} elseif ( $wgUser->getName() == $wgTitle->getText() ) {
-			$output .= '<div class="no-info-container">' .
-				wfMsgHtml( 'userboard_nomessages' ) .
-			'</div>';
-
-		}
+		} 
+        
+        if(!$isThereAnyPost){ //$wgUser->getName() == $wgTitle->getText()
+           $output .= '<div class="no-info-container">' .
+				wfMsgHtml( 'userwall_nomessages' ) .
+			'</div>'; 
+        }
 		return $output;
 	}
     
@@ -999,12 +1154,12 @@ class UserBoard {
        }      
     }
     
-    public function displayWallcommands($user_name, $message_id, $count = 10, $page = 0){
+    public function displayWallcomments($user_name, $message_id, $count = 10, $page = 0){
         global $wgUser, $wgTitle, $wgStylePath;
 
 		$output = ''; // Prevent E_NOTICE
         
-        $comments = $this->getUserWallCommands( $message_id, $count, $page );
+        $comments = $this->getUserWallComments( $message_id, $count, $page );
         
         $comment_user = Title::makeTitle( NS_USER, $wgUser->getName() );
         $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
@@ -1034,12 +1189,12 @@ class UserBoard {
                                    "</span>";
                   
                   $like_link .='<span class="user-wall-message-links" id="wall-comment-links-like-'.$comment['comment_id'].'" title="Like this comment">
-                       <a href="javascript:void(0);" onclick="javascript:like_wall_comment('.$comment['comment_id'].');">'.
+                       <a href="javascript:void(0);" onclick="javascript:like_wall_comment('.$comment['wall_message_id'].', '.$comment['comment_id'].');">'.
     								wfMsgHtml( 'user_wall_like' ) . '</a>
                        </span>';
                     
                   $unlike_link .='<span class="user-wall-message-links" id="wall-comment-links-unlike-'.$comment['comment_id'].'" title="Unlike this comment">
-                       <a href="javascript:void(0);" onclick="javascript:unlike_wall_comment('.$comment['comment_id'].');">'.
+                       <a href="javascript:void(0);" onclick="javascript:unlike_wall_comment('.$comment['wall_message_id'].', '.$comment['comment_id'].');">'.
     								wfMsgHtml( 'user_wall_unlike' ) . '</a>
                        </span>';
                                      

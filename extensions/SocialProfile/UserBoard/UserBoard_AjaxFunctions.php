@@ -14,7 +14,7 @@ function wfSendBoardMessage( $user_name, $message, $message_type, $count ) {
 		$wgUser->getID(), $wgUser->getName(), $user_id_to, $user_name,
 		urldecode( $message ), $message_type
 	);
-
+ 
 	return $b->displayMessages( $user_id_to, 0, $count );
 }
 
@@ -82,7 +82,7 @@ function wfSendWallComment( $user_name, $message_id, $comment ) {
         urldecode( $comment )
 	);
 
-	return $b->displayWallcommands( $user_name, $message_id );
+	return $b->displayWallcomments( $user_name, $message_id );
 }
 //
 $wgAjaxExportList[] = 'wfSendEditWallComment';
@@ -96,7 +96,7 @@ function wfSendEditWallComment( $user_name, $uwc_id, $message_id, $comment ) {
 	$b = new UserBoard();
 	$m = $b->sendEditWallComment( $uwc_id, $message_id, urldecode( $comment ) );
 
-	return $b->displayWallcommands( $user_name, $message_id );
+	return $b->displayWallcomments( $user_name, $message_id );
 }
 
 $wgAjaxExportList[] = 'wfDisplayAutoWallComment';
@@ -105,7 +105,7 @@ function wfDisplayAutoWallComment($user_name, $message_id) {
     $user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );              
 	$b = new UserBoard();
-	return $b->displayWallcommands( $user_name, $message_id );
+	return $b->displayWallcomments( $user_name, $message_id );
 }
 
 $wgAjaxExportList[] = 'wfDeleteWallComment';
@@ -130,37 +130,59 @@ function wfSetPinnedWall( $ub_id ) {
 }
 
 $wgAjaxExportList[] = 'wfSendWallLike';
-function wfSendWallLike( $ub_id ) {
+function wfSendWallLike( $user_name, $ub_id ) {
 	global $wgUser;
-
+     
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+     
 	$b = new UserBoard();
 	$b->sendWallLike( $ub_id, $wgUser->getID(), $wgUser->getName() );
-	return 'ok';
+	return $b->displayWalls( $user_name, $user_id_to );
 }
 
 $wgAjaxExportList[] = 'wfSendWallUnLike';
-function wfSendWallUnLike( $ub_id ) {
+function wfSendWallUnLike( $user_name, $ub_id ) {
 	global $wgUser;
-
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+     
 	$b = new UserBoard();
 	$b->sendWallUnLike( $ub_id, $wgUser->getID() );
-	return 'ok';
+	return $b->displayWalls( $user_name, $user_id_to );
 } 
 
 $wgAjaxExportList[] = 'wfSendWallCommentLike';
-function wfSendWallCommentLike( $uwc_id ) {
+function wfSendWallCommentLike( $user_name, $ub_id, $uwc_id ) {
 	global $wgUser;
-
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    
 	$b = new UserBoard();
 	$b->sendWallCommentLike( $uwc_id, $wgUser->getID(), $wgUser->getName() );
-	return 'ok';
+	return $b->displayWallcomments( $user_name, $ub_id );
 }
 
 $wgAjaxExportList[] = 'wfSendWallCommentUnLike';
-function wfSendWallCommentUnLike( $uwc_id ) {
+function wfSendWallCommentUnLike( $user_name, $ub_id, $uwc_id ) {
 	global $wgUser;
-
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    
 	$b = new UserBoard();
 	$b->sendWallCommentUnLike( $uwc_id, $wgUser->getID() );
-	return 'ok';
+	return $b->displayWallcomments( $user_name, $ub_id );
+}
+
+$wgAjaxExportList[] = 'wfTestMathi';
+function wfTestMathi( $fd ) {
+	global $wgUser;
+    print_r($fd);
+    
+	 //$b->displayWallcomments( $user_name, $ub_id );
 }
