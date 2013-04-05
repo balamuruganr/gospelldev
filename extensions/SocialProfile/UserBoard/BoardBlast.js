@@ -105,5 +105,6 @@ var BoardBlast = {
 		document.blast.message.readOnly = true;
 		document.getElementById( 'blast-friends-list' ).innerHTML = 'Sending messages...';
 		document.blast.submit();
+        
 	}
 };

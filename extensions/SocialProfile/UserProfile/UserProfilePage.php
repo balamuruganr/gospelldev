@@ -1576,6 +1576,8 @@ class UserProfilePage extends Article {
 			$total = $total + $stats_data['user_board_priv'];
 		}
  
+ $b = new UserBoard();       
+ 
  $output .='<div id="user-board-wall-block">';
  
 		$output .= '<div class="user-section-heading">
@@ -1595,8 +1597,27 @@ class UserProfilePage extends Article {
 		$output .= '</div>
 				<div class="cleared"></div>
 			</div>
-		</div>
+		</div>        
 		<div class="cleared"></div>';
+        
+        //Walls list section
+       $output .= '<div id="user-board-walls">';
+       
+         //if ( $wgUser->getName() !== $user_name ) {
+          $output .= '<div id="add-wall-title">
+                       <span class="wall-title-lable">Enter name</span>
+                       <span class="add-wall-txtbox"><input type="text" name="wall_name" id="wall_name"></span>
+                       <input type="button" onclick="javascript:create_wall();" class="site-button" value="Create Wall">
+                      </div>';  
+         //}
+        $output .= '<div id="wall-title-list">';
+         $output .= $b->displayWalls($user_name, $user_id, 0, 10);
+        $output .= '</div>';
+                    
+       $output .= '</div>';
+       //Walls list section    
+                
+       $output .= '<div class="cleared"></div>';
 
 		//if ( $wgUser->getName() !== $user_name ) {
 			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
@@ -1617,8 +1638,8 @@ class UserProfilePage extends Article {
 		//}
 
 		$output .= '<div id="user-page-wall">';
-		$b = new UserBoard();
-		 $output .= $b->displayWalls($user_name, $user_id, 0, 10);
+		
+		 $output .= $b->displayWallPosts($user_name, $user_id, 0, 10);
 		$output .= '</div>';
       $output .='</div>';
       

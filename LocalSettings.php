@@ -143,10 +143,6 @@ $wgGospellSettingsUserBordMessageFileSize = 2097152; //2097152 = 2 mb in bytes;
 $wgLegacyJavaScript = true;
 $wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
 
-# Allow users to use Uploadify
-//$wgGroupPermissions['user']['uploadify'] = true;
-# Load the extension
-require_once("$IP/extensions/Uploadify/Uploadify.php");
 
                      //////////// Updated By Mathivanan /////////////////// 
 //==========================================================================================//

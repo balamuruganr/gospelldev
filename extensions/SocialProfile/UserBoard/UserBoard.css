@@ -122,3 +122,9 @@ select#message_type {
     margin-left: 5px;    
     width: 98%;   
 }
+
+.add_files a{ cursor:pointer; text-decoration: none; }
+#file-attach-block {
+    border:0px solid #ff0000;    
+}
+.file-block { display: block; }

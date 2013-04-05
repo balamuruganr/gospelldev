@@ -27,14 +27,52 @@ var UserBoard = {
 						user_1 = recipient;
 						user_2 = '';
 					}
-					var params = ( user_2 ) ? '&conv=' + user_2 : '';
-					var url = wgScriptPath + '/index.php?title=Special:UserBoard&user=' + user_1 + params;
-					window.location = url;
+				    UserBoard.sendMessageFilesAlso(encodedName, user_1, user_2, request);	
 				}
 			);
 		}
 	},
-
+    sendMessageFilesAlso: function( userTo, user_1, user_2, request ){
+       
+            var input = document.getElementById("file_upload"), 
+		    formdata = false;
+                
+            if (window.FormData) {
+      		 formdata = new FormData();
+    	    }
+        
+          formdata.append("user_name", userTo);  
+    
+          var i = 0, len = input.files.length, file;
+    
+           for ( ; i < len; i++ ) {
+    			file = input.files[i];			
+    				if (formdata) {
+    					formdata.append("up_files[]", file);
+    				}
+    				
+    		}
+         if (formdata) {
+            $.ajax({
+    				url: '?title='+window.wgPageName,
+    				type: "POST",
+    				data: formdata,
+    				processData: false,
+    				contentType: false,
+    				success: function (res) {
+    				 $('#file-attach-block').find('.file-block').html("<input type=\"file\" name=\"file_upload\" id=\"file_upload\" multiple>");
+                      
+                      var params = ( user_2 ) ? '&conv=' + user_2 : '';
+                      var url = wgScriptPath + '/index.php?title=Special:UserBoard&user=' + user_1 + params;
+                      window.location = url;
+                      	
+    				}
+    			});
+    	 } 
+      
+        
+        
+    },
 	deleteMessage: function( id ) {
 		if( confirm( _DELETE_CONFIRM ) ) {
 			sajax_request_type = 'POST';

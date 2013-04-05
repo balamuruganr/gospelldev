@@ -8,7 +8,50 @@ class UserBoard {
 	 * Constructor
 	 */
 	public function __construct() {}
+     
+    public function sendCreateWall($user_id_from, $user_name_from, $user_id_to, $user_name_to, $wall_name){
+        
+        $dbw = wfGetDB( DB_MASTER );
+        
+        $user_name_from = stripslashes( $user_name_from );
+		$user_name_to = stripslashes( $user_name_to );
+        
+        $dbw->insert(
+			'user_walls',
+			array(
+				'uw_user_id' => $user_id_from,
+				'uw_user_name' => $user_name_from,
+                'uw_user_id_from' => $user_id_from,
+                'uw_user_name_from' => $user_name_from,
+				'uw_wall_name' => $wall_name,
+				'uw_date' => date( 'Y-m-d H:i:s' ),
+			),
+			__METHOD__
+		);
+        
+        /*/ Send e-mail notification (if user is not writing on own board)
+		if ( $user_id_from != $user_id_to ) {
+			$this->sendBoardNotificationEmail( $user_id_to, $user_name_from );
+			$this->incNewMessageCount( $user_id_to );
+		}
 
+		$stats = new UserStatsTrack( $user_id_to, $user_name_to );
+		if ( $message_type == 0 ) {
+			// public message count
+			$stats->incStatField( 'user_board_count' );
+		} else {
+			// private message count
+			$stats->incStatField( 'user_board_count_priv' );
+		}
+
+		$stats = new UserStatsTrack( $user_id_from, $user_name_from );
+		$stats->incStatField( 'user_board_sent' );
+        */
+
+		return $dbw->insertId();
+        
+    } 
+        
 	/**
 	 * Sends a user board message to another user.
 	 * Performs the insertion to user_board table, sends e-mail notification
@@ -115,11 +158,11 @@ class UserBoard {
 			__METHOD__
 		);
        
-       return $dbw->insertId();   
+       return $dbw->insertId();    
     }
     
     public function sendUserBoardMessageFiles() {
-      global $wgUser, $wgUploadDirectory, $wgFileExtensions, $wgGospellSettingsUserBordMessageFileSize;
+      global $wgUser, $wgRequest, $wgUploadDirectory, $wgFileExtensions, $wgGospellSettingsUserBordMessageFileSize;
       
         $user_name = stripslashes( $_POST['user_name'] );
 	    $user_name = urldecode( $user_name );
@@ -157,7 +200,7 @@ class UserBoard {
       //$b->displayMessages( $user_id_to, 0, $count )      
     }
     
-    public function sendWallComment($message_id, $user_id, $user_name, $comment){
+    public function SendWallPostComment($message_id, $user_id, $user_name, $comment){
         $dbw = wfGetDB( DB_MASTER );
         
         $message_id = stripslashes( $message_id );
@@ -198,7 +241,7 @@ class UserBoard {
       return $dbw->insertId();  
     }
     
-    public function sendEditWallComment($uwc_id, $message_id, $comment){
+    public function SendEditWallPostComment($uwc_id, $message_id, $comment){
         $dbw = wfGetDB( DB_MASTER );
         
         $message_id = stripslashes( $message_id );
@@ -443,7 +486,59 @@ class UserBoard {
 			}
 		}
 	}
-
+    
+    public function getUserWallsList( $user_id, $user_id_2 = 0, $limit = 0, $page = 0 ){        
+        global $wgUser, $wgOut, $wgTitle;
+		$dbr = wfGetDB( DB_SLAVE );
+        
+        if ( $limit > 0 ) {
+			$limitvalue = 0;
+			if ( $page ) {
+				$limitvalue = $page * $limit - ( $limit );
+			}
+			$limit_sql = " LIMIT {$limitvalue},{$limit} ";
+		}
+        
+        if ( $user_id_2 ) {
+			$user_sql = "( (uw_user_id={$user_id} AND uw_user_id_from={$user_id_2}) OR (uw_user_id={$user_id_2} AND uw_user_id_from={$user_id}) )";
+			
+		} else {
+			$user_sql = "uw_user_id = {$user_id}";
+            
+			if ( $wgUser->isLoggedIn() ) {
+				$user_sql .= " OR (uw_user_id={$user_id} AND uw_user_id_from={$wgUser->getID() }" . " ) ";
+			}
+		}
+        
+        $sql = "SELECT uw_id, uw_user_id_from, uw_user_name_from, uw_user_id, uw_user_name,
+			uw_wall_name, UNIX_TIMESTAMP(uw_date) AS unix_time 
+            FROM {$dbr->tableName( 'user_walls' )} 
+            WHERE {$user_sql} 
+            ORDER BY uw_id ASC 
+            {$limit_sql}";
+        
+        $res = $dbr->query( $sql, __METHOD__ );
+		$walls = array();
+		foreach ( $res as $row ) {
+			//$parser = new Parser();
+			//$message_text = $parser->parse( $row->ub_message, $wgTitle, $wgOut->parserOptions(), true );
+			//$message_text = $message_text->getText();
+            
+			$walls[] = array(
+				'wall_id' => $row->uw_id,
+				'timestamp' => ( $row->unix_time ),
+				'user_id_from' => $row->uw_user_id_from,
+				'user_name_from' => $row->uw_user_name_from,
+				'user_id' => $row->uw_user_id,
+				'user_name' => $row->uw_user_name,
+				'wall_name' => $row->uw_wall_name
+			);
+		}
+        
+	 return $walls;
+             
+    }
+    
 	/**
 	 * Get the user board messages for the user with the ID $user_id.
 	 *
@@ -457,7 +552,7 @@ class UserBoard {
 	 *                       query
 	 * @return Array: array of user board messages
 	 */
-	public function getUserBoardMessages( $user_id, $user_id_2 = 0, $limit = 0, $page = 0 ) {
+	public function getUserBoardMessages( $wall_id = 0, $user_id, $user_id_2 = 0, $limit = 0, $page = 0 ) {
 		global $wgUser, $wgOut, $wgTitle;
 		$dbr = wfGetDB( DB_SLAVE );
 
@@ -468,6 +563,10 @@ class UserBoard {
 			}
 			$limit_sql = " LIMIT {$limitvalue},{$limit} ";
 		}
+        
+        if( $wall_id ){
+          $user_sql = " ub_wall_id={$wall_id} AND ";  
+        }
 
 		if ( $user_id_2 ) {
 			$user_sql = "( (ub_user_id={$user_id} AND ub_user_id_from={$user_id_2}) OR
@@ -488,7 +587,7 @@ class UserBoard {
 		}
 
 
-		$sql = "SELECT ub_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
+		$sql = "SELECT ub_id, ub_wall_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
 			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type, up_pinned
 			FROM {$dbr->tableName( 'user_board' )}
 			WHERE {$user_sql}
@@ -504,6 +603,7 @@ class UserBoard {
 			$messages[] = array(
 				'id' => $row->ub_id,
 				'timestamp' => ( $row->unix_time ),
+                'wall_id' => $row->ub_wall_id,
 				'user_id_from' => $row->ub_user_id_from,
 				'user_name_from' => $row->ub_user_name_from,
 				'user_id' => $row->ub_user_id,
@@ -516,6 +616,8 @@ class UserBoard {
 		}
 		return $messages;
 	}
+    
+    
     
     public function getUserBoardMessageFiles( $ub_id, $limit = 0, $page = 0){
         global $wgUser, $wgOut, $wgTitle;
@@ -625,7 +727,7 @@ class UserBoard {
 		return $messages;
 	}
     
-    public function getUserWallComments( $message_id, $limit = 0, $page = 0 ) {
+    public function getUserWallPostComments( $message_id, $limit = 0, $page = 0 ) {
 		global $wgUser, $wgOut, $wgTitle;
 		$dbr = wfGetDB( DB_SLAVE );
 
@@ -636,7 +738,7 @@ class UserBoard {
 			}
 			$limit_sql = " LIMIT {$limitvalue},{$limit} ";
 		}
-        
+        $comment_sql='';
         if ( $message_id ) {
           $comment_sql = "( uwc_wallmessage_id ={$message_id} )"; 
         }
@@ -722,8 +824,8 @@ class UserBoard {
 
 		$output = ''; // Prevent E_NOTICE
         $isThereAnyMsg=0;
-        
-		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
+        $wall_id = 0;
+		$messages = $this->getUserBoardMessages( $wall_id, $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {
 		  
     		     foreach ( $messages as $message ) {
@@ -797,16 +899,80 @@ class UserBoard {
 		return $output;
 	}
     
-    public function displayWalls( $user_name, $user_id, $user_id_2 = 0, $count = 10, $page = 0) {
+    public function getFirstWallID($user_name, $user_id, $user_id_2 = 0){        
+        global $wgUser, $wgTitle, $wgStylePath;
+        $dbr = wfGetDB( DB_SLAVE );
+        
+        
+        if ( $user_id_2 ) {
+			$user_sql = "( (uw_user_id={$user_id} AND uw_user_id_from={$user_id_2}) OR (uw_user_id={$user_id_2} AND uw_user_id_from={$user_id}) )";
+			
+		} else {
+			$user_sql = "uw_user_id = {$user_id}";
+            
+			if ( $wgUser->isLoggedIn() ) {
+				$user_sql .= " OR (uw_user_id={$user_id} AND uw_user_id_from={$wgUser->getID() }" . " ) ";
+			}
+		}
+         
+         $sql = "SELECT uw_id, uw_user_id_from, uw_user_name_from, uw_user_id, uw_user_name,
+			uw_wall_name, UNIX_TIMESTAMP(uw_date) AS unix_time 
+            FROM {$dbr->tableName( 'user_walls' )} 
+            WHERE {$user_sql} 
+            ORDER BY uw_id ASC LIMIT 0, 1";
+        
+        $res = $dbr->query( $sql, __METHOD__ );
+		$walls = array();
+		foreach ( $res as $row ) {
+		  $walls[] = array(
+				'wall_id' => $row->uw_id,
+				'timestamp' => ( $row->unix_time ),
+				'user_id_from' => $row->uw_user_id_from,
+				'user_name_from' => $row->uw_user_name_from,
+				'user_id' => $row->uw_user_id,
+				'user_name' => $row->uw_user_name,
+				'wall_name' => $row->uw_wall_name
+			);
+		}
+                 
+      return  (!empty($walls))?$walls[0]['wall_id']:0;   
+    }
+    
+    public function displayWalls($user_name, $user_id, $user_id_2 = 0, $count = 10, $page = 0) {
+        global $wgUser, $wgTitle, $wgStylePath;
+
+		$output = ''; // Prevent E_NOTICE
+        
+        $walls = $this->getUserWallsList(  $user_id, $user_id_2, $count, $page );
+        if ( $walls ) {	
+            //'<span><a>wall1</a></span><span><a>wall2</a></span><span><a>wall3</a></span>';
+           foreach ( $walls as $wall ) {    
+            $user = Title::makeTitle( NS_USER, $wall['user_name_from'] );
+		    $avatar = new wAvatar( $wall['user_id_from'], 'm' );
+                    
+            $comment_user = Title::makeTitle( NS_USER, $wgUser->getName() );
+            $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
+            //if ( $wgUser->getName() === $user_name ) {}
+            $output .= "<span><a>{$wall['wall_name']}</a></span>";
+           }         
+        }
+        
+     return $output;   
+    }
+        
+    
+    public function displayWallPosts( $wall_id, $user_name, $user_id, $user_id_2 = 0, $count = 10, $page = 0) {
 		global $wgUser, $wgTitle, $wgStylePath;
 
 		$output = ''; // Prevent E_NOTICE
         $isThereAnyPost = 0;
         
-		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
+        $wall_id = ($wall_id)?$wall_id:0; 
+        
+		$messages = $this->getUserBoardMessages( $wall_id, $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {		  
     		     foreach ( $messages as $message ) {    			 		     
-    			 if( $message['type'] == 0 ){	
+    			 if( $message['type'] == 0 && $message['wall_id'] >0 ){	
     			     $isThereAnyPost = 1;
     				$user = Title::makeTitle( NS_USER, $message['user_name_from'] );
     				$avatar = new wAvatar( $message['user_id_from'], 'm' );
@@ -853,7 +1019,7 @@ class UserBoard {
     				}
     				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
     					$delete_link = "<span class=\"user-board-red\">
-    							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_message({$message['id']})\">" .
+    							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_wall_post({$message['id']})\">" .
     								wfMsgHtml( 'userboard_delete' ) . '</a>
     						</span>';
     				}
@@ -892,7 +1058,7 @@ class UserBoard {
     						{$delete_link}
     					</div>";
                          
-                        $is_comments_there = $this->displayWallcomments($user_name, $message['id']); 
+                        $is_comments_there = $this->displayWallPostComments($user_name, $message['id']); 
                         
                     $output .= '<div id="user-wall-comments" class="wall-comments-'.$message['id'].'"> ';
                       $output .= $is_comments_there;                    
@@ -1055,7 +1221,7 @@ class UserBoard {
     }
     
     
-    public function sendWallCommentLike( $uwc_id, $user_id, $user_name ){
+    public function SendWallPostCommentLike( $uwc_id, $user_id, $user_name ){
         global $wgUser;
               
 		$dbw = wfGetDB( DB_MASTER );
@@ -1114,7 +1280,7 @@ class UserBoard {
               
     }
     
-    public function sendWallCommentUnLike( $uwc_id, $user_id ){
+    public function SendWallPostCommentUnLike( $uwc_id, $user_id ){
        if ( $uwc_id ) {
           $dbw = wfGetDB( DB_MASTER );
           
@@ -1154,12 +1320,12 @@ class UserBoard {
        }      
     }
     
-    public function displayWallcomments($user_name, $message_id, $count = 10, $page = 0){
+    public function displayWallPostComments($user_name, $message_id, $count = 10, $page = 0){
         global $wgUser, $wgTitle, $wgStylePath;
 
 		$output = ''; // Prevent E_NOTICE
         
-        $comments = $this->getUserWallComments( $message_id, $count, $page );
+        $comments = $this->getUserWallPostComments( $message_id, $count, $page );
         
         $comment_user = Title::makeTitle( NS_USER, $wgUser->getName() );
         $avatar_comment = new wAvatar( $wgUser->getID(), 'm' );
