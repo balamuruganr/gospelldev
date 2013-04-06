@@ -1,7 +1,7 @@
 /**
  * check user name exists and suggest uer name
  */
-jQuery( function ( $ ) {    
+jQuery( function ( $ ) {   
     $('#user_search').keyup(function() {            
         var uname = $.trim($('#user_search').val());                
         if(uname == ''){
@@ -50,7 +50,7 @@ function isValidEmailAddress(emailAddress) {
     return pattern.test(emailAddress);
 };
 
-jQuery("#wpRetype").click(function() {
+jQuery("#wpRetype").change(function() {
     if($('#wpPassword2').val() != $('#wpRetype').val()){
         $('#wpRetype').focus();
         $("#errretype").text("password must match");
@@ -58,11 +58,11 @@ jQuery("#wpRetype").click(function() {
     }
     else{
         $("#errretype").text("");
+        return true;
     }        
 });
     
-function IsEnoughLength(str,length)
-{ 
+function IsEnoughLength(str,length) { 
 	if ((str == null) || isNaN(length))
 		return false;
 	else if (str.length < length)
@@ -71,24 +71,21 @@ function IsEnoughLength(str,length)
 	
 }
 
-function HasMixedCase(passwd)
-{    
+function HasMixedCase(passwd) {    
 	if(passwd.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/))
 		return true;
 	else
 		return false;
 }
 
-function HasNumeral(passwd)
-{
+function HasNumeral(passwd) {
 	if(passwd.match(/[0-9]/))
 		return true;
 	else
 		return false;
 }
 
-function HasSpecialChars(passwd)
-{    
+function HasSpecialChars(passwd) {    
 	if(passwd.match(/.[!,@,#,$,%,^,&,*,?,_,~]/))
 		return true;
 	else
@@ -96,8 +93,7 @@ function HasSpecialChars(passwd)
 }
 
 
-function CheckPasswordStrength(pwd)
-{
+function CheckPasswordStrength(pwd) {
     var pass_strength;
 	if (IsEnoughLength(pwd,10) && HasMixedCase(pwd) && HasNumeral(pwd) && HasSpecialChars(pwd)) {
 		pass_strength = "<b><font style='color:olive'>Very strong</font></b>";
@@ -118,10 +114,8 @@ jQuery("#wpPassword2").change(function() {
     CheckPasswordStrength($("#wpPassword2").val());
 });  
 
-
-mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
+mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {    
 	jQuery( function( jQuery ) { 
-	   
 		jQuery( '#birthday' ).datepicker({
 			changeYear: true,
             changeMonth: true,
@@ -131,4 +125,32 @@ mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
           
         jQuery( 'form[name="userlogin2"]' ).validate();                
 	});
+});
+
+function chkValidEmail(email) {
+    var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;        
+    if( !emailReg.test( email ) ) {
+        $("#erremail").text("Please enter valid email");
+        return false;
+    } else {        
+        return true;
+    }    
+}
+function chkValidPassword() {
+    if($('#wpPassword2').val() != $('#wpRetype').val()){
+        $('#wpRetype').focus();
+        $("#errretype").text("password must match");
+        return false;
+    }
+    else{
+        $("#errretype").text("");
+        return true;
+    }       
+}
+$('#userlogin2').submit(function() { 
+    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {
+        return true
+    } else {
+        return false;
+    }    
 });

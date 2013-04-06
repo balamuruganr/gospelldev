@@ -67,7 +67,7 @@ class UsercreateTemplate extends QuickTemplate {
 			<td class="mw-input">
 				<?php
 			echo Html::input( 'wpFirstName', $this->data['firstname'], 'text', array(
-				'class' => 'loginText required',
+				'class' => 'required',
 				'id' => 'wpFirstName2',
 				'tabindex' => '1',
 				'size' => '20',
@@ -194,7 +194,8 @@ class UsercreateTemplate extends QuickTemplate {
 							if( $this->data['emailothers'] ) {
 								$this->msgWiki('prefs-help-email-others');
 							} */ ?>
-					</div>					
+					</div>	
+                    <span id="erremail" class="error"></span>				
 				</td>
 			<?php } ?>
 			<?php if( $this->data['usereason'] ) { ?>
