@@ -162,7 +162,7 @@ require_once( "$IP/extensions/WikiEditor/WikiEditor.php" );
 
 require_once("$IP/extensions/SocialProfile/SocialProfile.php");
 $wgUserProfileDisplay['friends'] = true;
-$wgUserProfileDisplay['foes'] = true;
+$wgUserProfileDisplay['foes'] = false;
 $wgUserBoard = true;
 $wgUserProfileDisplay['board'] = true;
 $wgUserProfileDisplay['stats'] = true;
