@@ -70,6 +70,8 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 					$wgRequest->getVal( 'message' ),
 					1
 				);
+                $_POST['user_name'] = $user_name;
+                $b->sendUserBoardMessageFiles();
 				$count++;
 			}
 			$output .= wfMsg( 'messagesentsuccess' );
@@ -174,6 +176,13 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     						. wfMsg( 'boardblastprivatenote' ) .
     					'</div-->
     					<textarea name="message" id="message" cols="63" rows="4"></textarea>
+                        <div class="cleared"></div>
+                        <div id="file-attach-block">
+                          <span class="add_files"><a>Attach files with message</a></span>
+                          <input type="hidden" name="user_name" value="" />
+                          <div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div>
+                         </div>
+                         <div class="cleared"></div>
     				</form>
     		</div>
     		<div class="blast-nav">

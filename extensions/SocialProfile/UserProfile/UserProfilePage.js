@@ -71,14 +71,15 @@ function display_messages() {
 }
 
 var wall_posted = 0;
-function send_wall() {
+function send_wall_post() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value ); 
 	var encMsg = encodeURIComponent( document.getElementById( 'message_wall' ).value );
 	var msgType = document.getElementById( 'message_type_wall' ).value;
 	if( document.getElementById( 'message_wall' ).value && !wall_posted ) {
 		wall_posted = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfSendBoardMessageWall', [ userTo, encMsg, msgType, 10 ], function( request ) {
+		sajax_do_call( 'wfSendBoardMessageWall', [ currWallId, userTo, encMsg, msgType, 10 ], function( request ) {
 				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				wall_posted = 0;
 				document.getElementById( 'message_wall' ).value = '';
@@ -90,21 +91,30 @@ function send_wall() {
 var display_wall_post_timer;
 var wall_post_displayed= 0;
 function display_wall_post() {
-	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;	
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    	
 	if( !wall_post_displayed ) {
 		wall_post_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallPost', [ userTo, 10 ], function( request ) {
+		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10 ], function( request ) {
 				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				wall_post_displayed = 0;
 			}
 		);
 	}
- display_wall_post_timer = setTimeout(display_wall_post, 20000);        
+ display_wall_post_timer = setTimeout(display_wall_post, 8000);        
+}
+
+//to display the posts of clicked Wall
+function display_postfor_wall( wall_id ){    
+    document.getElementById( 'current_wall_id' ).value =  wall_id;
+    $('span[id*="curr_wall_"]').each(function(){$(this).removeClass("active_wall");});
+    $('#curr_wall_'+ wall_id).addClass("active_wall");
+    display_wall_post();
 }
 
 var wall_comment_posted = 0;
-function send_wall_comment(hook) {	
+function send_post_comment(hook) {	
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	var encMsg = encodeURIComponent( document.getElementById( hook ).value );
     var x = hook.split("_");
@@ -112,7 +122,7 @@ function send_wall_comment(hook) {
 	if( document.getElementById( hook ).value && !wall_comment_posted ) {
 		wall_comment_posted = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfSendWallComment', [ userTo, msg_id, encMsg ], function( request ) {
+		sajax_do_call( 'wfSendWallPostComment', [ userTo, msg_id, encMsg ], function( request ) {
 				//document.getElementById( 'user-wall-comments' ).innerHTML = request.responseText;
                 $('.wall-comments-'+msg_id).html(request.responseText);
 				wall_comment_posted = 0;
@@ -129,7 +139,7 @@ function send_edit_comment( uwc_id, ub_id){
     if( document.getElementById( 'edit_wall_comment_'+ ub_id ).value && !edit_comment_posted ) {
 		edit_comment_posted = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfSendEditWallComment', [ userTo, uwc_id, ub_id, encMsg ], function( request ) {
+		sajax_do_call( 'wfSendEditWallPostComment', [ userTo, uwc_id, ub_id, encMsg ], function( request ) {
 				//document.getElementById( 'user-wall-comments' ).innerHTML = request.responseText;
                 $('.wall-comments-'+ub_id).html(request.responseText);
 				edit_comment_posted = 0;
@@ -154,10 +164,11 @@ function display_wall_comment(msg_id) {
 	}
 }
 function delete_comment( uwc_id, ub_id ) {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	if( confirm( 'Are you sure you want to delete this comment?' ) ) {
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDeleteWallComment', [ uwc_id, ub_id ], function( request ) {
-		   window.location.reload();
+		sajax_do_call( 'wfDeleteWallComment', [ userTo, uwc_id, ub_id ], function( request ) {
+		   $('.wall-comments-'+ub_id).html(request.responseText);
 		} );
 	}
 }
@@ -168,17 +179,19 @@ function show_comment_textarea(id){
     window.clearTimeout(display_wall_post_timer);   
 }
 function add_comment(e, id){
+   window.clearTimeout(display_wall_post_timer); 
    var code = e.keyCode || e.which;
-  
+    
     if (code === 13)
      {
         e.preventDefault(); 
-        send_wall_comment(id);                     
+        send_post_comment(id);                     
      }
 }
-function edit_wall_comment(e,uwc_id,ub_id){
-    var code = e.keyCode || e.which;
-  
+function edit_post_comment(e,uwc_id,ub_id){
+    window.clearTimeout(display_wall_post_timer);
+    
+    var code = e.keyCode || e.which;  
     if (code === 13)
      {
         e.preventDefault(); 
@@ -187,10 +200,22 @@ function edit_wall_comment(e,uwc_id,ub_id){
 }
 
 function delete_message( id ) {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	if( confirm( 'Are you sure you want to delete this message?' ) ) {
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDeleteBoardMessage', [ id ], function( request ) {
-			window.location.reload();
+		sajax_do_call( 'wfDeleteBoardMessage', [ userTo, id ], function( request ) {
+			document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
+		} );
+	}
+}
+
+function delete_wall_post( id ) {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
+	if( confirm( 'Are you sure you want to delete this message?' ) ) {
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDeleteWallMessage', [ currWallId, userTo, id ], function( request ) {
+			display_wall_post();
 		} );
 	}
 }
@@ -288,20 +313,21 @@ function edit_comment(uwc_id, ub_id){
           var x = $.trim($(div_obj).children(".user-wall-comment-txt").text());          
           $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-body").remove();
           $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-links").remove();         
-          $('#user-wall-comment-block-'+uwc_id).append('<textarea onkeypress="edit_wall_comment(event, ' + uwc_id + ', ' + ub_id + ');" id="edit_wall_comment_' + ub_id + '" name="edit_wall_comment_' + ub_id + '" onfocus="javascript:stop_auto_load();">' + x + '</textarea>');
+          $('#user-wall-comment-block-'+uwc_id).append('<textarea onkeypress="edit_post_comment(event, ' + uwc_id + ', ' + ub_id + ');" id="edit_wall_comment_' + ub_id + '" name="edit_wall_comment_' + ub_id + '" onfocus="javascript:stop_auto_load();">' + x + '</textarea>');
           
           window.clearTimeout(comment_timer); 
           window.clearTimeout(display_wall_post_timer);        
 }
 //-------------- Like functions --------------------
 var liked = 0;
-function like_wall( ub_id ){
+function like_wall_post( ub_id ){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
     //userTo, encMsg, msgType, 10
     if( !liked ) {
       liked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallLike', [ userTo, ub_id ], function( request ) {
+      sajax_do_call( 'wfSendWallLike', [ currWallId, userTo, ub_id ], function( request ) {
 				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				liked = 0;
 			}
@@ -309,13 +335,14 @@ function like_wall( ub_id ){
     }
 }
 var unliked = 0;
-function unlike_wall( ub_id ){
+function unlike_wall_post( ub_id ){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
     //userTo, encMsg, msgType, 10
     if( !unliked ) {
       unliked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallUnLike', [ userTo, ub_id ], function( request ) {
+      sajax_do_call( 'wfSendWallUnLike', [ currWallId, userTo, ub_id ], function( request ) {
 				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				unliked = 0;
 			}
@@ -324,13 +351,13 @@ function unlike_wall( ub_id ){
 }
 
 var wall_comment_liked = 0;
-function like_wall_comment(ub_id, uwc_id){
+function like_post_comment(ub_id, uwc_id){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     //userTo, encMsg, msgType, 10
     if( !wall_comment_liked ) {
       wall_comment_liked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallCommentLike', [ userTo, ub_id, uwc_id ], function( request ) {
+      sajax_do_call( 'wfSendWallPostCommentLike', [ userTo, ub_id, uwc_id ], function( request ) {
 				$('.wall-comments-'+ub_id).html(request.responseText);
 				wall_comment_liked = 0;
 			}
@@ -338,13 +365,13 @@ function like_wall_comment(ub_id, uwc_id){
     }
 }
 var wall_comment_unliked = 0;
-function unlike_wall_comment(ub_id, uwc_id){
+function unlike_post_comment(ub_id, uwc_id){
    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     //userTo, encMsg, msgType, 10
     if( !wall_comment_unliked ) {
       wall_comment_unliked = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSendWallCommentUnLike', [ userTo, ub_id, uwc_id ], function( request ) {
+      sajax_do_call( 'wfSendWallPostCommentUnLike', [ userTo, ub_id, uwc_id ], function( request ) {
 				$('.wall-comments-'+ub_id).html(request.responseText);
 				wall_comment_unliked = 0;
 			}
@@ -354,18 +381,38 @@ function unlike_wall_comment(ub_id, uwc_id){
 
 var pinned = 0; 
 function set_pinned(ub_id){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
+    
     if( !pinned ) {
       pinned = 1;
       sajax_request_type = 'POST';
-      sajax_do_call( 'wfSetPinnedWall', [ ub_id ], function( request ) {
+      sajax_do_call( 'wfSetPinnedPost', [ currWallId, userTo, ub_id ], function( request ) {
 				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				pinned = 0;
 			}
 		);   
     }
 }
+
+var wall_created = 0;
+function create_wall(){
+  var userTo = decodeURIComponent( wgTitle );  
+  var encWallName = encodeURIComponent( document.getElementById( 'wall_name' ).value );    
+  if( document.getElementById( 'wall_name' ).value && !wall_created ) {
+     wall_created = 1;
+     sajax_request_type = 'POST';
+     sajax_do_call( 'wfCreateWall', [ userTo, encWallName ], function( request ) {
+				document.getElementById( 'wall-title-list' ).innerHTML = request.responseText;
+                document.getElementById( 'wall_name' ).value = '';
+				wall_created = 0;
+			}
+		);
+   }  
+}
+
 function stop_auto_load(){
-   window.clearTimeout(display_wall_post_timer);  
+  window.clearTimeout(display_wall_post_timer);  
 }
 
 (function() { 

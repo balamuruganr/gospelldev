@@ -129,6 +129,12 @@ class SpecialViewUserBoard extends SpecialPage {
 		$output .= '<a href="' . $user->escapeFullURL() . '">&lt; ' .
 			wfMsg( 'userboard_backprofile', $user_name ) . '</a>';
 		$output .= '</div>';
+        
+        ///////////////////////////////////
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+          $wgOut->addHTML( $this->sendAjaxReqforUserBordMessageFiles() );
+        }
+        ///////////////////////////////////
 
 		$board_to_board = ''; // Prevent E_NOTICE
 
@@ -258,7 +264,14 @@ class SpecialViewUserBoard extends SpecialPage {
     					</select-->
     					<p>
     					<textarea name="message" id="message" cols="63" rows="4"></textarea>
-    
+                        <div class="cleared"></div>
+                        <form name="upload_file_frm" id="upload_file_frm" action="" enctype="multipart/form-data">
+                         <div id="file-attach-block">
+                          <span class="add_files"><a>Attach files with message</a></span>
+                          <div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div>
+                         </div>
+                         <div class="cleared"></div> 
+                        </form>
     					<div class="user-page-message-box-button">
     						<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:UserBoard.sendMessage(' . $per_page . ');" />
     					</div>
@@ -277,6 +290,7 @@ class SpecialViewUserBoard extends SpecialPage {
 		if ( $ub_messages ) {
 			foreach ( $ub_messages as $ub_message ) {
 			 if($wall_hook){
+			     
     			 if ( $ub_message['type'] == 0 ) {
     				$user = Title::makeTitle( NS_USER, $ub_message['user_name_from'] );
     				$avatar = new wAvatar( $ub_message['user_id_from'], 'm' );
@@ -340,7 +354,7 @@ class SpecialViewUserBoard extends SpecialPage {
     						{$board_to_board}
     						{$delete_link}
     					</div>";
-                      $is_comments_there = $b->displayWallcomments($ub_message['id']);
+                      $is_comments_there = $b->displayWallPostComments($user_name, $ub_message['id']);
                       
                       $output .= '<div id="user-wall-comments" class="wall-comments-'.$ub_message['id'].'"> ';
                        $output .= $is_comments_there;                    
@@ -409,6 +423,9 @@ class SpecialViewUserBoard extends SpecialPage {
     							{$ub_message_text}
     						</div>
     						<div class=\"cleared\"></div>
+                             <div class=\"user-board-message-files\">";                            
+                 $output .= $b->displayUserBoardMessageFiles($ub_message['id']);           
+                  $output .= "</div>
     					</div>
     					<div class=\"user-board-message-links\">
     						{$board_link}
@@ -432,6 +449,11 @@ class SpecialViewUserBoard extends SpecialPage {
 
 		$wgOut->addHTML( $output );
 	}
+    
+    function sendAjaxReqforUserBordMessageFiles(){        
+        $b = new UserBoard();       
+        $b->sendUserBoardMessageFiles();
+    }
 
 	/**
 	 * Add a new JS global variable for UserBoard.js to allow localization.

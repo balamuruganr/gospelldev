@@ -765,4 +765,39 @@
     border:0px solid #ff0000;    
 }
 .file-block { display: block; }
-.remove-file-block  {cursor:pointer;color: #0645AD; text-decoration: none;}
+#user-board-walls {
+ border:0px solid #ff0000;  
+}
+
+#add-wall-title{
+    padding:3px;
+}
+#add-wall-title span {
+    padding:0px;
+    margin:1px;
+}
+#add-wall-title span input{
+    border:1px solid #A9B0A6;    
+}
+#wall-title-list { 
+   padding:3px;  
+}
+#wall-title-list span a {
+   color:#0645AD;
+   margin: 1px;
+   text-decoration: none;
+   cursor:pointer;
+   border:1px solid #aaaaaa;
+   padding:2px;    
+}
+#wall-title-list span a:hover{
+   text-decoration:underline;
+}
+
+#wall-title-list .active_wall a {
+   color:red; 
+   text-decoration:none; 
+}
+#wall-title-list .active_wall a:hover{
+   text-decoration:none;
+}

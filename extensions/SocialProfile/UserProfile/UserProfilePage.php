@@ -1576,6 +1576,8 @@ class UserProfilePage extends Article {
 			$total = $total + $stats_data['user_board_priv'];
 		}
  
+ $b = new UserBoard();       
+ 
  $output .='<div id="user-board-wall-block">';
  
 		$output .= '<div class="user-section-heading">
@@ -1595,9 +1597,31 @@ class UserProfilePage extends Article {
 		$output .= '</div>
 				<div class="cleared"></div>
 			</div>
-		</div>
+		</div>        
 		<div class="cleared"></div>';
-
+        
+        //Walls list section
+       $output .= '<div id="user-board-walls">';
+       
+         //if ( $wgUser->getName() !== $user_name ) {
+          $output .= '<div id="add-wall-title">
+                       <!--span class="wall-title-lable">Enter name</span-->
+                       <span class="add-wall-txtbox"><input type="text" name="wall_name" id="wall_name" placeholder="Enter wall name here..."></span>
+                       <input type="button" onclick="javascript:create_wall();" class="site-button" value="Create Wall">
+                      </div>';  
+         //}
+        $output .= '<div id="wall-title-list">';
+         $output .= $b->displayWalls($user_name, $user_id, 0, 10);
+        $output .= '</div>';
+                    
+       $output .= '</div>';
+       //Walls list section    
+                
+       $output .= '<div class="cleared"></div>';
+       
+       //get first wall id for default display
+		 $current_wall_id = 0;        
+         $output .= "<input type=\"hidden\" id=\"current_wall_id\" value=\"{$current_wall_id}\" />";
 		//if ( $wgUser->getName() !== $user_name ) {
 			if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
 				$output .= '<div class="user-page-message-form">
@@ -1605,7 +1629,7 @@ class UserProfilePage extends Article {
 					    <input type="hidden" id="message_type_wall" value="0" />
 						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="Write on the wall..."/></textarea></p>
 						<div class="user-page-message-box-button">
-							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall();" />
+							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall_post();" />
 						</div>
 					</div>';
 			} else {
@@ -1616,9 +1640,10 @@ class UserProfilePage extends Article {
 			}
 		//}
 
-		$output .= '<div id="user-page-wall">';
-		$b = new UserBoard();
-		 $output .= $b->displayWalls($user_name, $user_id, 0, 10);
+		$output .= '<div id="user-page-wall">';         
+         
+		 $output .= $b->displayWallPosts($current_wall_id, $user_name, $user_id, 0, 10);
+         
 		$output .= '</div>';
       $output .='</div>';
       
