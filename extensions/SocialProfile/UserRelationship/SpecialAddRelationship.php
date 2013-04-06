@@ -49,6 +49,7 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 
 		$this->user_name_to = $userTitle->getText();
 		$this->user_id_to = User::idFromName( $this->user_name_to );
+               $this->user_real_name_to = (User::whoIsReal($this->user_id_to)) ? User::whoIsReal($this->user_id_to) : $this->user_name_to ;         
 		$this->relationship_type = $wgRequest->getInt( 'rel_type' );
 		if ( !$this->relationship_type || !is_numeric( $this->relationship_type ) ) {
 			$this->relationship_type = 1;
@@ -60,6 +61,7 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 
 		if ( ( $wgUser->getID() == $this->user_id_to ) && ( $wgUser->getID() != 0 ) ) {
 			$wgOut->setPageTitle( wfMsg( 'ur-error-title' ) );
+                       if(!isset($out)){ $out =''; }
 			$out .= '<div class="relationship-error-message">' .
 				wfMsg( 'ur-add-error-message-yourself' ) .
 			'</div>
@@ -216,12 +218,12 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 		global $wgOut;
 
 		if ( $this->relationship_type == 1 ) {
-			$wgOut->setPageTitle( wfMsg( 'ur-add-title-friend', $this->user_name_to ) );
-			$add = wfMsg( 'ur-add-message-friend', $this->user_name_to );
+			$wgOut->setPageTitle( wfMsg( 'ur-add-title-friend', $this->user_real_name_to ) );
+			$add = wfMsg( 'ur-add-message-friend', $this->user_real_name_to );
 			$button = wfMsg( 'ur-add-button-friend' );
 		} else {
-			$wgOut->setPageTitle( wfMsg( 'ur-add-title-foe', $this->user_name_to ) );
-			$add = wfMsg( 'ur-add-message-foe', $this->user_name_to );
+			$wgOut->setPageTitle( wfMsg( 'ur-add-title-foe', $this->user_real_name_to ) );
+			$add = wfMsg( 'ur-add-message-foe', $this->user_real_name_to );
 			$button = wfMsg( 'ur-add-button-foe' );
 		}
 
