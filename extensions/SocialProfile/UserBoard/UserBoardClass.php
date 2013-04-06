@@ -1135,7 +1135,7 @@ class UserBoard {
     
     				$output .= "<div class=\"user-board-message\" id=\"user-wall-message-{$message['id']}\">
     					<div class=\"user-board-message-from\">
-    					 <a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a>&nbsp;{$message['wall_id']}
+    					 <a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a>
                          {$is_pinned}
     					</div>
     					<div class=\"user-board-message-time\">" .
