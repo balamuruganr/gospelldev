@@ -1123,7 +1123,7 @@ class UserBoard {
     					$board_link = '<a href="' . UserBoard::getUserWallURL( $message['user_name_from'] ) . '">' .
     						wfMsgHtml( 'userwall_sendmessage', $message['user_name_from'] ) . '</a>';
     				}
-    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
+    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->getName() == $message['user_name_from'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
     					$delete_link = "<span class=\"user-board-red\">
     							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_wall_post({$message['id']})\">" .
     								wfMsgHtml( 'userboard_delete' ) . '</a>
