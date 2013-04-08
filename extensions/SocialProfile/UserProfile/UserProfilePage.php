@@ -869,7 +869,7 @@ class UserProfilePage extends Article {
 			if ( $relationship == false ) {
 				$output .= $wgLang->pipeList( array(
 					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
-					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
+//					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
 					''
 				) );
 			} else {
@@ -894,10 +894,11 @@ class UserProfilePage extends Article {
 					wfMsg( 'user-send-message' ) . '</a>';
 				$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
 			}
+/*			
 			$output .= '<a href="' . $give_gift->escapeFullURL( 'user=' . $user_safe ) . '" rel="nofollow">' .
 				wfMsg( 'user-send-gift' ) . '</a>';
 			$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
-        
+*/        
            
 		}
         
