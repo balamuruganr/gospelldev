@@ -130,7 +130,7 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 		} elseif ( UserRelationship::userHasRequestByID( $this->user_id_to, $wgUser->getID() ) == true ) {
 
 			if ( $this->relationship_type == 1 ) {
-				$error = wfMsg( 'ur-add-error-message-pending-friend-request', $this->user_name_to );
+				$error = wfMsg( 'ur-add-error-message-pending-friend-request', $this->user_real_name_to );
 			} else {
 				$error = wfMsg( 'ur-add-error-message-pending-foe-request', $this->user_name_to );
 			}
@@ -185,8 +185,8 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 				$out = '';
 
 				if ( $this->relationship_type == 1 ) {
-					$wgOut->setPageTitle( wfMsg( 'ur-add-sent-title-friend', $this->user_name_to ) );
-					$sent = wfMsg( 'ur-add-sent-message-friend', $this->user_name_to );
+					$wgOut->setPageTitle( wfMsg( 'ur-add-sent-title-friend', $this->user_real_name_to ) );
+					$sent = wfMsg( 'ur-add-sent-message-friend', $this->user_real_name_to );
 				} else {
 					$wgOut->setPageTitle( wfMsg( 'ur-add-sent-title-foe', $this->user_name_to ) );
 					$sent = wfMsg( 'ur-add-sent-message-foe', $this->user_name_to );
