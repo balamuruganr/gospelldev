@@ -1457,7 +1457,8 @@ class UserBoard {
                    $close_edit_link .="<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>
                                        <span id=\"wall_comment_edit\" onclick=\"edit_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/edit.png\" border=\"0\" title=\"Edit this comment\"></span>";
                   } else {                   
-                   $close_edit_link .="<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>";  
+                   $close_edit_link .="";
+                   //<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>  
                   }
                  
                   $comment_time .="<span style=\"color:#949494\">" .

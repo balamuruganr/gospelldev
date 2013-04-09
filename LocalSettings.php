@@ -143,6 +143,19 @@ $wgGospellSettingsUserBordMessageFileSize = 2097152; //2097152 = 2 mb in bytes;
 $wgLegacyJavaScript = true;
 $wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
 
+require_once("$IP/extensions/Collection/Collection.php");
+$wgCollectionPODPartners = array(
+    'pediapress' => array(
+        'name' => 'PediaPress',
+        'url' => 'http://pediapress.com/',
+        'posturl' => 'http://pediapress.com/api/collections/',
+        'infopagetitle' => 'coll-order_info_article',
+    ),
+);
+
+//$wgCollectionPODPartners = false;
+//$wgGroupPermissions['user']['collectionsaveascommunitypage'] = true;
+//$wgGroupPermissions['user']['collectionsaveasuserpage']      = true;
 
                      //////////// Updated By Mathivanan /////////////////// 
 //==========================================================================================//
