@@ -160,6 +160,10 @@ class LoginForm extends SpecialPage {
             if(isset($_REQUEST['checkuser'])) {                      
                 require_once("$IP/includes/gospellIncludeCode.php");
             }
+            if(isset($_REQUEST['msg_from_user_id'])){
+               gospellCommonFunctions::searchUserFriends($_REQUEST['msg_from_user_id']); 
+                die();  
+            }
         }                
 		$this->setHeaders();
 

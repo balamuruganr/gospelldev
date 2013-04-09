@@ -1473,14 +1473,14 @@ class UserProfilePage extends Article {
 				$output .= '<a href="' . UserBoard::getBoardBlastURL() . '">' .
 					wfMsg( 'user-send-board-blast' ) . '</a>';
 			}
-			if ( $total > 10 ) {
-				$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
-			}
+			//if ( $total > 10 ) {
+			//	$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
+			//}
 		}
-		if ( $total > 10 ) {
-			$output .= '<a href="' . UserBoard::getUserBoardURL( $user_name ) . '">' .
-				wfMsg( 'user-view-all' ) . '</a>';
-		}
+		//if ( $total > 10 ) {
+		//	$output .= '<a href="' . UserBoard::getUserBoardURL( $user_name ) . '">' .
+		//		wfMsg( 'user-view-all' ) . '</a>';
+		//}
 		$output .= '</div>
 				<!--div class="action-left">';
 		if ( $total > 10 ) {
@@ -1628,7 +1628,7 @@ class UserProfilePage extends Article {
 				$output .= '<div class="user-page-message-form">
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
 					    <input type="hidden" id="message_type_wall" value="0" />
-						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="Write on the wall..."/></textarea></p>
+						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="What are you thinking about?"/></textarea></p>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall_post();" />
 						</div>

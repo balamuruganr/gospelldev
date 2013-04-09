@@ -307,6 +307,34 @@ class gospellCommonFunctions {
             die();                                    
         }              
     }
+    
+    public static function searchUserFriends( $user_id, $friend_name ){
+        global $wgUser;
+        
+        if( isset($user_id) && isset($friend_name)){
+            
+            $friend_name = urldecode( $friend_name );
+            $friend_name = substr($friend_name, 0, -4);            
+            $friends = array();
+            $dbw = wfGetDB( DB_SLAVE);  
+            $res = $dbw->query("SELECT r_id, r_user_id, r_user_name, r_user_id_relation, r_user_name_relation, r_type  FROM user_relationship
+                                WHERE LOWER(CONVERT(r_user_name_relation USING latin1)) LIKE '".$friend_name."%' 
+                                AND r_user_id ={$user_id} AND r_type =1
+                                LIMIT 50");
+                                            
+            foreach ( $res as $row ) {
+                $friends[] = array(                          
+                      'relation_id' => $row->r_id,
+                      'user_id' => $row->r_user_id_relation,
+                      'user_name' => $row->r_user_name_relation
+                );
+        	}
+            header('Content-type:application/json');          
+            echo json_encode($friends);         
+            die();
+        }
+        
+    }
 }
 
 

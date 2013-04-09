@@ -1123,7 +1123,7 @@ class UserBoard {
     					$board_link = '<a href="' . UserBoard::getUserWallURL( $message['user_name_from'] ) . '">' .
     						wfMsgHtml( 'userwall_sendmessage', $message['user_name_from'] ) . '</a>';
     				}
-    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
+    				if ( $wgUser->getName() == $message['user_name'] || $wgUser->getName() == $message['user_name_from'] || $wgUser->isAllowed( 'userboard-delete' ) ) {
     					$delete_link = "<span class=\"user-board-red\">
     							<a href=\"javascript:void(0);\" onclick=\"javascript:delete_wall_post({$message['id']})\">" .
     								wfMsgHtml( 'userboard_delete' ) . '</a>
@@ -1135,7 +1135,7 @@ class UserBoard {
     
     				$output .= "<div class=\"user-board-message\" id=\"user-wall-message-{$message['id']}\">
     					<div class=\"user-board-message-from\">
-    					 <a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a>&nbsp;{$message['wall_id']}
+    					 <a href=\"{$user->escapeFullURL()}\" title=\"{$message['user_name_from']}\">{$message['user_name_from']}</a>
                          {$is_pinned}
     					</div>
     					<div class=\"user-board-message-time\">" .
@@ -1457,7 +1457,8 @@ class UserBoard {
                    $close_edit_link .="<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>
                                        <span id=\"wall_comment_edit\" onclick=\"edit_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/edit.png\" border=\"0\" title=\"Edit this comment\"></span>";
                   } else {                   
-                   $close_edit_link .="<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>";  
+                   $close_edit_link .="";
+                   //<span id=\"wall_comment_delete\" onclick=\"delete_comment('{$comment['comment_id']}','{$message_id}');\"><img src=\"{$wgStylePath}/common/images/remove.png\" border=\"0\" title=\"Delete this comment\"></span>  
                   }
                  
                   $comment_time .="<span style=\"color:#949494\">" .

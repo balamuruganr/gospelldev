@@ -9,7 +9,8 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-
+global $IP;  
+require_once("$IP/includes/gospellCommonClass.php"); 
 class SpecialBoardBlast extends UnlistedSpecialPage {
 
 	/**
@@ -26,7 +27,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 	 */
 	public function execute( $params ) {
 		global $wgRequest, $wgOut, $wgUser, $wgUserBoardScripts;
-
+        
 		// This feature is available only to logged-in users.
 		if ( !$wgUser->isLoggedIn() ) {
 			$wgOut->setPageTitle( wfMsg( 'boardblastlogintitle' ) );
@@ -45,14 +46,21 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 			$wgOut->blockedPage( false );
 			return false;
 		}
-
+         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {            
+            
+            if(isset($_REQUEST['msg_from_user_id'])){
+               gospellCommonFunctions::searchUserFriends($_REQUEST['msg_from_user_id'], $_REQUEST['friend_name']); 
+                die();  
+            }
+        }
 		// Add CSS & JS
 		$wgOut->addExtensionStyle( $wgUserBoardScripts . '/BoardBlast.css' );
 		$wgOut->addScriptFile( $wgUserBoardScripts . '/BoardBlast.js' );
 
 		$output = '';
 
-		if ( $wgRequest->wasPosted() ) {
+		if ( $wgRequest->wasPosted() ) {	    
+		   
 			$wgOut->setPageTitle( wfMsg( 'messagesenttitle' ) );
 			$b = new UserBoard();
 
@@ -187,7 +195,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     		</div>
     		<div class="blast-nav">
     				<h2>' . wfMsg( 'boardblaststep2' ) . '</h2>
-    				<div class="blast-nav-links">
+    				<!--div class="blast-nav-links">
     					<a href="javascript:void(0);" onclick="javascript:BoardBlast.selectAll()">' .
     						wfMsg( 'boardlinkselectall' ) . '</a> -
     					<a href="javascript:void(0);" onclick="javascript:BoardBlast.unselectAll()">' .
@@ -206,7 +214,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     			$output .= '<a href="javascript:void(0);" onclick="javascript:BoardBlast.toggleFoes(0)">' .
     				wfMsg( 'boardlinkunselectfoes' ) . '</a>';
     		}
-    		$output .= '</div>
+    		$output .= '</div-->
     		</div>';
     
     		$rel = new UserRelationship( $wgUser->getName() );
@@ -214,7 +222,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     
     		$output .= '<div id="blast-friends-list" class="blast-friends-list">';
     
-    		$x = 1;
+    		/*$x = 1;
     		$per_row = 3;
     		if ( count( $relationships ) > 0 ) {
     			foreach ( $relationships as $relationship ) {
@@ -234,8 +242,15 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     			}
     		} else {
     			$output .= '<div>' . wfMsg( 'boardnofriends' ) . '</div>';
-    		}
-    
+    		} */
+            
+            $output .= '<div id="friends_suggesion">
+                        <input type="text" name="friend_name" id="friend_name" onkeyup="javascript:getFriendsNames('.$wgUser->getID().');" placeholder="Enter name" />
+                        <div class="cleared"></div>
+                        <div id="user_names_messages"></div>
+                        
+            </div>';
+            
     		$output .= '</div>
     
     			<div class="cleared"></div>';

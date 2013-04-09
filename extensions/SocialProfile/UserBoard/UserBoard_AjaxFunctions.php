@@ -243,9 +243,9 @@ function wfCreateWall( $user_name, $wall_name ) {
  return $b->displayWalls( $user_name, $user_id_to, 0, 10 );
 }
 
-$wgAjaxExportList[] = 'wfTestMathi';
+$wgAjaxExportList[] = 'wfTestfunc';
 function wfTestMathi( $fd ) {
 	global $wgUser;
-    print_r($fd);    
-	 //$b->displayWallPostComments( $user_name, $ub_id );
+      
+ $b->displayWallPostComments( $user_name, $ub_id );
 }
