@@ -96,16 +96,19 @@ function HasSpecialChars(passwd) {
 function CheckPasswordStrength(pwd) {
     var pass_strength;
 	if (IsEnoughLength(pwd,10) && HasMixedCase(pwd) && HasNumeral(pwd) && HasSpecialChars(pwd)) {
-		pass_strength = "<b><font style='color:olive'>Very strong</font></b>";
+		pass_strength = "<font style='color:olive'>Very strong</font>";
     }
 	else if (IsEnoughLength(pwd,8) && HasMixedCase(pwd) && (HasNumeral(pwd) || HasSpecialChars(pwd))) {
-		pass_strength = "<b><font style='color:Blue'>Strong</font></b>";
+		pass_strength = "<font style='color:Blue'>Strong</font>";
     }
 	else if (IsEnoughLength(pwd,6) && HasNumeral(pwd)){
-		pass_strength = "<b><font style='color:Green'>Good</font></b>";
+		pass_strength = "<font style='color:Green'>Good</font>";
     }
+	else if ($('#wpPassword2').val().length < 6){
+		pass_strength = "<font style='color:red'>password length minimum 6</font>";
+    }    
 	else {
-	   	pass_strength = "<b><font style='color:red'>Weak</font></b>";
+	   	pass_strength = "<font style='color:red'>Weak</font>";
     }
     $('#errpassword2').html(pass_strength);
 }
@@ -136,7 +139,11 @@ function chkValidEmail(email) {
         return true;
     }    
 }
-function chkValidPassword() {
+function chkValidPassword() {       
+    if($('#wpPassword2').val().length < 6){
+        $("#errpassword2").text("password length minimum 6");
+        return false;
+    }
     if($('#wpPassword2').val() != $('#wpRetype').val()){
         $('#wpRetype').focus();
         $("#errretype").text("password must match");
@@ -147,10 +154,74 @@ function chkValidPassword() {
         return true;
     }       
 }
-$('#userlogin2').submit(function() { 
-    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {
+$('#userlogin2').submit(function() {    
+    var userAgent = navigator.userAgent.toLowerCase();    
+    if (/msie/.test(userAgent) && 
+        parseFloat((userAgent.match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9) { 
+            if($('#wpFirstName2').val() == ''){
+                $('#wpFirstName2').focus();
+                $("#errfirstname2").text("required");         
+                return false;
+            }
+            if($('#wpLastName2').val() == ''){   
+                $('#wpLastName2').focus();
+                $("#errlastname2").text("required");
+                return false;
+            }
+            if($('#wpGender2').val() == ''){   
+                $('#wpGender2').focus();
+                $("#errgender").text("required");
+                return false;
+            }
+            if($('#birthday').val() == ''){   
+                $('#birthday').focus();
+                $("#errbirthday").text("required");
+                return false;
+            }                                          
+            if($('#wpName2').val() == ''){   
+                $('#wpName2').focus();
+                $("#errname2").text("required");
+                return false;
+            }
+            if($('#wpPassword2').val() == ''){
+                $('#wpPassword2').focus();
+                $("#errpassword2").text("required");
+                return false;
+            }            
+            if($('#wpPassword2').length() < 6){
+                $('#wpPassword2').focus();
+                $("#errpassword2").text("password length is minimum 6");
+                return false;
+            }                    
+            if($('#wpPassword2').val() != $('#wpRetype').val()){
+                $('#wpRetype').focus();
+                $("#errretype").text("password must match");
+                return false;
+            }    
+            if($('#wpEmail').val() == ''){  
+                $('#wpEmail').focus();
+                $("#erremail").text("required");
+                return false;
+            }     
+            if($('#hometown_country').val() == ''){  
+                $('#hometown_country').focus();
+                $("#errhomecountry").text("required");
+                return false;
+            }                                     
+            if(!isValidEmailAddress($('#wpEmail').val())){
+                $("#erremail").text("Please enter Valid email");
+                return false;
+            }   
+            if($('#aboutme').val() == ''){  
+                $('#aboutme').focus();
+                $("#erraboutme").text("required");
+                return false;
+            }
+            return true;                
+    }
+    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {        
         return true
     } else {
         return false;
-    }    
+    }                
 });
