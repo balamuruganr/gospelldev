@@ -1,7 +1,104 @@
 /**
  * check user name exists and suggest uer name
  */
-jQuery( function ( $ ) {   
+jQuery( function ( $ ) {
+    
+    
+    if($('#wpTextbox1').length) {    
+
+        var inaccurate_occurrence, i, match_string, sign_post_avail;        
+        var signpost_template_array = new Array();
+        var signpost_id_array = new Array();
+        
+        signpost_template_array[0] = "/{{Inaccurate}}/gi";
+        signpost_template_array[1] = "/{{Incomplete}}/gi";
+        signpost_template_array[2] = "/{{Disputed}}/gi";
+        
+        signpost_id_array[0] = "inaccurate";
+        signpost_id_array[1] = "incomplete";
+        signpost_id_array[2] = "disputeed";
+        
+        var singpost_template_cnt = signpost_template_array.length;
+
+        for( i=0; i<singpost_template_cnt; i++ ) {   
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;            
+            if(sign_post_avail) {                             
+                $('#add'+signpost_id_array[i]).hide();
+                $('#remove'+signpost_id_array[i]).show();                  
+            }           
+        }
+        
+    };        
+    $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {    
+        var txt = $("#wpTextbox1");  
+        var signpost_ary = new Array();
+        var add_signpost_msg_ary = new Array();
+        
+        signpost_ary['addinaccurate'] = '{{Inaccurate}}';
+        signpost_ary['addincomplete'] = '{{Incomplete}}';
+        signpost_ary['adddisputeed'] = '{{Disputed}}';
+
+        add_signpost_msg_ary['addinaccurate'] = 'Inaccurate';
+        add_signpost_msg_ary['addincomplete'] = 'Incomplete';
+        add_signpost_msg_ary['adddisputeed'] = 'Disputed';
+            	
+        var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        if(occurrence == 0){
+            txt.val(signpost_ary[this.id]+"\n" + txt.val() );
+            alert(add_signpost_msg_ary[this.id]+' signpost added and please save the changes');
+        }else{
+            alert(add_signpost_msg_ary[this.id]+' signpost is already added');
+        }                    
+    });    
+    $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
+        var txt = $("#wpTextbox1");  
+        var rm_signpost_ary = new Array();
+        var rm_signpost_msg_ary = new Array();
+        
+        rm_signpost_ary['removeinaccurate'] = '{{Inaccurate}}';
+        rm_signpost_ary['removeincomplete'] = '{{Incomplete}}';
+        rm_signpost_ary['removedisputeed'] = '{{Disputed}}';
+        
+        rm_signpost_msg_ary['removeinaccurate'] = 'Inaccurate';
+        rm_signpost_msg_ary['removeincomplete'] = 'Incomplete';
+        rm_signpost_msg_ary['removedisputeed'] = 'Disputed';
+            	
+        var occurrence = (txt.val().replace(new RegExp(eval('/'+rm_signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        if(occurrence) {
+            var replace_val = txt.val().replace(eval('/'+rm_signpost_ary[this.id]+'/gi'),' ');
+            txt.val(replace_val);
+            alert(rm_signpost_msg_ary[this.id]+' signpost removed and please save the changes');
+        }                    
+    });        
+    $('#wpSave').click(function() {
+
+        var inaccurate_occurrence, i, match_string, sign_post_avail;        
+        var signpost_template_array = new Array();
+        var signpost_template_name_array = new Array();
+        
+        signpost_template_array[0] = "/{{Inaccurate}}/gi";
+        signpost_template_array[1] = "/{{Incomplete}}/gi";
+        signpost_template_array[2] = "/{{Disputed}}/gi";
+        
+        signpost_template_name_array[0] = "Inaccurate";
+        signpost_template_name_array[1] = "Incomplete";
+        signpost_template_name_array[2] = "Disputed";
+        
+        var singpost_template_cnt = signpost_template_array.length;
+
+        for( i=0; i<singpost_template_cnt; i++ ) {   
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;
+            if(sign_post_avail) {            
+                inaccurate_occurrence = $("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i]))).length; 
+                if(inaccurate_occurrence > 1) {
+                    alert(signpost_template_name_array[i]+' signpost is added more than one time. Please add it one time and save the changes');
+                    return false;
+                } 
+            }           
+        }
+                
+    });
+       
     $('#user_search').keyup(function() {            
         var uname = $.trim($('#user_search').val());                
         if(uname == ''){

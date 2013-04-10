@@ -35,6 +35,7 @@
  * Surgeon General's Warning: prolonged exposure to this class is known to cause
  * headaches, which may be fatal.
  */
+require_once("$IP/includes/gospellCommonClass.php"); 
 class EditPage {
 
 	/**
@@ -1834,8 +1835,8 @@ class EditPage {
 		if ( $this->section == 'new' ) {
 			$this->showSummaryInput( true, $this->summary );
 			$wgOut->addHTML( $this->getSummaryPreview( true, $this->summary ) );
-		}
-
+		}        
+               gospellCommonFunctions::showSingnPostButton();
 		$wgOut->addHTML( $this->editFormTextBeforeContent );
 
 		if ( !$this->isCssJsSubpage && $showToolbar && $wgUser->getOption( 'showtoolbar' ) ) {
@@ -2432,7 +2433,6 @@ HTML
 		return "<div id=\"editpage-copywarn\">\n" .
 			call_user_func_array( 'wfMessage', $copywarnMsg )->plain() . "\n</div>";
 	}
-
 	protected function showStandardInputs( &$tabindex = 2 ) {
 		global $wgOut;
 		$wgOut->addHTML( "<div class='editOptions'>\n" );

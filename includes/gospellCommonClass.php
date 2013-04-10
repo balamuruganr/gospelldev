@@ -335,6 +335,23 @@ class gospellCommonFunctions {
         }
         
     }
+
+/*
+add and remove sign post container
+*/
+    public static function showSingnPostButton() {
+        global $wgOut;
+        
+        $wgOut->addHTML( '<div>' );
+        $wgOut->addHTML( '<span id="addinaccurate">Add Inaccurate</span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="addincomplete">Add Incomplete</span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="adddisputeed">Add Disputed</span>&nbsp;&nbsp;' );        
+        $wgOut->addHTML( '<span id="removeinaccurate" style="display:none;">Remove Inaccurate</span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="removeincomplete" style="display:none;">Remove Incomplete</span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="removedisputeed" style="display:none;">Remove Disputed</span>&nbsp;&nbsp;' );        
+		$wgOut->addHTML( "</div>\n" );              
+    }
+     
 }
 
 
