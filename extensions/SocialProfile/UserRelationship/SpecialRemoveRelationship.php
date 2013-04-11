@@ -10,7 +10,8 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-
+global $IP;
+require_once("$IP/includes/gospellCommonClass.php"); 
 class SpecialRemoveRelationship extends UnlistedSpecialPage {
 
 	/**
@@ -45,16 +46,17 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 
 		$this->user_name_to = $usertitle->getText();
 		$this->user_id_to = User::idFromName( $this->user_name_to );
+        $this->user_realname_to = gospellCommonFunctions::getUserRealNameByUserId($this->user_id_to);//getting user real name
 		$this->relationship_type = UserRelationship::getUserRelationshipByID(
 			$this->user_id_to,
 			$wgUser->getID()
 		);
 
 		if ( $this->relationship_type == 1 ) {
-			$confirmTitle = wfMsg( 'ur-remove-relationship-title-confirm-friend', $this->user_name_to );
-			$confirmMsg = wfMsg( 'ur-remove-relationship-message-confirm-friend', $this->user_name_to );
+			$confirmTitle = wfMsg( 'ur-remove-relationship-title-confirm-friend', $this->user_realname_to );
+			$confirmMsg = wfMsg( 'ur-remove-relationship-message-confirm-friend', $this->user_realname_to );
 			$error = wfMsg( 'ur-remove-error-not-loggedin-friend' );
-			$pending = wfMsg( 'ur-remove-error-message-pending-friend-request', $this->user_name_to );
+			$pending = wfMsg( 'ur-remove-error-message-pending-friend-request', $this->user_realname_to );
 		} else {
 			$confirmTitle = wfMsg( 'ur-remove-relationship-title-confirm-foe', $this->user_name_to );
 			$confirmMsg = wfMsg( 'ur-remove-relationship-message-confirm-foe', $this->user_name_to );
@@ -161,8 +163,8 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 		$avatar = new wAvatar( $this->user_id_to, 'l' );
 
 		if ( $this->relationship_type == 1 ) {
-			$title = wfMsg( 'ur-remove-relationship-title-friend', $this->user_name_to );
-			$remove = wfMsg( 'ur-remove-relationship-message-friend', $this->user_name_to, wfMsg( 'ur-remove' ) );
+			$title = wfMsg( 'ur-remove-relationship-title-friend', $this->user_realname_to );
+			$remove = wfMsg( 'ur-remove-relationship-message-friend', $this->user_realname_to, wfMsg( 'ur-remove' ) );
 		} else {
 			$title = wfMsg( 'ur-remove-relationship-title-foe', $this->user_name_to );
 			$remove = wfMsg( 'ur-remove-relationship-message-foe', $this->user_name_to, wfMsg( 'ur-remove' ) );

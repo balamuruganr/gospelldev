@@ -351,6 +351,23 @@ add and remove sign post container
         $wgOut->addHTML( '<span id="removedisputeed" style="display:none;">Remove Disputed</span>&nbsp;&nbsp;' );        
 		$wgOut->addHTML( "</div>\n" );              
     }
+    
+    public static function getUserRealNameByUserId($user_id) {  
+         $usr_real_name = '';   
+         if(isset($user_id)) {                                     
+            $dbw = wfGetDB( DB_SLAVE);  
+            $res = $dbw->query("SELECT user_name, user_real_name FROM user WHERE user_id = '".$user_id."'");                                   
+                     
+            foreach ( $res as $row ) {
+                $usr_real_name = ($row->user_real_name) ? $row->user_real_name : $row->user_name ;
+        	}  
+            return $usr_real_name;      
+        } 
+        else {
+            return $usr_real_name;
+        }             
+    }
+    
      
 }
 
