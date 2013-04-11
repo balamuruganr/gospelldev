@@ -32,7 +32,8 @@ jQuery( function ( $ ) {
     $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {    
         var txt = $("#wpTextbox1");  
         var signpost_ary = new Array();
-        var add_signpost_msg_ary = new Array();
+        var enable_id_ary = new Array();
+        var add_signpost_msg_ary = new Array();        
         
         signpost_ary['addinaccurate'] = '{{Inaccurate}}';
         signpost_ary['addincomplete'] = '{{Incomplete}}';
@@ -41,10 +42,16 @@ jQuery( function ( $ ) {
         add_signpost_msg_ary['addinaccurate'] = 'Inaccurate';
         add_signpost_msg_ary['addincomplete'] = 'Incomplete';
         add_signpost_msg_ary['adddisputeed'] = 'Disputed';
-            	
+
+        enable_id_ary['addinaccurate'] = 'removeinaccurate';
+        enable_id_ary['addincomplete'] = 'removeincomplete';
+        enable_id_ary['adddisputeed'] = 'removedisputeed';
+                    	
         var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
         if(occurrence == 0){
             txt.val(signpost_ary[this.id]+"\n" + txt.val() );
+            $('#'+this.id).hide();
+            $('#'+enable_id_ary[this.id]).show();
             alert(add_signpost_msg_ary[this.id]+' signpost added and please save the changes');
         }else{
             alert(add_signpost_msg_ary[this.id]+' signpost is already added');
@@ -52,7 +59,8 @@ jQuery( function ( $ ) {
     });    
     $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
         var txt = $("#wpTextbox1");  
-        var rm_signpost_ary = new Array();
+        var enable_id_ary = new Array();
+        var rm_signpost_ary = new Array();        
         var rm_signpost_msg_ary = new Array();
         
         rm_signpost_ary['removeinaccurate'] = '{{Inaccurate}}';
@@ -62,11 +70,17 @@ jQuery( function ( $ ) {
         rm_signpost_msg_ary['removeinaccurate'] = 'Inaccurate';
         rm_signpost_msg_ary['removeincomplete'] = 'Incomplete';
         rm_signpost_msg_ary['removedisputeed'] = 'Disputed';
+
+        enable_id_ary['removeinaccurate'] = 'addinaccurate';
+        enable_id_ary['removeincomplete'] = 'addincomplete';
+        enable_id_ary['removedisputeed'] = 'adddisputeed';
             	
         var occurrence = (txt.val().replace(new RegExp(eval('/'+rm_signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
         if(occurrence) {
             var replace_val = txt.val().replace(eval('/'+rm_signpost_ary[this.id]+'/gi'),' ');
             txt.val(replace_val);
+            $('#'+this.id).hide();
+            $('#'+enable_id_ary[this.id]).show();
             alert(rm_signpost_msg_ary[this.id]+' signpost removed and please save the changes');
         }                    
     });        
