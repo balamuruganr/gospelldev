@@ -670,6 +670,7 @@ class UserProfilePage extends Article {
 				$this->getProfileSection( wfMsg( 'custom-info-field4' ), $profile_data['custom_4'], false ) .
 			'</div>';
 		} elseif ( $wgUser->getName() == $user_name ) {
+		  /*
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' .
 					wfMsg( 'custom-info-title' ) .
@@ -687,6 +688,7 @@ class UserProfilePage extends Article {
 			<div class="no-info-container">' .
 				wfMsg( 'custom-no-info' ) .
 			'</div>';
+            */
 		}
 
 		return $output;
@@ -744,6 +746,7 @@ class UserProfilePage extends Article {
 				$this->getProfileSection( wfMsg( 'other-info-drinks' ), $profile_data['drinks'], false ) .
 			'</div>';
 		} elseif ( $this->isOwner() ) {
+		  /*
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' .
 					wfMsg( 'other-info-title' ) .
@@ -761,6 +764,7 @@ class UserProfilePage extends Article {
 			<div class="no-info-container">' .
 				wfMsg( 'other-no-info' ) .
 			'</div>';
+            */
 		}
 		return $output;
 	}
