@@ -527,6 +527,7 @@ class UserProfilePage extends Article {
 		$defaultCountry = wfMsgForContent( 'user-profile-default-country' );
 
 		// Current location
+/*        
 		$location = $profile_data['location_city'] . ', ' . $profile_data['location_state'];
 		if ( $profile_data['location_country'] != $defaultCountry ) {
 			if ( $profile_data['location_city'] && $profile_data['location_state'] ) { // city AND state
@@ -542,12 +543,15 @@ class UserProfilePage extends Article {
 				$location .= $profile_data['location_country'];
 			}
 		}
-
-		if ( $location == ', ' ) {
+*/        
+        $location = $profile_data['location_country'];
+		if (empty($location)) {
 			$location = '';
 		}
+        $hometown = '';
 
 		// Hometown
+/*
 		$hometown = $profile_data['hometown_city'] . ', ' . $profile_data['hometown_state'];
 		if ( $profile_data['hometown_country'] != $defaultCountry ) {
 			if ( $profile_data['hometown_city'] && $profile_data['hometown_state'] ) { // city AND state
@@ -567,7 +571,7 @@ class UserProfilePage extends Article {
 		if ( $hometown == ', ' ) {
 			$hometown = '';
 		}
-
+*/
 		$joined_data = $profile_data['real_name'] . $location . $hometown .
 						$profile_data['birthday'] . $profile_data['occupation'] .
 						$profile_data['websites'] . $profile_data['places_lived'] .
@@ -594,7 +598,7 @@ class UserProfilePage extends Article {
 			<div class="profile-info-container">' .
 				$this->getProfileSection( wfMsg( 'user-personal-info-real-name' ), $profile_data['real_name'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-location' ), $location, false ) .
-				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
+//				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-birthday' ), $profile_data['birthday'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-occupation' ), $profile_data['occupation'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-websites' ), $profile_data['websites'], false ) .

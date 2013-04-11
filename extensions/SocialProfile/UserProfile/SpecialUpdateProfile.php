@@ -108,10 +108,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
                     if(strlen(trim($wgRequest->getVal( 'real_name' )))<=0): $valid_name = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'email' )))<=0): $valid_email = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'gender' )))<=0): $valid_gender = false; endif;
-                    if(strlen(trim($wgRequest->getVal( 'location_city' )))<=0): $valid_location_city = false; endif;
+//                    if(strlen(trim($wgRequest->getVal( 'location_city' )))<=0): $valid_location_city = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'location_country' )))<=0): $valid_location_country = false; endif;
-                    if(strlen(trim($wgRequest->getVal( 'hometown_city' )))<=0): $valid_hometown_city = false; endif;
-                    if(strlen(trim($wgRequest->getVal( 'hometown_country' )))<=0): $valid_hometown_country = false; endif;
+//                    if(strlen(trim($wgRequest->getVal( 'hometown_city' )))<=0): $valid_hometown_city = false; endif;
+//                    if(strlen(trim($wgRequest->getVal( 'hometown_country' )))<=0): $valid_hometown_country = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'birthday' )))<=0): $valid_birth_date  = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'birthday' )))<=0): $valid_birth_date  = false; endif;
                     if(strlen(trim($wgRequest->getVal( 'about' )))<=0): $valid_about_text  = false; endif;
@@ -322,12 +322,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$dbw = wfGetDB( DB_MASTER );
 		$basicProfileData = array(
             'up_gender' => $wgRequest->getVal( 'gender' ),
-			'up_location_city' => $wgRequest->getVal( 'location_city' ),
-			'up_location_state' => $wgRequest->getVal( 'location_state' ),
+//			'up_location_city' => $wgRequest->getVal( 'location_city' ),
+//			'up_location_state' => $wgRequest->getVal( 'location_state' ),
 			'up_location_country' => $wgRequest->getVal( 'location_country' ),
-			'up_hometown_city' => $wgRequest->getVal( 'hometown_city' ),
-			'up_hometown_state' => $wgRequest->getVal( 'hometown_state' ),
-			'up_hometown_country' => $wgRequest->getVal( 'hometown_country' ),
+//			'up_hometown_city' => $wgRequest->getVal( 'hometown_city' ),
+//			'up_hometown_state' => $wgRequest->getVal( 'hometown_state' ),
+			'up_hometown_country' => $wgRequest->getVal( 'location_country' ),
 			'up_birthday' => self::formatBirthdayDB( $dob_str ),
 			'up_about' => $wgRequest->getVal( 'about' ),
 			'up_occupation' => $wgRequest->getVal( 'occupation' ),
@@ -530,10 +530,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		<div class="cleared"></div>';
 
 		$form .= '<div class="profile-update">
-			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-location' ) . '</p>
-			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-city' ) . ' *</p>
-			<p class="profile-update-unit"><input type="text" class="required" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) ? $location_city : '' ) . '" title="' . wfMsg( 'user-profile-personal-location' ) . '-' . wfMsg( 'user-profile-personal-city' ) . '" /></p>
-			<div class="cleared"></div>';
+			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-location' ) . '</p>'.
+//			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-city' ) . ' *</p>
+//			<p class="profile-update-unit"><input type="text" class="required" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) ? $location_city : '' ) . '" title="' . wfMsg( 'user-profile-personal-location' ) . '-' . wfMsg( 'user-profile-personal-city' ) . '" /></p>
+			'<div class="cleared"></div>';
 		$form .= '<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-country' ) . ' *</p>';        
 		$form .= "<select name=\"location_country\" id=\"location_country\" class=\"required\" title=\"" . wfMsg( 'user-profile-personal-location' ) . "-" . wfMsg( 'user-profile-personal-country' ) . "\"><option value=\"\">-Select Country-</option>";
 
@@ -547,7 +547,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<div class="cleared"></div>
 		</div>
 		<div class="cleared"></div>';
-
+/*
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-hometown' ) . '</p>
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-city' ) . ' *</p>
@@ -566,7 +566,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			<div class="cleared"></div>
 		</div>
 		<div class="cleared"></div>';
-
+*/
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-birthday' ) . '</p>
 			<p class="profile-update-unit-left" id="birthday-format">' .
