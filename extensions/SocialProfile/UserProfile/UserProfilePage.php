@@ -8,7 +8,8 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-
+global $IP;
+require_once("$IP/includes/gospellCommonClass.php"); 
 class UserProfilePage extends Article {
 
 	public $title = null;
@@ -835,7 +836,8 @@ class UserProfilePage extends Article {
 			</div>'; */
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
-		$output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
+        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';        
+        $output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
 			'</div>';
 
 		$output .= '<div id="profile-right">';

@@ -368,6 +368,19 @@ add and remove sign post container
         }             
     }
     
+	/** @return String: <img> HTML tag with full path to the cover image */
+    function getCoverPhotoURL($user_id) {
+        global $wgUploadPath, $wgUploadDirectory, $wgDBname;
+        
+        $files = glob( $wgUploadDirectory . '/cover_photos/' . $wgDBname . '_cover_' . $user_id .  '.jpg');
+        if ( !isset( $files[0] ) || !$files[0] ) {
+            $cover_filename = 'default_cover.gif';
+            return '';
+        } else {
+            $cover_filename = basename( $files[0] ) . '?r=' . filemtime( $files[0] );
+            return "<img src=\"{$wgUploadPath}/cover_photos/{$cover_filename}\" alt=\"coverphoto\" border=\"0\" />";
+        }        		
+    }    
      
 }
 
