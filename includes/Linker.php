@@ -1809,9 +1809,10 @@ class Linker {
 	 */
 	public static function formatTemplates( $templates, $preview = false, $section = false ) {
 		wfProfileIn( __METHOD__ );
+        global $wgUser;        
 
 		$outText = '';
-		if ( count( $templates ) > 0 ) {
+		if ( count( $templates ) > 0 && in_array( 'sysop', $wgUser->getGroups() )) {
 			# Do a batch existence check
 			$batch = new LinkBatch;
 			foreach ( $templates as $title ) {
