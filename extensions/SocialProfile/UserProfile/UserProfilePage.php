@@ -837,8 +837,8 @@ class UserProfilePage extends Article {
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
         $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';        
-        $output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
-			'</div>';
+        $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
+			'</a></div>';
 
 		$output .= '<div id="profile-right">';
         

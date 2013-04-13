@@ -58,7 +58,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
         //============================
         $profile_upd_one = false;
         $profile_upd_two = false;
-        $valid_name = true;
+        $valid_name = false;
         $valid_email = true;
         $valid_gender = true;
         $valid_location_city = true;
@@ -493,7 +493,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . wfMsg( 'user-profile-personal-info' ) . '</p>
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-name' ) . ' *</p>
-			<p class="profile-update-unit"><input type="text" class="required" size="25" name="real_name" id="real_name" value="' . $real_name . '" title="' . wfMsg( 'user-profile-personal-name' ) . '" /></p>
+			<p class="profile-update-unit"><input type="text" class="required" size="25" name="real_name" id="real_name" value="' . $real_name . '" title="' . wfMsg( 'user-profile-personal-name' ) . '" readonly /></p>
 			<div class="cleared"></div>
 			<p class="profile-update-unit-left">' . wfMsg( 'user-profile-personal-email' ) . ' *</p>
 			<p class="profile-update-unit"><input type="text" class="email required" size="25" name="email" id="email" value="' . $email . '" title="' . wfMsg( 'user-profile-personal-email' ) . '" readonly />';
