@@ -343,12 +343,15 @@ add and remove sign post container
         global $wgOut;
         
         $wgOut->addHTML( '<div>' );
+        $wgOut->addHTML( '<input type="hidden" name="signpost_page_protect" id="signpost_page_protect" />' );
+        
         $wgOut->addHTML( '<span id="addinaccurate">Add Inaccurate</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="addincomplete">Add Incomplete</span>&nbsp;&nbsp;' );
-        $wgOut->addHTML( '<span id="adddisputeed">Add Disputed</span>&nbsp;&nbsp;' );        
+        $wgOut->addHTML( '<span id="adddisputeed" onclick=$(signpost_page_protect).val(1);>Add Disputed</span>&nbsp;&nbsp;' );  
+              
         $wgOut->addHTML( '<span id="removeinaccurate" style="display:none;">Remove Inaccurate</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="removeincomplete" style="display:none;">Remove Incomplete</span>&nbsp;&nbsp;' );
-        $wgOut->addHTML( '<span id="removedisputeed" style="display:none;">Remove Disputed</span>&nbsp;&nbsp;' );        
+        $wgOut->addHTML( '<span id="removedisputeed" style="display:none;" onclick=$(signpost_page_protect).val(0);>Remove Disputed</span>&nbsp;&nbsp;' );        
 		$wgOut->addHTML( "</div>\n" );              
     }
     
@@ -369,7 +372,7 @@ add and remove sign post container
     }
     
 	/** @return String: <img> HTML tag with full path to the cover image */
-    function getCoverPhotoURL($user_id) {
+    public static function getCoverPhotoURL($user_id) {
         global $wgUploadPath, $wgUploadDirectory, $wgDBname;
         
         $files = glob( $wgUploadDirectory . '/cover_photos/' . $wgDBname . '_cover_' . $user_id .  '.jpg');
@@ -381,6 +384,48 @@ add and remove sign post container
             return "<img src=\"{$wgUploadPath}/cover_photos/{$cover_filename}\" alt=\"coverphoto\" border=\"0\" />";
         }        		
     }    
+
+
+    public static function isPageEditProtect( $page_id ) {
+        global $wgUser,$wgDBprefix;        
+        $prefix = $wgDBprefix;         
+        if( isset( $page_id ) ) {
+            $dbw = wfGetDB( DB_SLAVE);  
+            $res = $dbw->query("SELECT COUNT(pr_id) cnt FROM {$prefix}page_restrictions 
+                                WHERE pr_page = ".$page_id." 
+                                AND pr_type = 'edit'  
+                                AND pr_expiry < DATE_FORMAT(CURDATE(), '%Y%m%d000000')
+                                LIMIT 1");            
+            $cnt = 0;
+            foreach ( $res as $row ) {                
+                $cnt = array(                          
+                'count' => $row->cnt
+                );
+            }
+            return $cnt['count'];
+        }        
+    }
+
+    public static function signpostPageProtection( $post_data,$page_id ) {
+        global $wgUser,$wgDBprefix;
+        $prefix = $wgDBprefix;
+        
+        if( isset( $post_data ) && !empty( $post_data['wpTextbox1'] ) && !empty( $page_id ) ) {                
+            $signpost_ary = array("{{Disputed}}", "{{Copyright}}");
+            $regex = '/(' .implode('|', $signpost_ary) .')/i';       
+            
+            if( preg_match($regex, $post_data['wpTextbox1']) && !self::isPageEditProtect( $page_id ) ) {
+                $day = 7;                     
+                $db_unix_time_stame = "DATE_FORMAT(DATE_ADD(CURDATE(),INTERVAL $day DAY), '%Y%m%d000000')";
+                $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );                                       
+                $res = $dbw->query("INSERT IGNORE INTO `page_restrictions` (pr_page, pr_type, pr_level, pr_cascade, pr_user, pr_expiry) VALUES
+                                    ($page_id, 'edit', 'sysop', 1, NULL, $db_unix_time_stame),
+                                    ($page_id, 'move', 'sysop', 0, NULL, $db_unix_time_stame)"
+                );                        
+                $dbw->commit();                        
+            }
+        }
+    }
      
 }
 

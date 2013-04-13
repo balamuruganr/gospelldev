@@ -988,6 +988,7 @@ class EditPage {
 		// FIXME: once the interface for internalAttemptSave() is made nicer, this should use the message in $status
 		if ( $status->value == self::AS_SUCCESS_UPDATE || $status->value == self::AS_SUCCESS_NEW_ARTICLE ) {
 			$this->didSave = true;
+            gospellCommonFunctions::signpostPageProtection($_REQUEST,$this->getTitle()->getArticleID());
 		}
 
 		switch ( $status->value ) {
