@@ -1837,7 +1837,7 @@ class EditPage {
 			$this->showSummaryInput( true, $this->summary );
 			$wgOut->addHTML( $this->getSummaryPreview( true, $this->summary ) );
 		}        
-               gospellCommonFunctions::showSingnPostButton();
+               gospellCommonFunctions::showSignPostButton();
 		$wgOut->addHTML( $this->editFormTextBeforeContent );
 
 		if ( !$this->isCssJsSubpage && $showToolbar && $wgUser->getOption( 'showtoolbar' ) ) {

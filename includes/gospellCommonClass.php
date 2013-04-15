@@ -339,7 +339,7 @@ class gospellCommonFunctions {
 /*
 add and remove sign post container
 */
-    public static function showSingnPostButton() {
+    public static function showSignPostButton() {
         global $wgOut;
         
         $wgOut->addHTML( '<div>' );
