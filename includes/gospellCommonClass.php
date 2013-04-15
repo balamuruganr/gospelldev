@@ -525,7 +525,7 @@ class gospellCommonFunctions {
      return $books;        
     }
        
-}
+
 
 /*
 add and remove sign post container
@@ -619,7 +619,3 @@ add and remove sign post container
     }
      
 }
-
-
-?>
->>>>>>> d0fdd680f16ec7b5d6cbc2a2b97552bca0aae81a
