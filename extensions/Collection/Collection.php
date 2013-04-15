@@ -463,7 +463,7 @@ function wfAjaxCollectionSuggestUndoArticle( $lastAction, $article ) {
 $wgAjaxExportList[] = 'wfAjaxCollectionSuggestUndoArticle';
 
 //////////////////////////////////////////////////////////////////
-function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null, $book_id = 0, $pageName = null ) {
+function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null, $book_id = 0, $pageName = null, $user_name ) {
 	if ( !is_null( $oldid ) ) {
 		$oldid = intval( $oldid );
 	}
@@ -479,9 +479,13 @@ function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null,
 	if ( is_null( $title ) ) {
 		$title = Title::newMainPage();
 	}
-    $_SESSION['wsCollection']['book_id'] = $book_id; 
-	$html = CollectionHooks::renderBookCreatorBox( $title, $mode = '', $book_id );
     
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );    
+    
+    $_SESSION['wsCollection']['book_id'] = $book_id; 
+	$html = CollectionHooks::renderBookCreatorBox( $title, $mode = '', $book_id, $user_name );
+    //echo $user_name.$book_id; die;
 	$result = array();
 	$result['html'] = $html;
 	$r = new AjaxResponse( FormatJson::encode( $result ) );
@@ -491,16 +495,21 @@ function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null,
 
 $wgAjaxExportList[] = 'wfAjaxCollectionGetRenderBookCreatorBox';
 
-function wfAjaxSetDefaultBookSettings() {
+function wfAjaxSetDefaultBookSettings( $user_name ) {
 	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id  = User::idFromName( $user_name );
+    
     
        if(isset($_SESSION['wsCollection']['book_id'])){ 
             $book_id = $_SESSION['wsCollection']['book_id'];
         } else { 
-            $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );
+            $user_having_books = gospellCommonFunctions::get_user_current_book( $user_id, $user_name );
             $book_id = (is_object($user_having_books))? $user_having_books->book_id : '';
         }
-  
+        
     $result = array();
 	$result['html'] = $book_id;
 	$r = new AjaxResponse( FormatJson::encode( $result ) );

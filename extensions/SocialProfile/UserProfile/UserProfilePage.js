@@ -494,17 +494,23 @@ function update_wall(){
 function save_collection( collection){
     $.jStorage.set('collection', collection);
 }
-function goto_this_bookset( bookid ){
+function goto_this_bookset( bookid, url ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+    var userTo = decodeURIComponent( wgTitle ); 
     //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
     var hint  = "";
-    var oldid = "0";
+    var oldid = "0";    
     $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
-			'rsargs[]': [hint, oldid, bookid, wgPageName]
-		}, function(result) {
-			$('#siteNotice').html(result.html);
+			'rsargs[]': [hint, oldid, bookid, wgPageName, userTo]
+		}, function(result) { 
+		   if($('.mw-body').children().is('#siteNotice')){
+		      $('.mw-body').children('#siteNotice').html(result.html); 
+		   } else {		      
+		     $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>'); 
+		   }		    
+           window.location = url;
 		}); 
 }
 $(window).scroll(function() {
@@ -515,11 +521,11 @@ $(window).scroll(function() {
 (function() { 
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post
-        display_wall_post();      
+        //display_wall_post();      
         //Autodisplay of Wall post's comments  
-        runAuto();    
+        //runAuto();    
         //AutoDisplay Of Messages
-       display_messages(); 
+       //display_messages(); 
    /////////////////// Auto Display using sajax ///////////////
    
               

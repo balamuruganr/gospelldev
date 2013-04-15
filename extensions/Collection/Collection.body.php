@@ -65,18 +65,7 @@ class SpecialCollection extends SpecialPage {
 			) );
 			return;
 		}
-        
-        /*///////////////////////////////////////////////////////        
-        if ( $wgUser->isLoggedIn() && !$wgUser->isBlocked() ) {
-           $user_having_books = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName());
-           if(is_object($user_having_books)){
-            $out->redirect();
-           } else {
-            $out->redirect();
-           } 
-        }
-        ///////////////////////////////////////////////////////*/
-        
+              
 		switch ( $request->getVal( 'bookcmd', '' ) ) {
 			case 'book_creator':
 				$this->renderBookCreatorPage( $request->getVal( 'referer', '' ), $par );                
@@ -394,7 +383,7 @@ class SpecialCollection extends SpecialPage {
 						array( 'known', 'noclasses' )
 					) .
                     '</div>
-                   <div style="clear: both;"></div>
+                   <div style="clear:both;"></div>
                   </div>';
                   
         $out->addHTML($output);           

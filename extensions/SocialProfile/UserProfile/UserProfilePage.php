@@ -58,10 +58,6 @@ class UserProfilePage extends Article {
 									'referer' => $wgTitle,
 								)).'">Create Book</a></div>
                           </div><div class="cleared"></div>');
-                          
-         $wgOut->addHTML( '<div id="user-book-list">');
-          $wgOut->addHTML( $this->getUserProfileBookList( $this->user_id, $this->user_name ) );    
-         $wgOut->addHTML( '</div>');                     
         
         ///////////////////////////////////////////////////////////////////////////////////////////
 		// User does not want social profile for User:user_name, so we just
@@ -82,7 +78,10 @@ class UserProfilePage extends Article {
 		if ( !wfRunHooks( 'UserProfileBeginLeft', array( &$this ) ) ) {
 			wfDebug( __METHOD__ . ": UserProfileBeginLeft messed up profile!\n" );
 		}
-
+        
+        ////////////// Book List
+        $wgOut->addHTML( $this->getUserProfileBookList( $this->user_name ) );    
+        
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 1 ) );
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 2 ) );
 		$wgOut->addHTML( $this->getGifts( $this->user_name ) );
@@ -952,26 +951,62 @@ class UserProfilePage extends Article {
 		return $output;
 	}
     
-    function getUserProfileBookList( $user_id, $user_name ){
-        //if ( $this->isOwner() ) {}
+    function getUserProfileBookList( $user_name ){
+        global $wgUser, $wgServer, $wgScript, $wgScriptPath; 
+        
+        $url = $wgServer . (($wgScript == null) ? ($wgScriptPath . "/index.php") : $wgScript);
+        $url .='?title=Special:Book&bookcmd=&bookid=';
+        
+        if ( $wgUser->getName() !== $user_name ) {
+          $user_id = User::idFromName( $user_name );   
+        } else {
+          $user_id = $wgUser->getID(); 
+        }
+         
          $books = gospellCommonFunctions::get_user_books( $user_id, $user_name );         
          $bk_out = '';
-         echo $user_id.$user_name;
+         
+         
+         $bk_out .= '<div class="user-section-heading">
+                     <div class="user-section-title">Books</div>
+                      <div class="user-section-actions">
+                       <div class="action-right"></div>
+                       <div class="action-left"></div>
+                      </div>
+    				  <div class="cleared"></div>
+                    </div>
+			        <div class="cleared"></div>
+                    <div class="user-relationship-container">';
+                    /*
+					<div class="action-left">';
+			if ( intval( str_replace( ',', '', $relationship_count ) ) > 4 ) {
+				$output .= wfMsg( 'user-count-separator', $per_row, $relationship_count );
+			} else {
+				$output .= wfMsg( 'user-count-separator', $relationship_count, $relationship_count );
+			}
+			$output .= '</div>*/
+         
+         
+         
+         
          if( $books ) {
             
             foreach($books as $book){
                 
-              if ( !$this->isOwner() ) {
-                if($book['book_type'] == 1){
-                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>";  
+              if ( $wgUser->getName() !== $user_name ) {
+                if(!$book['book_type']){ //Only Public Books                     
+                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";  
                  }                
-              } else {
-               $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>"; 
+              } else {               
+                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>"; 
               }  
                           
             } 
                       
          }
+         
+      $bk_out .= '</div>'; 
+        
      return $bk_out;     
     }
     

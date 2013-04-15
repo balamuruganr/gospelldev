@@ -30,6 +30,11 @@ class CollectionHooks {
 	 *
 	 * @return bool
 	 */
+    static function isOwner() {
+        global $wgUser;
+		return ($wgUser->getName())? $wgUser->getName(): false;
+	}
+     
 	static function buildSidebar( $skin, &$bar ) {
 		global $wgCollectionPortletForLoggedInUsersOnly;
 
@@ -196,7 +201,10 @@ class CollectionHooks {
 			return true;
 		}
         
-                        
+        //if($wgUser->getID() && $wgUser->getName()){
+           //$user_id = User::idFromName( $user_name );  
+        //}
+                                       
         if(isset($_SESSION['wsCollection']['book_id'])){ 
             $book_id = $_SESSION['wsCollection']['book_id'];
             $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName(), $book_id );
@@ -256,9 +264,9 @@ class CollectionHooks {
 		if ( $title->isSpecial( 'Book' ) ) { 
 			$cmd = $request->getVal( 'bookcmd', '' );
 			if ( $cmd == 'suggest' ) { 
-				$siteNotice .= self::renderBookCreatorBox( $title, 'suggest' );
+				$siteNotice .= self::renderBookCreatorBox( $title, 'suggest', 0, $wgUser->getName() );
 			} elseif ( $cmd == '' ) { 
-				$siteNotice .= self::renderBookCreatorBox( $title, 'showbook', $book_id);
+				$siteNotice .= self::renderBookCreatorBox( $title, 'showbook', $book_id, $wgUser->getName());
 			}
 			return true;
 		}
@@ -273,7 +281,7 @@ class CollectionHooks {
 			return true;
 		}
         
-		$siteNotice .= self::renderBookCreatorBox( $title, $mode = '', $book_id );
+		$siteNotice .= self::renderBookCreatorBox( $title, $mode = '', $book_id, $wgUser->getName() );
 		return true;
 	}
 
@@ -282,7 +290,7 @@ class CollectionHooks {
 	 * @param $mode string
 	 * @return string
 	 */
-	static function renderBookCreatorBox( $title, $mode = '', $book_id ) {
+	static function renderBookCreatorBox( $title, $mode = '', $book_id = 0, $user_name = '' ) {
 		global $wgCollectionStyleVersion;
 		global $wgUser, $wgOut, $wgExtensionAssetsPath, $wgRequest;
 
@@ -297,10 +305,21 @@ class CollectionHooks {
 
 		$addRemoveState = $mode;
         
+        if($user_name !==''){
+           
+           if ( $wgUser->getName() !== $user_name ) {
+              $user_id = User::idFromName( $user_name );   
+            } else {
+              $user_id = $wgUser->getID(); 
+            }
+             
+        } 
+                  
         /////////////////////
-        $book_obj = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName(), $book_id);
+        $book_obj = gospellCommonFunctions::get_user_current_book($user_id, $user_name, $book_id);
         $book_type = ($book_obj->book_type)?"Private":"Public";
         ////////////////////
+        
         $html = '';
         //$html .= "<span>".$wgUser->getID()."</span>"."<span>".$wgUser->getName()."</span>"."<span>$book_id</span><span>".self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )."</span>";
 		$html .= Xml::element( 'div',
@@ -383,7 +402,7 @@ class CollectionHooks {
 		$imagePath = "$wgExtensionAssetsPath/Collection/images";
 
 		return self::getBookCreatorBoxAddRemoveLink( $imagePath, $ajaxHint, $title, $oldid, $book_id )
-			. self::getBookCreatorBoxShowBookLink( $imagePath, $ajaxHint )
+			. self::getBookCreatorBoxShowBookLink( $imagePath, $ajaxHint, $book_id )
 			. self::getBookCreatorBoxSuggestLink( $imagePath, $ajaxHint );
 	}
 
@@ -474,7 +493,7 @@ class CollectionHooks {
 	 * @param $ajaxHint
 	 * @return string
 	 */
-	static function getBookCreatorBoxShowBookLink( $imagePath, $ajaxHint ) {
+	static function getBookCreatorBoxShowBookLink( $imagePath, $ajaxHint, $book_id ) {
 		$numArticles = CollectionSession::countArticles();
 
 		if ( $ajaxHint == 'showbook' ) {
@@ -493,8 +512,31 @@ class CollectionHooks {
 				. '&#160;' . wfMessage( 'coll-show_collection' )->escaped()
 				. ' (' . wfMessage( 'coll-n_pages' )->numParams( $numArticles )->escaped() . ')'
 			); // @todo FIXME: Hard coded parentheses.
-		} else {
-			return Linker::linkKnown(
+		} else { //
+			return Linker::link(
+						SpecialPage::getTitleFor( 'Book' ),
+						Xml::element( 'img',
+					array(
+						'src' => "$imagePath/silk-book_open.png",
+						'alt' => '',
+						'width' => '16',
+						'height' => '16',
+					)
+				)
+				. '&#160;' . wfMessage( 'coll-show_collection' )->escaped()
+					. ' (' . wfMessage( 'coll-n_pages' )->numParams( $numArticles )->escaped() . ')',						
+						array(
+ 					          'rel' => 'nofollow',
+                              'title' => wfMessage( 'coll-show_collection_tooltip' )->text(),
+            				  'class' => 'collection-creatorbox-iconlink',
+            				),
+                        array('bookcmd' =>"",
+                              'bookid' => $book_id ),    
+						array( 'known', 'noclasses' )
+					);
+		}
+	}
+/*Linker::linkKnown(
 				SpecialPage::getTitleFor( 'Book' ),
 				Xml::element( 'img',
 					array(
@@ -511,10 +553,8 @@ class CollectionHooks {
 					'title' => wfMessage( 'coll-show_collection_tooltip' )->text(),
 					'class' => 'collection-creatorbox-iconlink',
 				)
-			); // @todo FIXME: Hard coded parentheses.
-		}
-	}
-
+			); // @todo FIXME: Hard coded parentheses.                               
+*/
 	/**
 	 * @param $imagePath
 	 * @param $ajaxHint
