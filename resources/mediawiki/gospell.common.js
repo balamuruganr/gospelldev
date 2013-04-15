@@ -157,7 +157,7 @@ jQuery( function ( $ ) {
    ////////////////////////////////
    set_default_book();
    ///////////////////////////////      
-} );
+});
 
 function isValidEmailAddress(emailAddress) {
     var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
@@ -345,24 +345,33 @@ $('#userlogin2').submit(function() {
 ///////////////////////////// Updated Mathi for Default book ///////////////////////////
 function goto_default_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
-    //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
+    var userTo = decodeURIComponent( wgTitle ); 
+    
     var hint  = "";
     var oldid = "0";
     $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
-			'rsargs[]': [hint, oldid, bookid, wgPageName]
+			'rsargs[]': [hint, oldid, bookid, wgPageName, userTo]
 		}, function(result) {
-			$('#siteNotice').html(result.html);
-            //save_collection(result.collection);
+		  
+			//$('#siteNotice').html(result.html);//save_collection(result.collection);             
+		   if($('.mw-body').children().is('#siteNotice')){
+		      $('.mw-body').children('#siteNotice').html(result.html); 
+		   } else {		      
+		     $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>'); 
+		   }
+           
 		}); 
 }
 function set_default_book(){
      var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+     var userTo = decodeURIComponent( wgTitle ); 
+          
      $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxSetDefaultBookSettings',
-			'rsargs[]': []
+			'rsargs[]': [ userTo ]
 		}, function(result) {
 		    goto_default_bookset( result.html );
 		});

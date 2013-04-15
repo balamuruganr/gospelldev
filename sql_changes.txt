@@ -1,3 +1,38 @@
+CREATE TABLE IF NOT EXISTS `user_book_items` (
+  `bi_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `bi_book_id` int(11) NOT NULL,
+  `bi_book_user_name` varchar(255) NOT NULL,
+  `bi_type` varchar(255) NOT NULL,
+  `bi_content_type` varchar(255) NOT NULL,
+  `bi_title` varchar(255) NOT NULL,
+  `bi_revision` int(6) NOT NULL,
+  `bi_latest` int(6) NOT NULL,
+  `bi_date` datetime NOT NULL,
+  `bi_url` text NOT NULL,
+  `bi_current_version` int(6) NOT NULL,
+  `bi_displaytitle` varchar(255) NOT NULL,
+  `bi_status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`bi_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `user_books` (
+  `book_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `book_name` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `is_anonym_user` tinyint(1) NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `book_type` tinyint(1) NOT NULL,
+  `book_date` datetime NOT NULL,
+  `status` varchar(255) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+
+
 ALTER TABLE `user_board` CHANGE `up_pinned` `ub_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0';
 
 //add user group 
