@@ -27,9 +27,10 @@ jQuery( function ( $ ) {
             if(sign_post_avail) {                             
                 $('#add'+signpost_id_array[i]).hide();
                 $('#remove'+signpost_id_array[i]).show(); 
-                if(signpost_id_array[i] == 'redirect'){
-                    $('#removeredirect').hide();
-                    $('#redirect_signpost_container').hide();                    
+                if(signpost_id_array[i] == 'redirect') {
+                    $('#removeredirect').show();
+                    $('#redirect_signpost_container').hide();
+                    $('#addredirect').hide();                    
                 }                                 
             }           
         }                        
@@ -369,8 +370,7 @@ $('#userlogin2').submit(function() {
                 $('#aboutme').focus();
                 $("#erraboutme").text("required");
                 return false;
-            }
-            return true;                
+            }            
     }
     if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {        
         return true
