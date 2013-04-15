@@ -1,7 +1,118 @@
 /**
  * check user name exists and suggest uer name
  */
-jQuery( function ( $ ) {   
+jQuery( function ( $ ) {
+    
+    
+    if($('#wpTextbox1').length) {    
+
+        var inaccurate_occurrence, i, match_string, sign_post_avail;        
+        var signpost_template_array = new Array();
+        var signpost_id_array = new Array();
+        
+        signpost_template_array[0] = "/{{Inaccurate}}/gi";
+        signpost_template_array[1] = "/{{Incomplete}}/gi";
+        signpost_template_array[2] = "/{{Disputed}}/gi";
+        
+        signpost_id_array[0] = "inaccurate";
+        signpost_id_array[1] = "incomplete";
+        signpost_id_array[2] = "disputeed";
+        
+        var singpost_template_cnt = signpost_template_array.length;
+
+        for( i=0; i<singpost_template_cnt; i++ ) {   
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;            
+            if(sign_post_avail) {                             
+                $('#add'+signpost_id_array[i]).hide();
+                $('#remove'+signpost_id_array[i]).show();                  
+            }           
+        }
+        
+    };        
+    $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {    
+        var txt = $("#wpTextbox1");  
+        var signpost_ary = new Array();
+        var enable_id_ary = new Array();
+        var add_signpost_msg_ary = new Array();        
+        
+        signpost_ary['addinaccurate'] = '{{Inaccurate}}';
+        signpost_ary['addincomplete'] = '{{Incomplete}}';
+        signpost_ary['adddisputeed'] = '{{Disputed}}';
+
+        add_signpost_msg_ary['addinaccurate'] = 'Inaccurate';
+        add_signpost_msg_ary['addincomplete'] = 'Incomplete';
+        add_signpost_msg_ary['adddisputeed'] = 'Disputed';
+
+        enable_id_ary['addinaccurate'] = 'removeinaccurate';
+        enable_id_ary['addincomplete'] = 'removeincomplete';
+        enable_id_ary['adddisputeed'] = 'removedisputeed';
+                    	
+        var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        if(occurrence == 0){
+            txt.val(signpost_ary[this.id]+"\n" + txt.val() );
+            $('#'+this.id).hide();
+            $('#'+enable_id_ary[this.id]).show();
+            alert(add_signpost_msg_ary[this.id]+' signpost added and please save the changes');
+        }else{
+            alert(add_signpost_msg_ary[this.id]+' signpost is already added');
+        }                    
+    });    
+    $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
+        var txt = $("#wpTextbox1");  
+        var enable_id_ary = new Array();
+        var rm_signpost_ary = new Array();        
+        var rm_signpost_msg_ary = new Array();
+        
+        rm_signpost_ary['removeinaccurate'] = '{{Inaccurate}}';
+        rm_signpost_ary['removeincomplete'] = '{{Incomplete}}';
+        rm_signpost_ary['removedisputeed'] = '{{Disputed}}';
+        
+        rm_signpost_msg_ary['removeinaccurate'] = 'Inaccurate';
+        rm_signpost_msg_ary['removeincomplete'] = 'Incomplete';
+        rm_signpost_msg_ary['removedisputeed'] = 'Disputed';
+
+        enable_id_ary['removeinaccurate'] = 'addinaccurate';
+        enable_id_ary['removeincomplete'] = 'addincomplete';
+        enable_id_ary['removedisputeed'] = 'adddisputeed';
+            	
+        var occurrence = (txt.val().replace(new RegExp(eval('/'+rm_signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        if(occurrence) {
+            var replace_val = txt.val().replace(eval('/'+rm_signpost_ary[this.id]+'/gi'),' ');
+            txt.val(replace_val);
+            $('#'+this.id).hide();
+            $('#'+enable_id_ary[this.id]).show();
+            alert(rm_signpost_msg_ary[this.id]+' signpost removed and please save the changes');
+        }                    
+    });        
+    $('#wpSave').click(function() {
+
+        var inaccurate_occurrence, i, match_string, sign_post_avail;        
+        var signpost_template_array = new Array();
+        var signpost_template_name_array = new Array();
+        
+        signpost_template_array[0] = "/{{Inaccurate}}/gi";
+        signpost_template_array[1] = "/{{Incomplete}}/gi";
+        signpost_template_array[2] = "/{{Disputed}}/gi";
+        
+        signpost_template_name_array[0] = "Inaccurate";
+        signpost_template_name_array[1] = "Incomplete";
+        signpost_template_name_array[2] = "Disputed";
+        
+        var singpost_template_cnt = signpost_template_array.length;
+
+        for( i=0; i<singpost_template_cnt; i++ ) {   
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;
+            if(sign_post_avail) {            
+                inaccurate_occurrence = $("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i]))).length; 
+                if(inaccurate_occurrence > 1) {
+                    alert(signpost_template_name_array[i]+' signpost is added more than one time. Please add it one time and save the changes');
+                    return false;
+                } 
+            }           
+        }
+                
+    });
+       
     $('#user_search').keyup(function() {            
         var uname = $.trim($('#user_search').val());                
         if(uname == ''){
@@ -99,16 +210,19 @@ function HasSpecialChars(passwd) {
 function CheckPasswordStrength(pwd) {
     var pass_strength;
 	if (IsEnoughLength(pwd,10) && HasMixedCase(pwd) && HasNumeral(pwd) && HasSpecialChars(pwd)) {
-		pass_strength = "<b><font style='color:olive'>Very strong</font></b>";
+		pass_strength = "<font style='color:olive'>Very strong</font>";
     }
 	else if (IsEnoughLength(pwd,8) && HasMixedCase(pwd) && (HasNumeral(pwd) || HasSpecialChars(pwd))) {
-		pass_strength = "<b><font style='color:Blue'>Strong</font></b>";
+		pass_strength = "<font style='color:Blue'>Strong</font>";
     }
 	else if (IsEnoughLength(pwd,6) && HasNumeral(pwd)){
-		pass_strength = "<b><font style='color:Green'>Good</font></b>";
+		pass_strength = "<font style='color:Green'>Good</font>";
     }
+	else if ($('#wpPassword2').val().length < 6){
+		pass_strength = "<font style='color:red'>password length minimum 6</font>";
+    }    
 	else {
-	   	pass_strength = "<b><font style='color:red'>Weak</font></b>";
+	   	pass_strength = "<font style='color:red'>Weak</font>";
     }
     $('#errpassword2').html(pass_strength);
 }
@@ -139,7 +253,11 @@ function chkValidEmail(email) {
         return true;
     }    
 }
-function chkValidPassword() {
+function chkValidPassword() {       
+    if($('#wpPassword2').val().length < 6){
+        $("#errpassword2").text("password length minimum 6");
+        return false;
+    }
     if($('#wpPassword2').val() != $('#wpRetype').val()){
         $('#wpRetype').focus();
         $("#errretype").text("password must match");
@@ -150,13 +268,80 @@ function chkValidPassword() {
         return true;
     }       
 }
-$('#userlogin2').submit(function() { 
-    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {
+
+$('#userlogin2').submit(function() {    
+    var userAgent = navigator.userAgent.toLowerCase();    
+    if (/msie/.test(userAgent) && 
+        parseFloat((userAgent.match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9) { 
+            if($('#wpFirstName2').val() == ''){
+                $('#wpFirstName2').focus();
+                $("#errfirstname2").text("required");         
+                return false;
+            }
+            if($('#wpLastName2').val() == ''){   
+                $('#wpLastName2').focus();
+                $("#errlastname2").text("required");
+                return false;
+            }
+            if($('#wpGender2').val() == ''){   
+                $('#wpGender2').focus();
+                $("#errgender").text("required");
+                return false;
+            }
+            if($('#birthday').val() == ''){   
+                $('#birthday').focus();
+                $("#errbirthday").text("required");
+                return false;
+            }                                          
+            if($('#wpName2').val() == ''){   
+                $('#wpName2').focus();
+                $("#errname2").text("required");
+                return false;
+            }
+            if($('#wpPassword2').val() == ''){
+                $('#wpPassword2').focus();
+                $("#errpassword2").text("required");
+                return false;
+            }            
+            if($('#wpPassword2').length() < 6){
+                $('#wpPassword2').focus();
+                $("#errpassword2").text("password length is minimum 6");
+                return false;
+            }                    
+            if($('#wpPassword2').val() != $('#wpRetype').val()){
+                $('#wpRetype').focus();
+                $("#errretype").text("password must match");
+                return false;
+            }    
+            if($('#wpEmail').val() == ''){  
+                $('#wpEmail').focus();
+                $("#erremail").text("required");
+                return false;
+            }     
+            if($('#hometown_country').val() == ''){  
+                $('#hometown_country').focus();
+                $("#errhomecountry").text("required");
+                return false;
+            }                                     
+            if(!isValidEmailAddress($('#wpEmail').val())){
+                $("#erremail").text("Please enter Valid email");
+                return false;
+            }   
+            if($('#aboutme').val() == ''){  
+                $('#aboutme').focus();
+                $("#erraboutme").text("required");
+                return false;
+            }
+            return true;                
+    }
+    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {        
         return true
     } else {
         return false;
+
     }    
 });
+
 ///////////////////////////// Updated Mathi for Default book ///////////////////////////
 function goto_default_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);

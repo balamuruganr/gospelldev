@@ -182,3 +182,7 @@ require_once("$IP/extensions/Facebook/Facebook.php");
 $wgShowIPinHeader = false; 
 
 $wgUploadDirectory = "{$IP}/images";
+
+//protect edit template from user
+$wgGroupPermissions['sysop']['edittemplate'] = true;
+$wgNamespaceProtection[ 10 ] = array( 'edittemplate' );

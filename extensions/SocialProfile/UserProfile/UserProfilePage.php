@@ -8,8 +8,10 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-global $IP;  
-require_once("$IP/includes/gospellCommonClass.php");
+
+global $IP;
+require_once("$IP/includes/gospellCommonClass.php"); 
+
 class UserProfilePage extends Article {
 
 	public $title = null;
@@ -540,6 +542,7 @@ class UserProfilePage extends Article {
 		$defaultCountry = wfMsgForContent( 'user-profile-default-country' );
 
 		// Current location
+/*        
 		$location = $profile_data['location_city'] . ', ' . $profile_data['location_state'];
 		if ( $profile_data['location_country'] != $defaultCountry ) {
 			if ( $profile_data['location_city'] && $profile_data['location_state'] ) { // city AND state
@@ -555,12 +558,15 @@ class UserProfilePage extends Article {
 				$location .= $profile_data['location_country'];
 			}
 		}
-
-		if ( $location == ', ' ) {
+*/        
+        $location = $profile_data['location_country'];
+		if (empty($location)) {
 			$location = '';
 		}
+        $hometown = '';
 
 		// Hometown
+/*
 		$hometown = $profile_data['hometown_city'] . ', ' . $profile_data['hometown_state'];
 		if ( $profile_data['hometown_country'] != $defaultCountry ) {
 			if ( $profile_data['hometown_city'] && $profile_data['hometown_state'] ) { // city AND state
@@ -580,7 +586,7 @@ class UserProfilePage extends Article {
 		if ( $hometown == ', ' ) {
 			$hometown = '';
 		}
-
+*/
 		$joined_data = $profile_data['real_name'] . $location . $hometown .
 						$profile_data['birthday'] . $profile_data['occupation'] .
 						$profile_data['websites'] . $profile_data['places_lived'] .
@@ -607,7 +613,7 @@ class UserProfilePage extends Article {
 			<div class="profile-info-container">' .
 				$this->getProfileSection( wfMsg( 'user-personal-info-real-name' ), $profile_data['real_name'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-location' ), $location, false ) .
-				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
+//				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-birthday' ), $profile_data['birthday'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-occupation' ), $profile_data['occupation'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-websites' ), $profile_data['websites'], false ) .
@@ -683,6 +689,7 @@ class UserProfilePage extends Article {
 				$this->getProfileSection( wfMsg( 'custom-info-field4' ), $profile_data['custom_4'], false ) .
 			'</div>';
 		} elseif ( $wgUser->getName() == $user_name ) {
+		  /*
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' .
 					wfMsg( 'custom-info-title' ) .
@@ -700,6 +707,7 @@ class UserProfilePage extends Article {
 			<div class="no-info-container">' .
 				wfMsg( 'custom-no-info' ) .
 			'</div>';
+            */
 		}
 
 		return $output;
@@ -757,6 +765,7 @@ class UserProfilePage extends Article {
 				$this->getProfileSection( wfMsg( 'other-info-drinks' ), $profile_data['drinks'], false ) .
 			'</div>';
 		} elseif ( $this->isOwner() ) {
+		  /*
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' .
 					wfMsg( 'other-info-title' ) .
@@ -774,6 +783,7 @@ class UserProfilePage extends Article {
 			<div class="no-info-container">' .
 				wfMsg( 'other-no-info' ) .
 			'</div>';
+            */
 		}
 		return $output;
 	}
@@ -840,8 +850,9 @@ class UserProfilePage extends Article {
 			</div>'; */
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
-		$output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
-			'</div>';
+        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';        
+        $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
+			'</a></div>';
 
 		$output .= '<div id="profile-right">';
         
@@ -880,7 +891,7 @@ class UserProfilePage extends Article {
 			if ( $relationship == false ) {
 				$output .= $wgLang->pipeList( array(
 					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
-					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
+//					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
 					''
 				) );
 			} else {
@@ -905,10 +916,11 @@ class UserProfilePage extends Article {
 					wfMsg( 'user-send-message' ) . '</a>';
 				$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
 			}
+/*			
 			$output .= '<a href="' . $give_gift->escapeFullURL( 'user=' . $user_safe ) . '" rel="nofollow">' .
 				wfMsg( 'user-send-gift' ) . '</a>';
 			$output .= wfMsgExt( 'pipe-separator', 'escapenoentities' );
-        
+*/        
            
 		}
         

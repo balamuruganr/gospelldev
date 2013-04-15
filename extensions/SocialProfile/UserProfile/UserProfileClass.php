@@ -226,11 +226,14 @@ class UserProfile {
 			} else {
 				$line = explode( '|' , trim( $line, '* ' ), 2 );
 				$page = Title::newFromText( $line[0] );
-				$link_text = $line[1];
-
-				$output .= '<div class="profile-tab' . ( ( $current_nav == $link_text ) ? '-on' : '' ) . '">
-					<a href="' . $page->escapeFullURL() . "\">{$link_text}</a>
-				</div>";
+                if($page == 'Special:UpdateProfile/custom' || $page == 'Special:UpdateProfile/personal'){ /*nothing here*/ }
+                else {   
+    				$link_text = $line[1];
+    
+    				$output .= '<div class="profile-tab' . ( ( $current_nav == $link_text ) ? '-on' : '' ) . '">
+    					<a href="' . $page->escapeFullURL() . "\">{$link_text}</a>
+    				</div>";
+                }
 			}
 		}
 

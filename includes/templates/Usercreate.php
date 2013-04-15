@@ -73,7 +73,8 @@ class UsercreateTemplate extends QuickTemplate {
 				'size' => '20',
 				'required '  => 'required',
 				'autofocus'
-			) ); ?>                
+			) ); ?> 
+            <span id="errfirstname2" class="error"></span>               
 			</td>
 		</tr>    
 		<tr>
@@ -86,7 +87,8 @@ class UsercreateTemplate extends QuickTemplate {
 				'tabindex' => '2',
 				'size' => '20',
 				'required '  => 'required'				
-			) ); ?>            			
+			) ); ?>  
+            <span id="errlastname2" class="error"></span>                      			
             </td>
 		</tr>
 		<tr>
@@ -102,13 +104,15 @@ class UsercreateTemplate extends QuickTemplate {
             }        
             ?>
             </select>  
+            <span id="errgender" class="error"></span>
             </td>
 		</tr>
 		<tr>
 			<td class="mw-label"><label for='birthday'><?php echo wfMsg( 'user-profile-personal-birthday' ); ?></label></td>
 			<td class="mw-input">
             <input type="text" class="long-birthday required" required="required" size="25" name="birthday" id="birthday" title="<?php echo wfMsg( 'user-profile-personal-birthday' ); ?>"  tabindex="4"/>
-            </td>
+            <span id="errbirthday" class="error"></span>
+            </td>            
 		</tr>                  
                     
 		<tr>
@@ -222,12 +226,15 @@ class UsercreateTemplate extends QuickTemplate {
 		    }           
             echo '</select>';         
         ?>
+        <span id="errhomecountry" class="error"></span>
+        </td>
         </tr>        
 		<tr>
 			<td class="mw-label"><label for='aboutme'><?php echo wfMsg( 'user-profile-personal-aboutme' ); ?></label></td>
 			<td class="mw-input">
                 <textarea class="required" required="required" maxlength="<?php echo $wgGospellSettingsProfileAboutMaxLenth; ?>" name="aboutme" id="aboutme" tabindex="10"></textarea>
-            </td>
+                <span id="erraboutme" class="error"></span>
+            </td>            
 		</tr>                  
         
 		<?php if( $this->data['canremember'] ) { ?>
