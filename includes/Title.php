@@ -2868,6 +2868,7 @@ class Title {
 			return $this->mLatestID = 0;
 		}
 		$linkCache = LinkCache::singleton();
+        
 		$this->mLatestID = intval( $linkCache->getGoodLinkFieldObj( $this, 'revision' ) );
 
 		return $this->mLatestID;

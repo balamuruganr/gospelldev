@@ -42,7 +42,10 @@ jQuery( function ( $ ) {
             }                        
         }                
         }).done();    
-    });     
+    });
+   ////////////////////////////////
+   set_default_book();
+   ///////////////////////////////      
 } );
 
 function isValidEmailAddress(emailAddress) {
@@ -154,3 +157,30 @@ $('#userlogin2').submit(function() {
         return false;
     }    
 });
+///////////////////////////// Updated Mathi for Default book ///////////////////////////
+function goto_default_bookset( bookid ){
+    var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+    //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
+    var hint  = "";
+    var oldid = "0";
+    $.getJSON(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
+		}, function(result) {
+			$('#siteNotice').html(result.html);
+            //save_collection(result.collection);
+		}); 
+}
+function set_default_book(){
+     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+     $.getJSON(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxSetDefaultBookSettings',
+			'rsargs[]': []
+		}, function(result) {
+		    goto_default_bookset( result.html );
+		});
+        
+}
+///////////////////////////// Updated Mathi for Default book ///////////////////////////

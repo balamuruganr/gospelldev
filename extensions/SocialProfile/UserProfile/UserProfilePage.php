@@ -8,7 +8,8 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
-
+global $IP;  
+require_once("$IP/includes/gospellCommonClass.php");
 class UserProfilePage extends Article {
 
 	public $title = null;
@@ -47,8 +48,20 @@ class UserProfilePage extends Article {
          
 		$wgOut->addHTML( '<div id="profile-top">' );
 		$wgOut->addHTML( $this->getProfileTop( $this->user_id, $this->user_name ) );
-		$wgOut->addHTML( '<div class="cleared"></div></div>' );
-
+        ////////////////////////////////////////////////////////////////////////////////////
+		$wgOut->addHTML( '<div class="cleared"></div>
+                           <div id="create_book_link"><a href="'.SkinTemplate::makeSpecialUrl(
+                              'Book',array(
+									'bookcmd' => 'book_creator',
+									'referer' => $wgTitle,
+								)).'">Create Book</a></div>
+                          </div><div class="cleared"></div>');
+                          
+         $wgOut->addHTML( '<div id="user-book-list">');
+          $wgOut->addHTML( $this->getUserProfileBookList( $this->user_id, $this->user_name ) );    
+         $wgOut->addHTML( '</div>');                     
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////
 		// User does not want social profile for User:user_name, so we just
 		// show header + page content
 		if (
@@ -861,8 +874,6 @@ class UserProfilePage extends Article {
 				'<a href="' . $update_profile->escapeFullURL() . '">' . wfMsg( 'user-edit-profile' ) . '</a>',
 				'<a href="' . $upload_avatar->escapeFullURL() . '">' . wfMsg( 'user-upload-avatar' ) . '</a>',
 				'<a href="' . $watchlist->escapeFullURL() . '">' . wfMsg( 'user-watchlist' ) . '</a>',
-				'<a href="'.$update_profile->escapeFullURL().'/books" rel="nofollow">' . wfMsg( 'user-books' ) . '</a>',
-                '<a href="'.$update_profile->escapeFullURL().'/wall" rel="nofollow">' . wfMsg( 'user-wall' ) . '</a>',
                 ''
 			) );
 		} elseif ( $wgUser->isLoggedIn() ) {
@@ -928,7 +939,30 @@ class UserProfilePage extends Article {
 
 		return $output;
 	}
-
+    
+    function getUserProfileBookList( $user_id, $user_name ){
+        //if ( $this->isOwner() ) {}
+         $books = gospellCommonFunctions::get_user_books( $user_id, $user_name );         
+         $bk_out = '';
+         echo $user_id.$user_name;
+         if( $books ) {
+            
+            foreach($books as $book){
+                
+              if ( !$this->isOwner() ) {
+                if($book['book_type'] == 1){
+                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>";  
+                 }                
+              } else {
+               $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>"; 
+              }  
+                          
+            } 
+                      
+         }
+     return $bk_out;     
+    }
+    
 	/**
 	 * This is currently unused, seems to be a leftover from the ArmchairGM
 	 * days.
@@ -1612,7 +1646,16 @@ class UserProfilePage extends Article {
          //}
         $output .= '<div id="wall-title-list">';
          $output .= $b->displayWalls($user_name, $user_id, 0, 10);
-        $output .= '</div>';
+        $output .= '</div>
+                    <div id="rename_wall_block"> 
+                      <span class="add-wall-txtbox"><input type="text" name="edit_wall_name" id="edit_wall_name"></span>
+                      <div class="cleared"></div>
+                      <div style="margin-top:10px;">
+                       <input type="hidden" name="edit_wall_id" id="edit_wall_id">
+                       <input type="button" onclick="javascript:update_wall();" class="site-button" value="Update Wall">&nbsp;
+                       <input type="button" onclick="javascript:cancle_update_wall();" class="site-button" value="Cancel">
+                      </div>
+                    </div>';
                     
        $output .= '</div>';
        //Walls list section    
@@ -1642,7 +1685,7 @@ class UserProfilePage extends Article {
 
 		$output .= '<div id="user-page-wall">';         
          
-		 $output .= $b->displayWallPosts($current_wall_id, $user_name, $user_id, 0, 10);
+		 $output .= $b->displayWallPosts( $current_wall_id, $user_name, $user_id, 0, 10 );
          
 		$output .= '</div>';
       $output .='</div>';

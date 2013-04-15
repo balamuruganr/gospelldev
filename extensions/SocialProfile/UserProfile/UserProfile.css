@@ -710,8 +710,16 @@
   border-bottom:1px solid #ffffff;  
 }
 
-
-
+#user-wall-likescount {
+    border: 0px solid red;
+    margin-left: 5px;    
+    width: 98%;
+    background:#f8f5f5;
+    min-height:20px;
+    font-size:12px;
+    border-bottom:1px solid #ffffff;   
+}
+.wall-comment-like-count { color:#0645AD; }
 .user-wall-comment-image {
 	float: left;
 	padding: 0px 10px 5px 0px;
@@ -782,13 +790,26 @@
 #wall-title-list { 
    padding:3px;  
 }
+#wall-title-list span {
+   width:auto;
+   clear:both; 
+}
+#wall-title-list span .wall_rename_remove {
+   color:#0645AD;
+   margin: 1px;
+   text-decoration: none;
+   cursor:pointer;
+   border:0;
+   padding:0px; 
+}
 #wall-title-list span a {
    color:#0645AD;
    margin: 1px;
    text-decoration: none;
    cursor:pointer;
    border:1px solid #aaaaaa;
-   padding:2px;    
+   padding:2px; 
+   width:50px;   
 }
 #wall-title-list span a:hover{
    text-decoration:underline;
@@ -800,4 +821,19 @@
 }
 #wall-title-list .active_wall a:hover{
    text-decoration:none;
+}
+#user-book-list span {
+  width:auto;  
+}
+#user-book-list span a{
+   color:#0645AD;
+   margin: 1px;
+   text-decoration: none;
+   cursor:pointer;
+   border:1px solid #aaaaaa;
+   padding:2px; 
+   width:50px; 
+}
+#user-book-list span a:hover {
+   text-decoration:underline;  
 }

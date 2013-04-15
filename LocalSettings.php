@@ -138,7 +138,8 @@ $wgGroupPermissions['sysop']['edit'] = true;
 
 $wgGospellSettingsProfileAboutMaxLenth = 512;
 $wgGospellSettingsUserProfileAgeLimit  = 13;
-$wgGospellSettingsUserBordMessageFileSize = 2097152; //2097152 = 2 mb in bytes;
+$wgGospellSettingsUserBordMessageFileSize = 10485760; //10485760 = 10MB & 2097152 = 2 mb in bytes;
+$wgGospellSettingsUserBordMessageTextLenth = 600;
 
 $wgLegacyJavaScript = true;
 $wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');

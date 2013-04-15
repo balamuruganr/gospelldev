@@ -1,3 +1,4 @@
+ALTER TABLE `user_board` CHANGE `up_pinned` `ub_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0'
 
 --
 -- Table structure for table `user_walls`

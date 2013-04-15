@@ -64,24 +64,24 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 			$wgOut->setPageTitle( wfMsg( 'messagesenttitle' ) );
 			$b = new UserBoard();
 
-			$count = 0;
-			$user_ids_to = explode( ',', $wgRequest->getVal( 'ids' ) );
-			foreach ( $user_ids_to as $user_id ) {
+			
+			$user_ids_to = $wgRequest->getVal( 'ids' ); //explode( ',',  );
+			//foreach ( $user_ids_to as $user_id ) {
 				$user = User::newFromId( $user_id );
 				$user->loadFromId();
 				$user_name = $user->getName();
 				$b->sendBoardMessage(
 					$wgUser->getID(),
 					$wgUser->getName(),
-					$user_id,
+					$user_ids_to,
 					$user_name,
 					$wgRequest->getVal( 'message' ),
 					1
 				);
                 $_POST['user_name'] = $user_name;
                 $b->sendUserBoardMessageFiles();
-				$count++;
-			}
+				
+			//}
 			$output .= wfMsg( 'messagesentsuccess' );
 		} else {
 			$wgOut->setPageTitle( ($wgRequest->getVal( 'is_wall' )) ? wfMsg( 'wallblasttitle' ) : wfMsg( 'boardblasttitle' ) );
@@ -113,7 +113,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
     					<div class="blast-message-text">'
     						. wfMsg( 'boardblastprivatenote' ) .
     					'</div>
-    					<textarea name="message" id="message" cols="63" rows="4"></textarea>
+    					<textarea name="message" id="message" cols="63" rows="4" onkeyup="javascript:BoardBlast.checkMessageLength()"></textarea>
     				</form>
     		</div>
     		<div class="blast-nav">

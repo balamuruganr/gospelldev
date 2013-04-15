@@ -87,22 +87,51 @@ function send_wall_post() {
 		);
 	}
 }
+
 // Auto display posted wall
 var display_wall_post_timer;
 var wall_post_displayed= 0;
-function display_wall_post() {
+function display_wall_post( key_page = 0 ) {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    	
 	if( !wall_post_displayed ) {
 		wall_post_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10 ], function( request ) {
-				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
-				wall_post_displayed = 0;
+		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10, key_page ], function( request ) {
+		        if(key_page > 0){
+		          if($(request.responseText).is(".user-board-message")){
+		              $('#user-page-wall').append( request.responseText );
+                      wall_post_displayed = 0;
+		            }
+		        } else {
+		          document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+                  wall_post_displayed = 0;
+		        }
+				
 			}
 		);
 	}
- display_wall_post_timer = setTimeout(display_wall_post, 8000);        
+ display_wall_post_timer = setTimeout(display_wall_post(key_page), 8000);        
+}
+
+var wall_post_scrolled_down = 0;
+var post_page = 2;
+function display_wall_post_onscroll_down() {
+	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    	
+	if( !wall_post_scrolled_down && post_page ) {
+		wall_post_scrolled_down = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10, post_page ], function( request ) {
+		  //alert(request.responseText);
+		        if($(request.responseText).is(".user-board-message")){
+		          $('#user-page-wall').append( request.responseText );
+		         }				
+				wall_post_scrolled_down = 0;
+                post_page++;
+			}
+		);
+	}
 }
 
 //to display the posts of clicked Wall
@@ -382,8 +411,7 @@ function unlike_post_comment(ub_id, uwc_id){
 var pinned = 0; 
 function set_pinned(ub_id){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
-    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
-    
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    
     if( !pinned ) {
       pinned = 1;
       sajax_request_type = 'POST';
@@ -393,6 +421,21 @@ function set_pinned(ub_id){
 			}
 		);   
     }
+}
+
+var unpinned = 0;
+function unset_pinned( ub_id ){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    
+    if( !unpinned ) {
+      unpinned = 1;
+      sajax_request_type = 'POST';
+      sajax_do_call( 'wfUnSetPinnedPost', [ currWallId, userTo, ub_id ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+				unpinned = 0;
+			}
+		);   
+    } 
 }
 
 var wall_created = 0;
@@ -411,10 +454,64 @@ function create_wall(){
    }  
 }
 
+function delete_wall( wall_id ){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	if( confirm( 'Are you sure you want to delete this message?' ) ) {
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDeleteWall', [ userTo, wall_id ], function( request ) {
+			document.getElementById( 'wall-title-list' ).innerHTML = request.responseText;
+		} );
+	} 
+}
+
 function stop_auto_load(){
   window.clearTimeout(display_wall_post_timer);  
 }
-
+function rename_wall( wall_id ){
+ $('#rename_wall_block').dialog( "open" );
+ $('#edit_wall_id').val( wall_id ); 
+ $('#edit_wall_name').val($('#curr_wall_'+ wall_id).children("a").text());
+}
+function cancle_update_wall( wall_id ){
+ $('#rename_wall_block').dialog( "close" );   
+}
+var wall_updateded = 0;
+function update_wall(){
+  var userTo = decodeURIComponent( wgTitle ); 
+  var encwall_id  = encodeURIComponent( document.getElementById( 'edit_wall_id' ).value );  
+  var encWallName = encodeURIComponent( document.getElementById( 'edit_wall_name' ).value );   
+  if( document.getElementById( 'edit_wall_name' ).value && !wall_updateded ) {
+     wall_updateded = 1;
+     sajax_request_type = 'POST';
+     sajax_do_call( 'wfUpdateWall', [ userTo, encwall_id, encWallName ], function( request ) {
+         document.getElementById( 'wall-title-list' ).innerHTML = request.responseText;
+         wall_updateded = 0;
+         $('#rename_wall_block').dialog( "close" );            
+       }       
+     );   
+   }
+}
+function save_collection( collection){
+    $.jStorage.set('collection', collection);
+}
+function goto_this_bookset( bookid ){
+    var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+    //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
+    var hint  = "";
+    var oldid = "0";
+    $.getJSON(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
+		}, function(result) {
+			$('#siteNotice').html(result.html);
+		}); 
+}
+$(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+       //display_wall_post_onscroll_down(); 
+   }
+});
 (function() { 
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post
@@ -423,13 +520,20 @@ function stop_auto_load(){
         runAuto();    
         //AutoDisplay Of Messages
        display_messages(); 
-   /////////////////// Auto Display using sajax /////////////// 
+   /////////////////// Auto Display using sajax ///////////////
    
-    /*$('.user-board-message-from').each(function(){
-        $(this).hover(
-          function(){ $(this).children("#user-board-message-pin").show(); },
-          function(){ $(this).children("#user-board-message-pin").hide(); }
-          );
-    });*/    
               
-})();    
+})();
+mw.loader.using( ['jquery.ui.dialog'], function() {
+	jQuery( function( jQuery ) {
+	    
+         $( '#rename_wall_block' ).dialog({
+                autoOpen: false,
+                height: 150,
+                width: 200,
+                modal: true
+             });
+        
+        
+	});
+});    

@@ -335,7 +335,193 @@ class gospellCommonFunctions {
         }
         
     }
+    static function send_user_book( $values = array() ){
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+                
+        $dbw->insert(
+			'user_books',
+			array(
+                'book_name' => $values['book_name'],
+				'user_id' => $values['user_id'],
+				'user_name' => $values['user_name'],
+                'is_anonym_user' => $values['is_anonymous_user'],
+                'enabled' => $values['enabled'],
+				'title' => $values['title'],
+				'subtitle' => $values['subtitle'],
+                'book_date' => $values['timestamp'],
+                'book_type' => $values['book_type'],
+			),
+			__METHOD__,
+            array( 'IGNORE' )
+    		);
+            
+ 		$dbw->commit();
+            
+        
+     return $dbw->insertId();   
+    }
+    
+    static function get_book_user($user_id, $user_name){
+        $dbr = wfGetDB( DB_SLAVE); // AS
+        $sql ="SELECT book_id, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+                            FROM user_books 
+                            WHERE user_id ={$user_id} 
+                            AND user_name ='{$user_name}'"; 
+                             
+        $res = $dbr->query( $sql , __METHOD__);
+        $books = array();
+        
+        foreach ( $res as $row ) {
+                $books[] = array(                          
+                      'book_id' => $row->book_id,
+                      'user_id' => $row->user_id,
+                      'user_name' => $row->user_name,
+                      'is_anonym_user' => $row->is_anonym_user,
+                      'enabled' => $row->enabled,
+                      'title' => $row->title,
+                      'subtitle' => $row->subtitle,
+                      'book_type' => $row->book_type,
+                      'status' => $row->status
+                      
+                );
+       	}
+        
+     return  $books;  
+    }
+    
+    static function send_book_items( $items = array() ){
+        global $wgUser;
+        
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+               
+        $dbw->insert(
+			'user_book_items',
+			array(
+				'bi_book_id' => $items['book_id'],
+                'bi_book_user_name' => $wgUser->getName(),
+				'bi_type' => $items['type'],
+                'bi_content_type' => $items['content_type'],
+                'bi_title' => $items['title'],
+				'bi_revision' => $items['revision'],
+                'bi_latest' => $items['latest'],
+				'bi_date' => date("Y-m-d H:i:s",$items['timestamp']),
+                'bi_url' => $items['url'],
+                'bi_current_version' => $items['currentVersion'],
+                'bi_displaytitle' => (isset($items['displaytitle']))? $items['displaytitle'] : "",
+			),
+			__METHOD__,
+            array( 'IGNORE' )
+    		);
+            
+ 		$dbw->commit();
+            
+        
+     return $dbw->insertId();
+    }
+    
+    static function remove_book_item( $book_id = 0, $user_name, $type, $title ){
+        global $wgUser;
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+        $falg = false;
+         
+         $s = $dbw->selectRow(
+				'user_book_items',
+				array( 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
+				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_type' =>$type, 'bi_title' => $title ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->delete(
+					'user_book_items',
+					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_type' =>$type, 'bi_title' => $title ),
+					__METHOD__
+				);
+             $falg = true;   
+            }
+                                        
+ 		$dbw->commit(); 
+               
+     return $falg;
+    }
+    
+    static function get_book_items( $book_id = 0, $user_name ='' ){
+        global $wgUser;
+        
+        $dbr = wfGetDB( DB_SLAVE); 
+        $sql ="SELECT bi_book_id, bi_type, bi_content_type, bi_title, bi_revision, bi_latest, UNIX_TIMESTAMP(bi_date) AS unix_book_item_time, 
+                bi_url, bi_current_version, bi_displaytitle, bi_status 
+                FROM user_book_items WHERE bi_book_id ={$book_id} AND bi_book_user_name ='{$user_name}' ORDER BY bi_id ASC"; 
+        //echo $sql;                      
+        $res = $dbr->query( $sql, __METHOD__);
+        $book_items = array();
+        $i = 0;
+        
+        foreach ( $res as $row ) {
+                $book_items[$i] = array(                          
+                      'book_id' => $row->bi_book_id,
+                      'type' => $row->bi_type,
+                      'content_type' => $row->bi_content_type,
+                      'title' => $row->bi_title,
+                      'revision' => $row->bi_revision,
+                      'latest' => $row->bi_latest,
+                      'timestamp' => $row->unix_book_item_time,
+                      'url' => $row->bi_url,
+                      'currentVersion' => $row->bi_current_version                      
+                 ); 
+                 
+                if($row->bi_displaytitle != ''){ $book_items[$i]['displaytitle'] = $row->bi_displaytitle; }
+                
+          $i = $i+1;      
+       	}
+     return $book_items;   
+    }
+    
+    static function get_user_current_book($user_id = 0, $user_name, $book_id = 0){
+        $dbr = wfGetDB( DB_SLAVE);
+        
+        if( $book_id > 0 ){
+            $book_sql = " AND book_id={$book_id}";
+        } else {
+            $book_sql = " ORDER BY book_id DESC LIMIT 0, 1"; 
+        }
+        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+                            FROM user_books 
+                            WHERE user_id ={$user_id} 
+                            AND user_name ='{$user_name}'
+                            {$book_sql}";
+        
+       $res = $dbr->query( $sql, __METHOD__ );
+	   $row = $dbr->fetchObject( $res );
+       
+     return $row;  
+    }
+    
+    static function get_user_books( $user_id, $user_name ){
+       global $wgUser;
+       
+       $dbr = wfGetDB( DB_SLAVE); 
+        $sql ="SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, 
+                book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+                FROM user_books WHERE user_id ={$user_id} AND user_name ='{$user_name}' ORDER BY book_id DESC"; 
+                             
+        $res = $dbr->query( $sql, __METHOD__);
+        $books = array();
+        foreach ( $res as $row ) {
+                $books[] = array(                          
+                      'book_id' => $row->book_id,
+                      'book_name' => $row->book_name,
+                      'user_id' => $row->user_id,
+                      'user_name' => $row->user_name,
+                      'is_anonym_user' => $row->is_anonym_user,
+                      'enabled' => $row->enabled,
+                      'title' => $row->title,
+                      'subtitle' => $row->subtitle,
+                      'book_type' => $row->book_type,
+                      'book_time' => $row->unix_book_time                      
+                 ); 
+                      
+       	}
+     return $books;        
+    }
+       
 }
-
-
-?>
