@@ -293,14 +293,13 @@ class gospellCommonFunctions {
             $user_name = strtolower( $user_name );    
                       
             $dbw = wfGetDB( DB_SLAVE);  
-            $res = $dbw->query("SELECT user_name FROM user
-                                WHERE LOWER(CONVERT(user_name USING latin1))  LIKE '".$user_name."%'
-                                OR LOWER(CONVERT(user_real_name USING latin1))  LIKE '".$user_name."%'
+            $res = $dbw->query("SELECT user_name,user_real_name FROM user
+                                WHERE LOWER(CONVERT(user_real_name USING latin1))  LIKE '%".$user_name."%'
                                 LIMIT 50");   
                                 
             $usr_ary = array();            
             foreach ( $res as $row ) {
-                $usr_ary[] = $row->user_name;
+                $usr_ary[] = $row->user_name.'||'.$row->user_real_name;                
         	}  
             header('Content-type:application/json');          
             echo json_encode($usr_ary);            
