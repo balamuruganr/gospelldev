@@ -88,7 +88,8 @@ jQuery( function ( $ ) {
         var txt = $("#wpTextbox1");       
         var occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0;         
         if(occurrence == 0) {            
-            txt.val('#REDIRECT [['+redirect_page+']]\n' + txt.val() );            
+            txt.val('#REDIRECT [['+redirect_page+']]\n' + txt.val() ); 
+            alert('Redirect signpost added and please save the changes');           
             $('#removeredirect').show();
             $('#addredirect').hide();
             $('#redirect_signpost_container').hide();            
@@ -148,27 +149,17 @@ jQuery( function ( $ ) {
                     return false;
                 } 
             }           
-        }
-                
+        }                
+    });    
+    
+    mw.loader.using( ['jquery.typewatch'], function() {    
+    	jQuery( function( jQuery ) { 
+    		$('#user_search').typeWatch({
+    			callback: searchUserName,
+                captureLength:1
+    		});
+    	});
     });
-       
-    $('#user_search').keyup(function() {            
-        var uname = $.trim($('#user_search').val());                
-        if(uname == ''){
-            return false;
-        }            
-        $.ajax({
-        url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&user_search='+uname ),
-        cache: false
-        }).done(function( html ) {              
-            var res = '<ul>';
-            $.each(html, function(i, field){        
-                res = res + '<li><a href="'+window.wgScript+'?title=user:'+field+'">'+field+'</a>';     
-            });    
-            res = res + '</ul>';
-            $('#js_user_search_result').html(res);                  
-        });    
-    });     
     
     $('#wpName2').change(function() {        
         var fname = $.trim($('#wpFirstName2').val());
@@ -427,3 +418,22 @@ function checkSignpostRedirectAndAssignTop() {
     }
 }
 ///////////////////////////// Updated Mathi for Default book ///////////////////////////
+function searchUserName(){
+    var uname = $.trim($('#user_search').val());                
+    if(uname == ''){
+        return false;
+    }            
+    $.ajax({
+    url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&user_search='+uname ),
+    cache: false
+    }).done(function( html ) {              
+        var res = '<ul>';
+        $.each(html, function(i, field){
+            console.log(field);
+            var split_username = field.split('||');
+            res = res + '<li><a href="'+window.wgScript+'?title=user:'+split_username[0]+'">'+split_username[1]+'</a>';     
+        });    
+        res = res + '</ul>';
+        $('#js_user_search_result').html(res);                  
+    });     
+}
