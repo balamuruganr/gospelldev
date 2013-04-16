@@ -539,16 +539,23 @@ add and remove sign post container
         $wgOut->addHTML( '<span id="addincomplete">Add Incomplete</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="adddisputeed" onclick=$(signpost_page_protect).val(1);>Add Disputed</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="addredirect" onclick=$("#redirect_signpost_container").show(); >Add Redirect</span>&nbsp;&nbsp;' );   
+        $wgOut->addHTML( '<span id="adddisambiguation" onclick=$("#disambiguation_signpost_container").show(); >Add Disambiguation</span>&nbsp;&nbsp;' );   
               
         $wgOut->addHTML( '<span id="removeinaccurate" style="display:none;">Remove Inaccurate</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="removeincomplete" style="display:none;">Remove Incomplete</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="removedisputeed" style="display:none;" onclick=$(signpost_page_protect).val(0);>Remove Disputed</span>&nbsp;&nbsp;' );
         $wgOut->addHTML( '<span id="removeredirect" style="display:none;" >Remove Redirect</span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="removedisambiguation" style="display:none;" >Remove Disambiguation</span>&nbsp;&nbsp;' );
         
         $wgOut->addHTML( '<span id="redirect_signpost_container" style="display:none;" >
                           <input type="text" id="signpost_redirect_page" placeholder="Enter redirect page name" />
                           <input type="button" id="btn_signpost_redirect_page" value="submit" />
+                          </span>&nbsp;&nbsp;' );
+        $wgOut->addHTML( '<span id="disambiguation_signpost_container" style="display:none;" >
+                          <input type="text" id="signpost_disambiguation_page" placeholder="Enter disambiguation page name" />
+                          <input type="button" id="btn_signpost_disambiguation_page" value="submit" />
                           </span>&nbsp;&nbsp;' );                
+                                          
 		$wgOut->addHTML( "</div>\n" );              
     }
     

@@ -14,16 +14,22 @@ jQuery( function ( $ ) {
         signpost_template_array[1] = "/{{Incomplete}}/gi";
         signpost_template_array[2] = "/{{Disputed}}/gi";
         signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
+        signpost_template_array[4] = "/#REDIRECT(.*)]]/gi";
         
         signpost_id_array[0] = "inaccurate";
         signpost_id_array[1] = "incomplete";
-        signpost_id_array[2] = "disputeed";
+        signpost_id_array[2] = "disputeed";        
         signpost_id_array[3] = "redirect";
+        signpost_id_array[4] = "disambiguation";
         
         var singpost_template_cnt = signpost_template_array.length;
 
         for( i=0; i<singpost_template_cnt; i++ ) {   
-            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;            
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0; 
+            if(signpost_id_array[i] == 'disambiguation') {
+                var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
+                sign_post_avail=patt.test($("#wpTextbox1").val());                                                
+            }
             if(sign_post_avail) {                             
                 $('#add'+signpost_id_array[i]).hide();
                 $('#remove'+signpost_id_array[i]).show(); 
@@ -78,7 +84,7 @@ jQuery( function ( $ ) {
             $('#removeredirect').hide();
             $('#redirect_signpost_container').hide();
             $('#addredirect').show();
-    });  
+    });           
     $('#btn_signpost_redirect_page').click(function() {        
         var redirect_page = $("#signpost_redirect_page").val();   
         if(redirect_page == ''){
@@ -89,14 +95,50 @@ jQuery( function ( $ ) {
         var occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0;         
         if(occurrence == 0) {            
             txt.val('#REDIRECT [['+redirect_page+']]\n' + txt.val() ); 
-            alert('Redirect signpost added and please save the changes');           
+            alert('Redirect signpost added and please save the changes');                       
             $('#removeredirect').show();
             $('#addredirect').hide();
             $('#redirect_signpost_container').hide();            
         }else {
             alert('Redirect signpost is already added');
         }                    
-    });             
+    });      
+           
+    $('#disambiguation').click(function() {
+            $('#disambiguation_signpost_container').show();
+    });     
+    $('#removedisambiguation').click(function() {
+            var txt = $("#wpTextbox1"); 
+            var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
+            var occurrence=patt.test(txt.val());                                
+            if(occurrence){                
+                var replace_val = txt.val().replace(patt,'');
+                txt.val(replace_val);
+            }
+            $('#removedisambiguation').hide();
+            $('#disambiguation_signpost_container').hide();
+            $('#adddisambiguation').show();
+    }); 
+    $('#btn_signpost_disambiguation_page').click(function() {        
+        var disambiguation_page = $("#signpost_disambiguation_page").val();   
+        if(disambiguation_page == ''){
+            alert('plese enter disambiguation page name');
+            return false;
+        }
+        var txt = $("#wpTextbox1");       
+        var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
+        var occurrence=patt.test(txt.val());        
+        if(occurrence) {  
+            alert('Disambiguation signpost is already added');
+        }else {
+            txt.val('[['+disambiguation_page+' (disambiguation)]]\n' + txt.val() );
+            checkSignpostRedirectAndAssignTop(); 
+            alert('Disambiguation signpost added and please save the changes');           
+            $('#removedisambiguation').show();
+            $('#adddisambiguation').hide();
+            $('#disambiguation_signpost_container').hide();                                    
+        }                    
+    });                 
     $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
         var txt = $("#wpTextbox1");  
         var enable_id_ary = new Array();
@@ -406,18 +448,18 @@ function set_default_book(){
 		});
         
 }
+///////////////////////////// Updated Mathi for Default book ///////////////////////////
 function checkSignpostRedirectAndAssignTop() {
     var txt = $("#wpTextbox1"); 
     var redirect_occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0; 
-    if(redirect_occurrence){                
-        var tmp_redirect_str = txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')));
-        console.log(tmp_redirect_str);
+    if(redirect_occurrence) {                
+        var tmp_redirect_str = txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')));        
         var replace_val = txt.val().replace(eval('/#REDIRECT(.*)]]/gi'),'');  
         txt.val(replace_val);                              
         txt.val(tmp_redirect_str[0]+'\n' + txt.val() );                
     }
 }
-///////////////////////////// Updated Mathi for Default book ///////////////////////////
+
 function searchUserName(){
     var uname = $.trim($('#user_search').val());                
     if(uname == ''){
