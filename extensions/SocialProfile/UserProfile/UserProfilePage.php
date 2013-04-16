@@ -891,11 +891,16 @@ class UserProfilePage extends Article {
 			) );
 		} elseif ( $wgUser->isLoggedIn() ) {
 			if ( $relationship == false ) {
-				$output .= $wgLang->pipeList( array(
-					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
-//					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
-					''
-				) );
+                if( UserRelationship::userHasRequestByID( $id, $wgUser->getID() ) ) {
+                    $output .= wfMsg( 'ur-already-submitted' );
+                    $output .= ' |';
+                }else {
+                    $output .= $wgLang->pipeList( array(
+                    '<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
+                    //					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
+                    ''
+                    ) );
+                }
 			} else {
 				if ( $relationship == 1 ) {
 					$output .= $wgLang->pipeList( array(
