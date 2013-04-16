@@ -13,10 +13,12 @@ jQuery( function ( $ ) {
         signpost_template_array[0] = "/{{Inaccurate}}/gi";
         signpost_template_array[1] = "/{{Incomplete}}/gi";
         signpost_template_array[2] = "/{{Disputed}}/gi";
+        signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
         
         signpost_id_array[0] = "inaccurate";
         signpost_id_array[1] = "incomplete";
         signpost_id_array[2] = "disputeed";
+        signpost_id_array[3] = "redirect";
         
         var singpost_template_cnt = signpost_template_array.length;
 
@@ -24,39 +26,77 @@ jQuery( function ( $ ) {
             sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;            
             if(sign_post_avail) {                             
                 $('#add'+signpost_id_array[i]).hide();
-                $('#remove'+signpost_id_array[i]).show();                  
+                $('#remove'+signpost_id_array[i]).show(); 
+                if(signpost_id_array[i] == 'redirect') {
+                    $('#removeredirect').show();
+                    $('#redirect_signpost_container').hide();
+                    $('#addredirect').hide();                    
+                }                                 
             }           
-        }
-        
+        }                        
     };        
-    $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {    
-        var txt = $("#wpTextbox1");  
+   $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {
+        var txt = $("#wpTextbox1");                  
         var signpost_ary = new Array();
         var enable_id_ary = new Array();
         var add_signpost_msg_ary = new Array();        
         
         signpost_ary['addinaccurate'] = '{{Inaccurate}}';
         signpost_ary['addincomplete'] = '{{Incomplete}}';
-        signpost_ary['adddisputeed'] = '{{Disputed}}';
+        signpost_ary['adddisputeed']  = '{{Disputed}}';
+        
+        add_signpost_msg_ary['addinaccurate']   = 'Inaccurate';
+        add_signpost_msg_ary['addincomplete']   = 'Incomplete';
+        add_signpost_msg_ary['adddisputeed']    = 'Disputed';        
 
-        add_signpost_msg_ary['addinaccurate'] = 'Inaccurate';
-        add_signpost_msg_ary['addincomplete'] = 'Incomplete';
-        add_signpost_msg_ary['adddisputeed'] = 'Disputed';
-
-        enable_id_ary['addinaccurate'] = 'removeinaccurate';
-        enable_id_ary['addincomplete'] = 'removeincomplete';
-        enable_id_ary['adddisputeed'] = 'removedisputeed';
+        enable_id_ary['addinaccurate']  = 'removeinaccurate';
+        enable_id_ary['addincomplete']  = 'removeincomplete';
+        enable_id_ary['adddisputeed']   = 'removedisputeed';        
                     	
         var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
         if(occurrence == 0){
             txt.val(signpost_ary[this.id]+"\n" + txt.val() );
+            checkSignpostRedirectAndAssignTop();                                    
             $('#'+this.id).hide();
             $('#'+enable_id_ary[this.id]).show();
             alert(add_signpost_msg_ary[this.id]+' signpost added and please save the changes');
         }else{
             alert(add_signpost_msg_ary[this.id]+' signpost is already added');
         }                    
-    });    
+    });
+    $('#addredirect').click(function() {
+            $('#redirect_signpost_container').show();
+    }); 
+    
+    $('#removeredirect').click(function() {
+            var txt = $("#wpTextbox1"); 
+            var occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0; 
+            if(occurrence){                
+                var replace_val = txt.val().replace(eval('/#REDIRECT(.*)]]/gi'),'');
+                txt.val(replace_val);
+            }
+            $('#removeredirect').hide();
+            $('#redirect_signpost_container').hide();
+            $('#addredirect').show();
+    });  
+    $('#btn_signpost_redirect_page').click(function() {        
+        var redirect_page = $("#signpost_redirect_page").val();   
+        if(redirect_page == ''){
+            alert('plese enter redirect page name');
+            return false;
+        }
+        var txt = $("#wpTextbox1");       
+        var occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0;         
+        if(occurrence == 0) {            
+            txt.val('#REDIRECT [['+redirect_page+']]\n' + txt.val() ); 
+            alert('Redirect signpost added and please save the changes');           
+            $('#removeredirect').show();
+            $('#addredirect').hide();
+            $('#redirect_signpost_container').hide();            
+        }else {
+            alert('Redirect signpost is already added');
+        }                    
+    });             
     $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
         var txt = $("#wpTextbox1");  
         var enable_id_ary = new Array();
@@ -109,27 +149,17 @@ jQuery( function ( $ ) {
                     return false;
                 } 
             }           
-        }
-                
+        }                
+    });    
+    
+    mw.loader.using( ['jquery.typewatch'], function() {    
+    	jQuery( function( jQuery ) { 
+    		$('#user_search').typeWatch({
+    			callback: searchUserName,
+                captureLength:1
+    		});
+    	});
     });
-       
-    $('#user_search').keyup(function() {            
-        var uname = $.trim($('#user_search').val());                
-        if(uname == ''){
-            return false;
-        }            
-        $.ajax({
-        url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&user_search='+uname ),
-        cache: false
-        }).done(function( html ) {              
-            var res = '<ul>';
-            $.each(html, function(i, field){        
-                res = res + '<li><a href="'+window.wgScript+'?title=user:'+field+'">'+field+'</a>';     
-            });    
-            res = res + '</ul>';
-            $('#js_user_search_result').html(res);                  
-        });    
-    });     
     
     $('#wpName2').change(function() {        
         var fname = $.trim($('#wpFirstName2').val());
@@ -331,8 +361,7 @@ $('#userlogin2').submit(function() {
                 $('#aboutme').focus();
                 $("#erraboutme").text("required");
                 return false;
-            }
-            return true;                
+            }            
     }
     if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {        
         return true
@@ -378,4 +407,34 @@ function set_default_book(){
 		});
         
 }
+function checkSignpostRedirectAndAssignTop() {
+    var txt = $("#wpTextbox1"); 
+    var redirect_occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0; 
+    if(redirect_occurrence){                
+        var tmp_redirect_str = txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')));
+        console.log(tmp_redirect_str);
+        var replace_val = txt.val().replace(eval('/#REDIRECT(.*)]]/gi'),'');  
+        txt.val(replace_val);                              
+        txt.val(tmp_redirect_str[0]+'\n' + txt.val() );                
+    }
+}
 ///////////////////////////// Updated Mathi for Default book ///////////////////////////
+function searchUserName(){
+    var uname = $.trim($('#user_search').val());                
+    if(uname == ''){
+        return false;
+    }            
+    $.ajax({
+    url: mw.util.wikiScript( 'index.php?title=Special:UserLogin&user_search='+uname ),
+    cache: false
+    }).done(function( html ) {              
+        var res = '<ul>';
+        $.each(html, function(i, field){
+            console.log(field);
+            var split_username = field.split('||');
+            res = res + '<li><a href="'+window.wgScript+'?title=user:'+split_username[0]+'">'+split_username[1]+'</a>';     
+        });    
+        res = res + '</ul>';
+        $('#js_user_search_result').html(res);                  
+    });     
+}
