@@ -477,19 +477,21 @@ class gospellCommonFunctions {
      return $book_items;   
     }
     
-    static function get_user_current_book($user_id = 0, $user_name, $book_id = 0){
+    static function get_user_current_book($user_id = 0, $user_name = '', $book_id = 0){
+        global $wgUser;
         $dbr = wfGetDB( DB_SLAVE);
         
         if( $book_id > 0 ){
             $book_sql = " AND book_id={$book_id}";
         } else {
-            $book_sql = " ORDER BY book_id DESC LIMIT 0, 1"; 
+          $book_sql = " ORDER BY book_id DESC LIMIT 0, 1";   
         }
         $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
                             FROM user_books 
                             WHERE user_id ={$user_id} 
                             AND user_name ='{$user_name}'
                             {$book_sql}";
+       //echo "<br />".$sql."<br /><br /><br />";
         
        $res = $dbr->query( $sql, __METHOD__ );
 	   $row = $dbr->fetchObject( $res );
@@ -523,6 +525,56 @@ class gospellCommonFunctions {
                       
        	}
      return $books;        
+    }
+    
+    static function userNameFromBookId( $book_id = 0 ){
+        global $wgUser;
+        
+        $dbr = wfGetDB( DB_SLAVE); 
+        
+        //if($book_id === 0){
+        ///  $user_name = $wgUser;  
+        //}
+        
+        $s = $dbr->selectRow(
+				'user_books',
+				array( 'book_id', 'book_name', 'user_id', 'user_name' ),
+				array( 'book_id' => $book_id ),
+				__METHOD__
+			);
+            
+        if ($s !== false ){
+          $user_name =  $s->user_name; 
+        } else {
+          $user_name = $wgUser->getName();  
+        }    
+     
+     return $user_name;       
+    }
+    
+    static function userIdFromBookId( $book_id = 0 ){
+        global $wgUser;
+        
+        $dbr = wfGetDB( DB_SLAVE); 
+        
+        //if($book_id === 0){
+        ///  $user_name = $wgUser;  
+        //}
+        
+        $s = $dbr->selectRow(
+				'user_books',
+				array( 'book_id', 'book_name', 'user_id', 'user_name' ),
+				array( 'book_id' => $book_id ),
+				__METHOD__
+			);
+            
+        if ($s !== false ){
+          $user_id =  $s->user_id; 
+        } else {
+          $user_id = $wgUser->getID();  
+        }   
+     
+     return $user_id;       
     }
        
 

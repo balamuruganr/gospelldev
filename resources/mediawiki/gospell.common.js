@@ -353,14 +353,15 @@ function goto_default_bookset( bookid ){
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
 			'rsargs[]': [hint, oldid, bookid, wgPageName, userTo]
-		}, function(result) {
-		  
+		}, function(result) {		  
 			//$('#siteNotice').html(result.html);//save_collection(result.collection);             
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
-		   } else {		      
-		     $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>'); 
-		   }
+		   } /*else {	
+		     //if(wgTitle !== 'UserLogin'):
+		      //$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');
+             //endif;  
+		   }*/
            
 		}); 
 }
@@ -371,7 +372,7 @@ function set_default_book(){
      $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxSetDefaultBookSettings',
-			'rsargs[]': [ userTo ]
+			'rsargs[]': []
 		}, function(result) {
 		    goto_default_bookset( result.html );
 		});
