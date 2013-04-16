@@ -183,6 +183,8 @@ $wgShowIPinHeader = false;
 
 $wgUploadDirectory = "{$IP}/images";
 
-//protect edit template from user
+//Namespace edit protection from user , and sysop user can edit 
 $wgGroupPermissions['sysop']['edittemplate'] = true;
-$wgNamespaceProtection[ 10 ] = array( 'edittemplate' );
+$wgGroupPermissions['sysop']['edithelp'] = true;
+$wgNamespaceProtection[ NS_TEMPLATE ] = array( 'edittemplate' );
+$wgNamespaceProtection[NS_HELP]      = array( 'edithelp' );
