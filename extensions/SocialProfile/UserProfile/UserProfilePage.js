@@ -507,7 +507,7 @@ function goto_this_bookset( bookid, url ){
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
 		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}		    
-           window.location = url;
+           //window.location = url;
 		}); 
 }
 function auto_book_list() {
@@ -531,11 +531,11 @@ $(window).scroll(function() {
 (function() { 
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post
-        //display_wall_post();      
+        display_wall_post();      
         //Autodisplay of Wall post's comments  
-        //runAuto();    
+        runAuto();    
         //AutoDisplay Of Messages
-       //display_messages();
+       display_messages();
        
        //auto_book_list(); 
    /////////////////// Auto Display using sajax ///////////////

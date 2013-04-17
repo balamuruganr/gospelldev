@@ -47,20 +47,22 @@ class UserProfilePage extends Article {
 			parent::view();
 			return '';
 		}
-        
+                                       
+       
         ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
         if(isset($_SESSION['wsCollection']['user_id']) && isset($_SESSION['wsCollection']['user_name'])){
             if($_SESSION['wsCollection']['is_anonymous_user'] === 1){
               unset($_SESSION['wsCollection']['book_id'],$_SESSION['wsCollection']['user_id'],$_SESSION['wsCollection']['user_name']);  
             }
-        }        
-        $_SESSION['wsCollection']['user_id'] = $this->user_id;
-        $_SESSION['wsCollection']['user_name'] = $this->user_name;
+        }
         
-        $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
-        if(is_object($user_having_books)){
-           $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id; 
-        }         
+             $_SESSION['wsCollection']['user_id'] = $this->user_id;
+             $_SESSION['wsCollection']['user_name'] = $this->user_name;
+             
+             $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
+              if(is_object($user_having_books)){
+                   $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id; 
+              }                
         ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
          
 		$wgOut->addHTML( '<div id="profile-top">' );

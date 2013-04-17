@@ -65,25 +65,30 @@ $(function() {
       if( confirm( 'Are you sure you want to delete this book?' ) ) {
         
          var hint = args.shift();
-         var m = $('#mw-content-text').children('#user-page-left');
-         alert("TEST.."+ $(m).children().is('.user-books-container'));
-         /*$.post(script_url, {
+         var isContent = $('#user-page-left');
+         var bookBlock = $(isContent).children('#user-books-block');
+         var bookContainer = (bookBlock).children('.user-books-container');
+         //alert("TEST.."+ $(bookContainer).children().is('#user-book-2'));
+         var bookid_remove = args[4]; 
+         $.post(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollection' + func,
 			'rsargs[]': args
 		}, function(result) {
-		    var content = $('#mw-content-text').children('#user-page-left').children('.user-books-container');
 			if(result.collection.book_id > 0){                           
-			   goto_bookset( result.collection.book_id );                                
+			   goto_bookset( result.collection.book_id );
+               if( $(bookContainer).children().is('#user-book-'+bookid_remove) ){
+                  $(bookContainer).children('#user-book-'+bookid_remove).remove();
+               }                                               
 			} else {			 
-			 $('.mw-body').children('#siteNotice').remove();
-                 if($('#user-page-left').children().is('.user-books-container')){
-                    $('#user-page-left').children('#user-books-block').html("");
+			    $('.mw-body').children('#siteNotice').remove();
+                 if($(isContent).children().is('#user-books-block')){
+                    $(isContent).children('#user-books-block').html("");
                  }
             }
                                     
-		}, 'json');*/
-        
+		}, 'json');
+                
        } 
     }
     
