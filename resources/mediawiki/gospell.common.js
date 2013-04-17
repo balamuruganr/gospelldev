@@ -380,12 +380,12 @@ function goto_default_bookset( bookid ){
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
 			'rsargs[]': [hint, oldid, bookid, wgPageName]
-		}, function(result) {		  
-			//$('#siteNotice').html(result.html);//save_collection(result.collection);             
+		}, function(result) {  //$('#siteNotice').html(result.html);//save_collection(result.collection); 
+                    
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
-		   } //else { $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}
-           
+		   } //else { $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');} 
+                      
 		}); 
 }
 function set_default_book(){
