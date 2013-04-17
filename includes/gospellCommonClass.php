@@ -533,6 +533,7 @@ add and remove sign post container
         global $wgOut;
         
         $wgOut->addHTML( '<div>' );
+        $wgOut->addHTML( '<div id="signpost_msg_container"></div>' );
         $wgOut->addHTML( '<input type="hidden" name="signpost_page_protect" id="signpost_page_protect" />' );
         
         $wgOut->addHTML( '<span id="addinaccurate">Add Inaccurate</span>&nbsp;&nbsp;' );
