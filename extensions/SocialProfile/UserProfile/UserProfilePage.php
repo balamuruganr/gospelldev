@@ -868,10 +868,13 @@ class UserProfilePage extends Article {
 			</div>'; */
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
-        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';        
-        $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
-			'</a></div>';
-
+        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';
+        if ( $wgUser->getName() == $user_name ) {        
+            $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
+        		'</a></div>';
+        }else {
+            $output .= '<div id="profile-image">' . $avatar->getAvatarURL() .'</div>';                
+        }            
 		$output .= '<div id="profile-right">';
         
 		$output .= '<div id="profile-title-container">
@@ -907,11 +910,16 @@ class UserProfilePage extends Article {
 			) );
 		} elseif ( $wgUser->isLoggedIn() ) {
 			if ( $relationship == false ) {
-				$output .= $wgLang->pipeList( array(
-					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
-//					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
-					''
-				) );
+                if( UserRelationship::userHasRequestByID( $id, $wgUser->getID() ) ) {
+                    $output .= wfMsg( 'ur-already-submitted' );
+                    $output .= ' |';
+                }else {
+                    $output .= $wgLang->pipeList( array(
+                    '<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
+                    //					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
+                    ''
+                    ) );
+                }
 			} else {
 				if ( $relationship == 1 ) {
 					$output .= $wgLang->pipeList( array(
