@@ -69,7 +69,7 @@ class CollectionSession {
 		self::touchSession();
 	}
 
-	static function enable( $book_type = '', $book_name = '' ) {
+	static function enable( $book_name = '', $book_type = '', $sub_title = '' ) {
 	   global $wgUser, $wgOut, $wgTitle;
        
 		if ( !self::hasSession() ) { 
@@ -89,12 +89,12 @@ class CollectionSession {
            $coll['is_anonymous_user'] = 1; 
         }
            $coll['enabled'] = $_SESSION['wsCollection']['enabled']; 
-           $coll['title'] = $_SESSION['wsCollection']['title'];
-           $coll['subtitle'] = $_SESSION['wsCollection']['subtitle'];
+           $coll['title'] = $book_name;
+           $coll['subtitle'] = $sub_title;
            $coll['timestamp'] = date("Y-m-d H:i:s",strtotime($_SESSION['wsCollection']['timestamp']));
            $coll['book_type'] = $book_type;
            $coll['book_name'] = $book_name;
-        
+          
         $user_book = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName());
             
         if($wgUser->getID()){
@@ -111,12 +111,50 @@ class CollectionSession {
         if($user_book_after_send){
            $coll['book_id'] = $user_book_after_send->book_id; 
         }     
-         
-                   
+                            
         $_SESSION['wsCollection'] = $coll;  
         
         $wsBookCollection = array();
         $wsBookCollection = $_SESSION['wsCollection'];
+        
+     return $wsBookCollection;       
+	}
+    
+    static function editBook( $book_id, $book_name = '', $book_type = '', $sub_title = '' ) {
+	   global $wgUser, $wgOut, $wgTitle;
+       
+		if ( !self::hasSession() ) { 
+			self::startSession();
+		} else { 
+			$_SESSION['wsCollection']['enabled'] = true;
+			self::touchSession();
+		}
+                
+           $coll = array();
+        
+           $coll['title'] = $book_name;
+           $coll['subtitle'] = $sub_title;
+           $coll['book_type'] = $book_type;
+           $coll['book_name'] = $book_name;
+          
+        $user_book = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName());
+        
+        gospellCommonFunctions::edit_user_book($coll, $book_id); 
+              
+        $user_book_after_send = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName()); 
+               
+        if($user_book_after_send){
+           $coll['book_id'] = $user_book_after_send->book_id; 
+        }     
+                            
+        $_SESSION['wsCollection']['title'] = $coll['title'];
+        $_SESSION['wsCollection']['subtitle'] = $coll['subtitle'];  
+        $_SESSION['wsCollection']['book_type'] = $coll['book_type'];
+        $_SESSION['wsCollection']['book_name'] = $coll['book_name'];
+        
+        $wsBookCollection = array();
+        $wsBookCollection = $_SESSION['wsCollection'];
+        
      return $wsBookCollection;       
 	}
 
@@ -179,8 +217,9 @@ class CollectionSession {
 			return - 1;
 		}
         //////////////////////
-        if($book_id === 0){
-           $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $wgUser->getName() );   
+        
+        if($book_id === 0){            
+           $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $wgUser->getName() );              
         }else if($book_id !== '' || $book_id !== 0 ){
           $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $wgUser->getName() );  
         }          

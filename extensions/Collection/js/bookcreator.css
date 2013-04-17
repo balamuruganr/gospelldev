@@ -160,3 +160,15 @@
 #coll-orderbox ul {
 	list-style: none;
 }
+/*----------------------------------------------------------------*/
+.remove_edit_book_link {
+    border: 0;
+    cursor: pointer;
+    float: right;
+    margin-right: 5px;
+    padding: 0;
+}
+
+.remove-book {
+    color:#ff0000;
+}

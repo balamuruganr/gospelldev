@@ -300,6 +300,22 @@ function wfDeleteWall( $user_name, $wall_id ) {
  return $b->displayWalls( $user_name, $user_id_to, 0, 10 );
 }
 
+$wgAjaxExportList[] = 'wfAutoBookList';
+function wfAutoBookList( $user_name ) {
+	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    //$profile = new UserProfilePage( $user_name );
+    
+    //"<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";
+	
+    
+ 
+ return "";//$profile->getUserProfileBookList( $user_name );
+}
 
 
 $wgAjaxExportList[] = 'wfTestfunc';

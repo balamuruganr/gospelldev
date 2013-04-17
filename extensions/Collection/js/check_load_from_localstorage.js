@@ -40,16 +40,19 @@ function count_articles(items) {
         
         var bk_type = $(this).val();
         var bk_name = $('#book_name').val();
+        var bk_sbtitle = $('#sub_title').val();
+        
         var str ="";
         var x; 
         x = $('#pre_creater_link').val().split("&book_type=");
         str += x[0] + '&book_type=' + bk_type;
         str +='&book_name=' + bk_name;
+        str +='&sub_title=' + bk_sbtitle;
         
         $('#create-button').children("a").attr('href', str);
          
        } else {
-        alert("Please enter Book Name.");
+        alert("Please enter Book Title.");
         $('#book_name').focus();
        }
         
@@ -58,6 +61,7 @@ function count_articles(items) {
    $('#create-button').children("a").css('cursor',"pointer");
    
    $('#create-button').children("a").click(function(){
+    
      if( $(this).attr("href") ){
         
         $('#create-button').children("a").attr('href', $(this).attr("href"));
@@ -68,20 +72,24 @@ function count_articles(items) {
         if( $('#book_name').val() !=='' ){
             
            var bk_type = $('select[name="book_type"]').val();
-           var bk_name = $('#book_name').val(); 
+           var bk_name = $('#book_name').val();
+           var bk_sbtitle = $('#sub_title').val();            
            var str ="";
-           var x; 
+           var x;
+           
            x = $('#pre_creater_link').val().split("&book_type=");
            str += x[0] + '&book_type=' + bk_type;
            str +='&book_name=' + bk_name;
-           
+           str +='&sub_title=' + bk_sbtitle;           
            $('#create-button').children("a").attr('href', str);
-           return true; 
+           return true;
+            
         } else {
             
-          alert("Please enter Book Name.");
+          alert("Please enter Book Title.");
           $('#book_name').focus(); 
-          return false;  
+          return false;
+            
         }       
      }
      
@@ -89,14 +97,7 @@ function count_articles(items) {
    
 })(jQuery);
 
-function create_book(){ 
-  /*if( $('#create-button').children("a").attr("href") ){
-    //$('#create-button').children("a").removeAttr("href");
-    alert("Link is there..");
-  }  else {
-    alert("Link not there...");
-  }*/
-}
+/*
 function set_crater_link(){
         var bk_type = $('select[name="book_type"]').val();
         var str ="";
@@ -106,5 +107,9 @@ function set_crater_link(){
         str +='&book_name=' + bk_name;
         $('#create-button').children("a").attr('href', str);
 }
-
-
+//////////////// Remove the book ////////////////////
+    function remove_this_book( bookid ){
+        
+        alert( "TEST" +bookid );
+    }
+*/

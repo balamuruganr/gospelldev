@@ -189,10 +189,12 @@ class CollectionHooks {
 		if ( $skin ) {
 			$request = $skin->getRequest();
 			$title = $skin->getTitle();
+            //echo"TEST_1";
 		} else {
 			global $wgRequest, $wgTitle;
 			$title = $wgTitle;
 			$request = $wgRequest;
+            //echo"TEST_2";
 		}
         
 		$action = $request->getVal( 'action' );
@@ -201,26 +203,35 @@ class CollectionHooks {
 			return true;
 		}
         
-        //if($wgUser->getID() && $wgUser->getName()){
-           //$user_id = User::idFromName( $user_name );  
-        //}
-                                       
+                                                              
         if(isset($_SESSION['wsCollection']['book_id'])){ 
-            $book_id = $_SESSION['wsCollection']['book_id'];
-            $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName(), $book_id );
+             $book_id = $_SESSION['wsCollection']['book_id'];
+             $book_user_id = $_SESSION['wsCollection']['user_id'];
+             $book_user_name = $_SESSION['wsCollection']['user_name'];
+             
+             if($wgUser->isLoggedIn()){
+               $user_having_books = gospellCommonFunctions::get_user_current_book( $book_user_id, $book_user_name, $book_id ); 
+             } else {
+               $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName(), $book_id );
+             }             
         } else { 
             $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );
             $book_id = (is_object($user_having_books))? $user_having_books->book_id : '0';
         }
-           
+        
         ////////////////////////Updeted By Mathivanan 10-APR-2013 /////////////        
         
           if(is_object($user_having_books)){
+            
             $book_items = array();
             if(isset($user_having_books->book_id)){
-              $book_items = gospellCommonFunctions::get_book_items( $user_having_books->book_id, $wgUser->getName() );   
-             }
-             
+                if($wgUser->isLoggedIn()){
+                   $book_items = gospellCommonFunctions::get_book_items( $user_having_books->book_id, $book_user_name ); 
+                 } else {
+                   $book_items = gospellCommonFunctions::get_book_items( $user_having_books->book_id, $wgUser->getName() );
+                 } 
+                 
+             }             
              
             $_SESSION['wsCollection'] = array(
                         'book_id' => $user_having_books->book_id,
@@ -252,9 +263,6 @@ class CollectionHooks {
             		  );          
           }
           
-         
-          //print_r($_SESSION['wsCollection']['items']);
-          
           if( !CollectionSession::hasSession() 
 			|| !isset( $_SESSION['wsCollection']['enabled'] )
 			|| !$_SESSION['wsCollection']['enabled'] ) { 
@@ -264,9 +272,9 @@ class CollectionHooks {
 		if ( $title->isSpecial( 'Book' ) ) { 
 			$cmd = $request->getVal( 'bookcmd', '' );
 			if ( $cmd == 'suggest' ) { 
-				$siteNotice .= self::renderBookCreatorBox( $title, 'suggest', 0, $wgUser->getName() );
+				$siteNotice .= self::renderBookCreatorBox( $title, 'suggest', 0 );
 			} elseif ( $cmd == '' ) { 
-				$siteNotice .= self::renderBookCreatorBox( $title, 'showbook', $book_id, $wgUser->getName());
+				$siteNotice .= self::renderBookCreatorBox( $title, 'showbook', $book_id );
 			}
 			return true;
 		}
@@ -281,7 +289,7 @@ class CollectionHooks {
 			return true;
 		}
         
-		$siteNotice .= self::renderBookCreatorBox( $title, $mode = '', $book_id, $wgUser->getName() );
+		$siteNotice .= self::renderBookCreatorBox( $title, $mode = '', $book_id );
 		return true;
 	}
 
@@ -290,9 +298,9 @@ class CollectionHooks {
 	 * @param $mode string
 	 * @return string
 	 */
-	static function renderBookCreatorBox( $title, $mode = '', $book_id = 0, $user_name = '' ) {
+	static function renderBookCreatorBox( $title, $mode = '', $book_id = 0 ) {
 		global $wgCollectionStyleVersion;
-		global $wgUser, $wgOut, $wgExtensionAssetsPath, $wgRequest;
+		global $wgTitle, $wgUser, $wgOut, $wgExtensionAssetsPath, $wgRequest;
 
 		$imagePath = "$wgExtensionAssetsPath/Collection/images";
 		$ptext = $title->getPrefixedText();
@@ -305,23 +313,37 @@ class CollectionHooks {
 
 		$addRemoveState = $mode;
         
-        if($user_name !==''){
-           
-           if ( $wgUser->getName() !== $user_name ) {
-              $user_id = User::idFromName( $user_name );   
-            } else {
-              $user_id = $wgUser->getID(); 
-            }
-             
-        } 
-                  
+        $book_user_name = $_SESSION['wsCollection']['user_name'];
+        $book_user_id   = $_SESSION['wsCollection']['user_id'];                          
         /////////////////////
-        $book_obj = gospellCommonFunctions::get_user_current_book($user_id, $user_name, $book_id);
-        $book_type = ($book_obj->book_type)?"Private":"Public";
-        ////////////////////
         
+        $book_obj = gospellCommonFunctions::get_user_current_book($book_user_id, $book_user_name, $book_id);
+        $book_type = ($book_obj->book_type)?"Private":"Public";
+        $book_change_type = ($book_obj->book_type)?"Public":"Private";
+        ////////////////////
+        $book_user_name = $book_obj->user_name;
+        
+        $delete_edit_book_link = '';
         $html = '';
         //$html .= "<span>".$wgUser->getID()."</span>"."<span>".$wgUser->getName()."</span>"."<span>$book_id</span><span>".self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )."</span>";
+        
+        //$book_user_name
+        if($wgUser->getName() === $book_user_name){           
+           $delete_edit_book_link .= "<span class=\"remove_edit_book_link\">
+                                        <a class=\"remove-book\" href=\"javascript:void(0);\" onclick=\"removeBookCall('RemoveBook',['addarticle', wgNamespaceNumber, wgTitle, " .
+					Xml::encodeJsVar( 0 ) . ", " .
+					Xml::encodeJsVar( $book_id ) . "]);\">Remove This Book</a>
+                                       </span>";
+           $delete_edit_book_link .= '&nbsp;<span class="remove_edit_book_link">
+                                             <a href="'.SkinTemplate::makeSpecialUrl(
+                                                'Book',array(
+                									'bookcmd' => 'book_creator',
+                                                    'edit_book' => '1',
+                                                    'referer' => $ptext
+                								)).'">Rename This Book</a>
+                                            </span>'; //,'referer' => $wgTitle                                 
+        }
+        ///*<a onclick="collectionCall('RemoveArticle', ['addarticle', wgNamespaceNumber, wgTitle, &quot;0&quot;, 4]); return false;" rel="nofollow" id="coll-remove_article" title="Remove the current wiki page from your book" href="/gospelldev/index.php?title=Special:Book&amp;bookcmd=remove_article&amp;arttitle=User%3AMathivanan&amp;oldid=0"><img width="16" height="16" alt="" src="/gospelldev/extensions/Collection/images/silk-remove.png">&nbsp;Remove this page from your book</a>*/
 		$html .= Xml::element( 'div',
 			array( 'class' => 'collection-creatorbox' ),
 			null
@@ -338,8 +360,8 @@ class CollectionHooks {
 			'',
 			true
 		);
-
-		$html .= Xml::tags( 'div',
+           
+        $html .= Xml::tags( 'div',
 			array( 'class' => 'collection-creatorbox-row' ),
 			Xml::tags( 'div', null,
 				Linker::linkKnown(
@@ -358,8 +380,27 @@ class CollectionHooks {
 						'title' => wfMessage( 'coll-help_tooltip' )->text(),
 					)
 				)
-			)
-			. Xml::element( 'span',
+			) .
+            
+            '<span><strong>Book Title</strong>:&nbsp;'.$book_obj->book_name.'</span>&nbsp;' .
+            '<span><strong>Sub Title</strong>:&nbsp;'.$book_obj->subtitle.'</span>&nbsp;' .
+            '<span><strong>Book Type</strong>:&nbsp;<a title="Click to '. $book_change_type .'" style="cursor:pointer;">'.$book_type.'</a></span>' .
+             $delete_edit_book_link
+            /////////////////////////////
+		);
+                             
+		$html .= Xml::tags( 'div',
+			array(
+				'id' => 'coll-book_creator_box',
+				'class' => 'collection-creatorbox-row',
+			),
+			self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )
+	 	);
+
+		$html .= Xml::closeElement( 'div' );
+        
+        /*------------Book creater Text....
+    . Xml::element( 'span',
 				array( 'class' => 'collection-creatorbox-title' ),
 				wfMessage( 'coll-book_creator' )->text()
 			)
@@ -374,22 +415,11 @@ class CollectionHooks {
 				array( 'bookcmd' => 'stop_book_creator', 'referer' => $ptext )
 			)
 			. ')&nbsp;' .
-            ////////////////////////////
-            '<span><strong>Book Name</strong>:&nbsp;'.$book_obj->book_name.'</span>&nbsp;<span><strong>Book Type</strong>:&nbsp;'.$book_type.'</span>'
-            /////////////////////////////
-		);                     
-		$html .= Xml::tags( 'div',
-			array(
-				'id' => 'coll-book_creator_box',
-				'class' => 'collection-creatorbox-row',
-			),
-			self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )
-	 	);
-
-		$html .= Xml::closeElement( 'div' );
-		return $html;
+    */
+        
+     return $html;
 	}
-
+    
 	/**
 	 * @param $title
 	 * @param $ajaxHint null
@@ -463,6 +493,7 @@ class CollectionHooks {
                     Xml::encodeJsVar( $book_id ) . "]); return false;";
 			}
 		}
+        
         $html = '';
 		
         $html .= Linker::linkKnown(
@@ -530,8 +561,10 @@ class CollectionHooks {
                               'title' => wfMessage( 'coll-show_collection_tooltip' )->text(),
             				  'class' => 'collection-creatorbox-iconlink',
             				),
-                        array('bookcmd' =>"",
-                              'bookid' => $book_id ),    
+                        array(
+                              'bookcmd' =>"",
+                              'bookid' => $book_id
+                              ),    
 						array( 'known', 'noclasses' )
 					);
 		}

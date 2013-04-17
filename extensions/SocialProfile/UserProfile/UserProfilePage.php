@@ -47,6 +47,21 @@ class UserProfilePage extends Article {
 			parent::view();
 			return '';
 		}
+        
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
+        if(isset($_SESSION['wsCollection']['user_id']) && isset($_SESSION['wsCollection']['user_name'])){
+            if($_SESSION['wsCollection']['is_anonymous_user'] === 1){
+              unset($_SESSION['wsCollection']['book_id'],$_SESSION['wsCollection']['user_id'],$_SESSION['wsCollection']['user_name']);  
+            }
+        }        
+        $_SESSION['wsCollection']['user_id'] = $this->user_id;
+        $_SESSION['wsCollection']['user_name'] = $this->user_name;
+        
+        $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
+        if(is_object($user_having_books)){
+           $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id; 
+        }         
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
          
 		$wgOut->addHTML( '<div id="profile-top">' );
 		$wgOut->addHTML( $this->getProfileTop( $this->user_id, $this->user_name ) );
@@ -79,8 +94,12 @@ class UserProfilePage extends Article {
 			wfDebug( __METHOD__ . ": UserProfileBeginLeft messed up profile!\n" );
 		}
         
+        $wgOut->addHTML( '<div id="user-books-block" class="clearfix" style="width:100%">');
         ////////////// Book List
-        $wgOut->addHTML( $this->getUserProfileBookList( $this->user_name ) );    
+        $wgOut->addHTML( $this->getUserProfileBookList( $this->user_name ) ); 
+        
+        $wgOut->addHTML( '</div>');  
+        ////////////// Book List
         
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 1 ) );
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 2 ) );
@@ -966,6 +985,7 @@ class UserProfilePage extends Article {
          $books = gospellCommonFunctions::get_user_books( $user_id, $user_name );         
          $bk_out = '';
          
+         if( $books ) {
          
          $bk_out .= '<div class="user-section-heading">
                      <div class="user-section-title">Books</div>
@@ -976,7 +996,7 @@ class UserProfilePage extends Article {
     				  <div class="cleared"></div>
                     </div>
 			        <div class="cleared"></div>
-                    <div class="user-relationship-container">';
+                    <div class="user-books-container">';
                     /*
 					<div class="action-left">';
 			if ( intval( str_replace( ',', '', $relationship_count ) ) > 4 ) {
@@ -989,23 +1009,23 @@ class UserProfilePage extends Article {
          
          
          
-         if( $books ) {
+         
             
             foreach($books as $book){
                 
-              if ( $wgUser->getName() !== $user_name ) {
-                if(!$book['book_type']){ //Only Public Books                     
-                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";  
-                 }                
-              } else {               
-                  $bk_out .= "<span><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>"; 
-              }  
-                          
-            } 
-                      
-         }
-         
-      $bk_out .= '</div>'; 
+                  if ( $wgUser->getName() !== $user_name ) {
+                    if(!$book['book_type']){ //Only Public Books                     
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";  
+                     }                
+                  } else {               
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>"; 
+                  }                         
+            }
+            
+             
+          $bk_out .= '</div>'; 
+                     
+         }     
         
      return $bk_out;     
     }

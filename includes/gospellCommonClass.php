@@ -361,34 +361,27 @@ class gospellCommonFunctions {
      return $dbw->insertId();   
     }
     
-    static function get_book_user($user_id, $user_name){
-        $dbr = wfGetDB( DB_SLAVE); // AS
-        $sql ="SELECT book_id, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
-                            FROM user_books 
-                            WHERE user_id ={$user_id} 
-                            AND user_name ='{$user_name}'"; 
-                             
-        $res = $dbr->query( $sql , __METHOD__);
-        $books = array();
-        
-        foreach ( $res as $row ) {
-                $books[] = array(                          
-                      'book_id' => $row->book_id,
-                      'user_id' => $row->user_id,
-                      'user_name' => $row->user_name,
-                      'is_anonym_user' => $row->is_anonym_user,
-                      'enabled' => $row->enabled,
-                      'title' => $row->title,
-                      'subtitle' => $row->subtitle,
-                      'book_type' => $row->book_type,
-                      'status' => $row->status
-                      
-                );
-       	}
-        
-     return  $books;  
-    }
-    
+    static function edit_user_book($values = array(), $book_id ){
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+                
+        $s = $dbw->selectRow(
+				'user_books',
+				array( 'book_id', 'book_name', 'user_id', 'user_name', 'is_anonym_user', 'enabled', 'title', 'subtitle', 'book_type' ),
+				array( 'book_id' => $book_id ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->update(
+					'user_books',
+                    $values,
+					array( 'book_id' => $book_id ),
+					__METHOD__
+				);  
+            }
+            
+ 		$dbw->commit();       
+    }    
+       
     static function send_book_items( $items = array() ){
         global $wgUser;
         
@@ -442,6 +435,56 @@ class gospellCommonFunctions {
  		$dbw->commit(); 
                
      return $falg;
+    }
+    
+    static function remove_book( $book_id = 0, $user_name ){
+        global $wgUser;
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+        $falg = false;
+        
+         $s = $dbw->selectRow(
+				'user_books',
+				array( 'book_id', 'book_name', 'user_id', 'user_name', 'is_anonym_user', 'enabled', 'title', 'subtitle', 'book_type' ),
+				array( 'book_id' => $book_id, 'user_name' => $user_name ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->delete(
+					'user_books',
+					array( 'book_id' => $book_id, 'user_name' => $user_name ),
+					__METHOD__
+				);
+             $falg = true;   
+            }
+                                        
+ 		$dbw->commit(); 
+               
+      return $falg;
+    }
+    
+    static function remove_book_allitems( $book_id = 0, $user_name ){
+        global $wgUser;
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+        $falg = false;
+         
+         $s = $dbw->selectRow(
+				'user_book_items',
+				array( 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
+				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->delete(
+					'user_book_items',
+					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name ),
+					__METHOD__
+				);
+             $falg = true;   
+            }
+                                        
+ 		$dbw->commit(); 
+               
+      return $falg;
     }
     
     static function get_book_items( $book_id = 0, $user_name ='' ){

@@ -68,7 +68,11 @@ class SpecialCollection extends SpecialPage {
               
 		switch ( $request->getVal( 'bookcmd', '' ) ) {
 			case 'book_creator':
-				$this->renderBookCreatorPage( $request->getVal( 'referer', '' ), $par );                
+                $is_rename = '';
+                if($request->getVal( 'edit_book', '' )){
+                  $is_rename = $request->getVal( 'edit_book', '' );
+                }                
+				$this->renderBookCreatorPage( $request->getVal( 'referer', '' ), $par, $is_rename );                
 				return;
 			case 'start_book_creator':
                 $title = Title::newFromText( $request->getVal( 'referer', '' ) );
@@ -76,10 +80,19 @@ class SpecialCollection extends SpecialPage {
 					$title = Title::newMainPage();
 				}
                 
-                CollectionSession::enable( $request->getVal( 'book_type', '' ), $request->getVal( 'book_name', '' ) );
+                CollectionSession::enable( $request->getVal( 'book_name', '' ), $request->getVal( 'book_type', '' ), $request->getVal( 'sub_title', '' ) );
                                                        
 				$out->redirect( $title->getFullURL() );
 				return;
+            case 'edit_book_creator':
+                $title = Title::newFromText( $request->getVal( 'referer', '' ) );
+				if ( is_null( $title ) ) {
+					$title = Title::newMainPage();
+				}                
+                CollectionSession::editBook( $request->getVal( 'book_id', '' ), $request->getVal( 'book_name', '' ), $request->getVal( 'book_type', '' ), $request->getVal( 'sub_title', '' ) );
+                                                       
+				$out->redirect( $title->getFullURL() );
+				return;                
 			case 'stop_book_creator':
 				$title = Title::newFromText( $request->getVal( 'referer', '' ) );
 				if ( is_null( $title ) || $title->equals( $this->getTitle( $par ) ) ) {
@@ -324,9 +337,9 @@ class SpecialCollection extends SpecialPage {
 	 * @param $par
 	 * @return mixed
 	 */
-	function renderBookCreatorPage( $referer, $par ) {
+	function renderBookCreatorPage( $referer, $par, $is_rename = '' ) {
 		global $wgUser, $wgJsMimeType;
-
+        
 		$out = $this->getOutput();
 
 		$this->setHeaders();
@@ -347,29 +360,56 @@ class SpecialCollection extends SpecialPage {
 		if ( is_null( $title ) || $title->equals( $this->getTitle( $par ) ) ) {
 			$title = Title::newMainPage();
 		}
-       $output = '<div style="margin: 10px 0;">
+        
+        $edit_book_title = ($is_rename)?$_SESSION['wsCollection']['title']:'';
+        $edit_book_subtitle = ($is_rename)?$_SESSION['wsCollection']['subtitle']:'';
+        $edit_book_type = ($is_rename)?$_SESSION['wsCollection']['book_type']:'';
+        
+       $output = '<div style="margin:10px 0;">
+                   <div style="margin-bottom:10px;">
+                     <lable>Book Title:</lable><input type="text" name="book_name" id="book_name" value="'.
+                      $edit_book_title
+                     .'" />
+                   </div>
                    <div>
-                     <lable>Book Name:</lable><input type="text" name="book_name" id="book_name" />
+                     <lable>Sub Title:</lable><input type="text" name="sub_title" id="sub_title" value="'.
+                     $edit_book_subtitle
+                     .'" />
                    </div><br />
                    <div>
                      <lable>Book Type:</lable>
                      <select name="book_type">
-                      <option value="1">Private</option>';
+                      <option value="1"';
+                      ($edit_book_type == 1)? $output .= ' selected' : $output .= '';
+          $output .= '>Private</option>';
                       
           if($wgUser->getID() && $wgUser->getName()){
-           $output .= '<option value="0">Public</option>';
-          }                  
+                $output .= '<option value="0"';
+                 ($edit_book_type == 0)? $output .= ' selected' : $output .= '';
+                $output .= '>Public</option>';
+          }
+          
+          $value_arr = array( 
+                             'bookcmd' => ($is_rename)? 'edit_book_creator' : 'start_book_creator',
+							 'referer' => $referer,
+							);
+          if($is_rename){
+            $value_arr['book_id'] = $_SESSION['wsCollection']['book_id'];
+          }
+                         
+                            
           $output .= '
                      </select>
                    </div><br />
                    <div style="clear:both;"></div>
                    <input type="hidden" name="pre_creater_link" id="pre_creater_link" value="'.SkinTemplate::makeSpecialUrl(
-                              'Book',array(
-									'bookcmd' => 'start_book_creator',
-									'referer' => $referer,
-								)).'" />
+                              'Book', $value_arr ).'" />
                    <div id="create-button" class="collection-button ok">                    
-                    <a>Start book creator</a>
+                    <a>';
+                                        
+                    ($is_rename)? $output .= 'Update book' : $output .= 'Create book';             
+                    
+        $output .= '</a>
                    </div>
                    <div id="cancel-button" class="collection-button cancel">'
                    . Linker::link(

@@ -33,6 +33,7 @@ class SpecialUserlogout extends UnlistedSpecialPage {
 	}
 
 	function execute( $par ) {
+	     global $wgUser; 
 		/**
 		 * Some satellite ISPs use broken precaching schemes that log people out straight after
 		 * they're logged in (bug 17790). Luckily, there's a way to detect such requests.
@@ -47,11 +48,19 @@ class SpecialUserlogout extends UnlistedSpecialPage {
 
 		$user = $this->getUser();
 		$oldName = $user->getName();
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
+       
+                   unset( $_SESSION['wsCollection']['book_id'],
+                          $_SESSION['wsCollection']['user_id'],
+                          $_SESSION['wsCollection']['user_name']
+                          );
+                           
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
 		$user->logout();
 
 		$out = $this->getOutput();
 		$out->addWikiMsg( 'logouttext' );
-
+        
 		// Hook.
 		$injected_html = '';
 		wfRunHooks( 'UserLogoutComplete', array( &$user, &$injected_html, $oldName ) );

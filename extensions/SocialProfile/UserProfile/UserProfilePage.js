@@ -496,22 +496,32 @@ function save_collection( collection){
 }
 function goto_this_bookset( bookid, url ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
-    var userTo = decodeURIComponent( wgTitle ); 
     //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
     var hint  = "";
     var oldid = "0";    
     $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
-			'rsargs[]': [hint, oldid, bookid, wgPageName, userTo]
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
 		}, function(result) { 
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
-		   } else {		      
-		     $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>'); 
-		   }		    
+		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}		    
            window.location = url;
 		}); 
+}
+function auto_book_list() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;    
+    if($('#user-page-left').children().is('.user-books-container')){       
+       var firstbkObj = $('div.user-books-container span:first-child');
+       var bookid_arr = $(firstbkObj).attr("id").split("-");
+       var bookid = parseInt( bookid_arr[2] );//alert(bookid); 
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfAutoBookList', [ userTo ], function( request ) {		  
+		    $('#user-page-left').children('.user-books-container').html(request.responseText);
+               auto_book_list_timer = setTimeout(auto_book_list, 2000);
+        });
+   }     
 }
 $(window).scroll(function() {
    if($(window).scrollTop() + $(window).height() == $(document).height()) {
@@ -525,7 +535,9 @@ $(window).scroll(function() {
         //Autodisplay of Wall post's comments  
         //runAuto();    
         //AutoDisplay Of Messages
-       //display_messages(); 
+       //display_messages();
+       
+       //auto_book_list(); 
    /////////////////// Auto Display using sajax ///////////////
    
               

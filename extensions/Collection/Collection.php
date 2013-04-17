@@ -463,7 +463,7 @@ function wfAjaxCollectionSuggestUndoArticle( $lastAction, $article ) {
 $wgAjaxExportList[] = 'wfAjaxCollectionSuggestUndoArticle';
 
 //////////////////////////////////////////////////////////////////
-function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null, $book_id = 0, $pageName = null, $user_name ) {
+function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null, $book_id = 0, $pageName = null ) {
 	if ( !is_null( $oldid ) ) {
 		$oldid = intval( $oldid );
 	}
@@ -479,13 +479,15 @@ function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null,
 	if ( is_null( $title ) ) {
 		$title = Title::newMainPage();
 	}
+        
+    $_SESSION['wsCollection']['book_id'] = $book_id;
+    $user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+    $user_name = gospellCommonFunctions::userNameFromBookId( $book_id ); 
+    $_SESSION['wsCollection']['user_id'] = $user_id;
+    $_SESSION['wsCollection']['user_name'] = $user_name;
+      
+	$html = CollectionHooks::renderBookCreatorBox( $title, $mode = '', $book_id );
     
-    $user_name = stripslashes( $user_name );
-	$user_name = urldecode( $user_name );    
-    
-    $_SESSION['wsCollection']['book_id'] = $book_id; 
-	$html = CollectionHooks::renderBookCreatorBox( $title, $mode = '', $book_id, $user_name );
-    //echo $user_name.$book_id; die;
 	$result = array();
 	$result['html'] = $html;
 	$r = new AjaxResponse( FormatJson::encode( $result ) );
@@ -495,19 +497,14 @@ function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null,
 
 $wgAjaxExportList[] = 'wfAjaxCollectionGetRenderBookCreatorBox';
 
-function wfAjaxSetDefaultBookSettings( $user_name ) {
+function wfAjaxSetDefaultBookSettings() {
 	global $wgUser;
-    
-    $user_name = stripslashes( $user_name );
-	$user_name = urldecode( $user_name );
-	$user_id  = User::idFromName( $user_name );
-    
-    
-       if(isset($_SESSION['wsCollection']['book_id'])){ 
+        
+       if(isset($_SESSION['wsCollection']['book_id']) && $_SESSION['wsCollection']['user_id'] && $_SESSION['wsCollection']['user_name']){ 
             $book_id = $_SESSION['wsCollection']['book_id'];
-        } else { 
-            $user_having_books = gospellCommonFunctions::get_user_current_book( $user_id, $user_name );
-            $book_id = (is_object($user_having_books))? $user_having_books->book_id : '';
+        } else {           
+            $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );
+            $book_id = (is_object($user_having_books))? $user_having_books->book_id : '0';
         }
         
     $result = array();
@@ -518,3 +515,70 @@ function wfAjaxSetDefaultBookSettings( $user_name ) {
 }
 
 $wgAjaxExportList[] = 'wfAjaxSetDefaultBookSettings';
+
+function wfAjaxCollectionRemoveBook( $namespace = 0, $title = '', $oldid = '', $book_id = 0 ) {
+	global $wgUser;
+    //wfAjaxCollectionGetItemList();
+    $user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+    $user_name = gospellCommonFunctions::userNameFromBookId( $book_id );
+    
+    $is_book_removed = gospellCommonFunctions::remove_book( $book_id, $user_name );
+    
+    if($is_book_removed){
+     $is_book_items_removed = gospellCommonFunctions::remove_book_allitems( $book_id, $user_name );  
+    }
+    
+    if( $is_book_removed ){
+      $user_having_books = gospellCommonFunctions::get_user_current_book( $user_id, $user_name );          
+    }
+    
+    if(is_object($user_having_books)){
+      $book_items = array();
+            
+        if(isset($user_having_books->book_id)){
+            $new_book_id = $user_having_books->book_id;                          
+         } else {
+           $new_book_id = 0; 
+         }
+        
+        $book_items = gospellCommonFunctions::get_book_items( $new_book_id, $user_name );   
+         
+         $_SESSION['wsCollection'] = array(
+                        'book_id' => $user_having_books->book_id,
+                        'book_name' => $user_having_books->book_name,
+                        'user_id' => $user_having_books->user_id,
+                        'user_name' => $user_having_books->user_name,
+                        'is_anonymous_user' =>$user_having_books->is_anonym_user,
+            			'enabled' => true,
+            			'title' => $user_having_books->title,
+            			'subtitle' => $user_having_books->subtitle,
+                        'items' => $book_items,
+                        'book_type' => $user_having_books->book_type,
+                        'timestamp' => $user_having_books->unix_book_time
+            		  ); 
+    } else {
+        
+        $_SESSION['wsCollection'] = array(
+                        'book_id' => '',
+                        'book_name' => '', 
+                        'user_id' => '',
+                        'user_name' => '',
+                        'is_anonymous_user' =>'',
+            			'enabled' => false,
+            			'title' => '',
+            			'subtitle' => '',
+            			'items' => array(),
+                        'book_type' => '',
+                        'timestamp' => wfTimestampNow()
+            		  );
+    }
+    
+    return wfAjaxCollectionGetItemList();                   
+    /*$result = array();
+	$result['html'] = "Madyvanan";
+	$r = new AjaxResponse( FormatJson::encode( $result ) );
+	$r->setContentType( 'application/json' );
+	return $r;*/
+}
+
+$wgAjaxExportList[] = 'wfAjaxCollectionRemoveBook';

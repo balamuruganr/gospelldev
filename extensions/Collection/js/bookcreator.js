@@ -41,7 +41,7 @@ $(function() {
 		});
 	}
 
-	function collectionCall(func, args) { //alert("TEST:" +func);
+	function collectionCall(func, args) {
 	  var hint = args.shift();
 		$.post(script_url, {
 			'action': 'ajax',
@@ -59,10 +59,51 @@ $(function() {
 			save_collection(result.collection);
 		}, 'json');
 	}
-
-	window.collectionCall = collectionCall; // public
-
-
+    window.collectionCall = collectionCall; // public
+    
+    function removeBookCall( func, args ){
+      if( confirm( 'Are you sure you want to delete this book?' ) ) {
+        
+         var hint = args.shift();
+         var m = $('#mw-content-text').children('#user-page-left');
+         alert("TEST.."+ $(m).children().is('.user-books-container'));
+         /*$.post(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxCollection' + func,
+			'rsargs[]': args
+		}, function(result) {
+		    var content = $('#mw-content-text').children('#user-page-left').children('.user-books-container');
+			if(result.collection.book_id > 0){                           
+			   goto_bookset( result.collection.book_id );                                
+			} else {			 
+			 $('.mw-body').children('#siteNotice').remove();
+                 if($('#user-page-left').children().is('.user-books-container')){
+                    $('#user-page-left').children('#user-books-block').html("");
+                 }
+            }
+                                    
+		}, 'json');*/
+        
+       } 
+    }
+    
+    function goto_bookset( bookid ){
+    var hint  = "";
+    var oldid = "0";    
+    $.getJSON(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
+		}, function(result) { 
+		   if($('.mw-body').children().is('#siteNotice')){
+		      $('.mw-body').children('#siteNotice').html(result.html); 
+		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}		    
+           
+		}); 
+    }
+    window.removeBookCall = removeBookCall; //public
+    
+            
 	var mouse_pos = {};
 	var popup_div = null;
 	var addremove_link = null;
@@ -196,3 +237,4 @@ $(function() {
 });
 
 })(jQuery);
+

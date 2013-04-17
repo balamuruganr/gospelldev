@@ -371,26 +371,20 @@ $('#userlogin2').submit(function() {
     }    
 });
 
-///////////////////////////// Updated Mathi for Default book ///////////////////////////
+///////////////////////////// Updated for Default book ///////////////////////////
 function goto_default_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
-    var userTo = decodeURIComponent( wgTitle ); 
-    
     var hint  = "";
     var oldid = "0";
     $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
-			'rsargs[]': [hint, oldid, bookid, wgPageName, userTo]
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
 		}, function(result) {		  
 			//$('#siteNotice').html(result.html);//save_collection(result.collection);             
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
-		   } /*else {	
-		     //if(wgTitle !== 'UserLogin'):
-		      //$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');
-             //endif;  
-		   }*/
+		   } //else { $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}
            
 		}); 
 }
@@ -407,6 +401,8 @@ function set_default_book(){
 		});
         
 }
+///////////////////////////// Updated for Default book ///////////////////////////
+
 function checkSignpostRedirectAndAssignTop() {
     var txt = $("#wpTextbox1"); 
     var redirect_occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0; 
@@ -418,7 +414,7 @@ function checkSignpostRedirectAndAssignTop() {
         txt.val(tmp_redirect_str[0]+'\n' + txt.val() );                
     }
 }
-///////////////////////////// Updated Mathi for Default book ///////////////////////////
+
 function searchUserName(){
     var uname = $.trim($('#user_search').val());                
     if(uname == ''){
