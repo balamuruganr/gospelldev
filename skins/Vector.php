@@ -468,7 +468,7 @@ class VectorTemplate extends BaseTemplate {
 			<?php endif; ?>
 		<?php else: ?>
 		<div>
-		<input type="text" name="user_search" id="user_search" placeholder="search by user name" />
+		<input type="text" name="user_search" id="user_search" placeholder="search by user name" autocomplete="off"/>
 		<span id="js_user_search_result"></span>		
 			<?php echo $this->makeSearchInput( array( 'id' => 'searchInput' ) ); ?>
 			<?php echo $this->makeSearchButton( 'go', array( 'id' => 'searchGoButton', 'class' => 'searchButton' ) ); ?>
