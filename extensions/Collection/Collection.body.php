@@ -74,6 +74,9 @@ class SpecialCollection extends SpecialPage {
                 }                
 				$this->renderBookCreatorPage( $request->getVal( 'referer', '' ), $par, $is_rename );                
 				return;
+            case 'viewbook':
+                 $this->viewBookSpecialPage( $request->getVal( 'bookid', '' ), $request->getVal( 'referer', '' ), $par );
+                 return;    
 			case 'start_book_creator':
                 $title = Title::newFromText( $request->getVal( 'referer', '' ) );
 				if ( is_null( $title ) ) {
@@ -322,7 +325,7 @@ class SpecialCollection extends SpecialPage {
 				} else {
 					CollectionSuggest::run();
 				}
-				return;
+				return;               
 			case '':
 				$this->renderSpecialPage();
 				return;
@@ -582,6 +585,65 @@ class SpecialCollection extends SpecialPage {
 		$template->set( 'community-book-prefix', $prefixes['community-prefix'] );
 		$out->addTemplate( $template );
 	}
+    
+    function viewBookSpecialPage( $book_id, $referer, $par ) { 
+		global $wgUser, $wgCollectionFormats;
+        global $wgOut, $wgTitle;
+
+		
+
+		if ( !CollectionSession::hasSession() ) {
+			CollectionSession::startSession();
+		}
+        
+        $title = Title::newFromText( $referer );
+		if ( is_null( $title ) || $title->equals( $this->getTitle( $par ) ) ) {
+			$title = Title::newMainPage();
+		}
+        
+        $user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+        $user_name = gospellCommonFunctions::userNameFromBookId( $book_id );
+        $user_book = gospellCommonFunctions::get_user_current_book( $user_id, $user_name, $book_id );
+        
+        $book_items = array();
+        $book_items = gospellCommonFunctions::get_book_items( $book_id, $user_name );
+         
+        $view_book = array(
+                        'book_id' => $user_book->book_id,
+                        'book_name' => $user_book->book_name,
+                        'user_id' => $user_book->user_id,
+                        'user_name' => $user_book->user_name,
+                        'is_anonymous_user' =>$user_book->is_anonym_user,
+            			'enabled' => $user_book->enabled,
+            			'title' => $user_book->title,
+            			'subtitle' => $user_book->subtitle,
+                        'items' => $book_items,
+                        'book_type' => $user_book->book_type,
+                        'timestamp' => $user_book->unix_book_time
+            		  );
+        
+		$out = $this->getOutput();
+
+		$this->setHeaders();
+        $out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
+		//$out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
+		$out->addModules( 'ext.collection' );
+        
+        foreach($view_book['items'] as $bk_item){
+           $out->addHTML('==' . $this->msg( 'coll-view-item-title', $bk_item['title'] )->text() . '=='); 
+        }
+        //
+        
+
+		/*$template = new CollectionPageTemplate();
+		$template->set( 'collection', CollectionSession::getCollection() );
+		$template->set( 'podpartners', $this->mPODPartners );
+		$template->set( 'formats', $wgCollectionFormats );
+		$prefixes = self::getBookPagePrefixes();
+		$template->set( 'user-book-prefix', $prefixes['user-prefix'] );
+		$template->set( 'community-book-prefix', $prefixes['community-prefix'] );
+		$out->addTemplate( $template );*/
+	}
 
 	/**
 	 * @param $title string
@@ -634,13 +696,25 @@ class SpecialCollection extends SpecialPage {
 		if ( !isset( $collection['items'] ) || !is_array( $collection['items'] ) ) {
 			$collection['items'] = array();
 		}
-		array_push( $collection['items'], array(
+        
+        $item = array(
+            'book_id' => $collection['book_id'],
+			'type' => 'chapter',
+			'title' => $name
+		);
+        
+		/*array_push( $collection['items'], array(
 			'type' => 'chapter',
 			'title' => $name,
-		) );
-		CollectionSession::setCollection( $collection );
+		) );*/
+          //gospellCommonFunctions::send_book_items( $item );
+          array_push( $collection['items'], $item );          
+          CollectionSession::setCollection( $collection );
+     return true;                  
 	}
-
+    //function send_chapter( $item = array() ){        
+    //  return 
+    //}
 	/**
 	 * @param $index int
 	 * @param $name string
@@ -836,7 +910,13 @@ class SpecialCollection extends SpecialPage {
 			return false;
 		}
 		$collection = CollectionSession::getCollection();
-		array_splice( $collection['items'], $index, 1 );
+        $is_deleted = gospellCommonFunctions::remove_book_item( 
+                           $collection['items'][$index]['book_id'], $wgUser->getName(), $collection['items'][$index]['type'], $collection['items'][$index]['title']
+                          );
+        if($is_deleted){
+         array_splice( $collection['items'], $index, 1 );   
+        }                       
+		
 		CollectionSession::setCollection( $collection );
 		return true;
 	}
@@ -1279,11 +1359,16 @@ class SpecialCollection extends SpecialPage {
 		}
 	}
 
-	function download() {
+	function download() { 
 		global $wgCollectionContentTypeToFilename;
 
 		$request = $this->getRequest();
-
+                
+         //echo("<pre>");
+         //print_r($wgCollectionContentTypeToFilename);
+         //echo("<pre>");
+         //print_r($request); die;
+          
 		$this->tempfile = tmpfile();
 		$r = self::mwServeCommand( 'render_status', array(
 			'collection_id' => $request->getVal( 'collection_id' ),
@@ -1433,6 +1518,7 @@ class SpecialCollection extends SpecialPage {
 		global $wgOut, $wgCollectionMWServeURL, $wgCollectionMWServeCredentials, $wgCollectionFormatToServeURL;
 
 		$serveURL = $wgCollectionMWServeURL;
+        
 		if ( isset ( $args['writer'] ) ) {
 			if ( array_key_exists( $args['writer'], $wgCollectionFormatToServeURL ) ) {
 				$serveURL = $wgCollectionFormatToServeURL[ $args['writer'] ];

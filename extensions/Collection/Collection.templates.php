@@ -17,8 +17,10 @@ class CollectionPageTemplate extends QuickTemplate {
 ?>
 
 <div class="collection-column collection-column-left">
-
-<form action="<?php echo htmlspecialchars( SkinTemplate::makeSpecialUrl( 'Book' ) ) ?>" method="post" id="mw-collection-title-form">
+<div>
+ <?php //echo"<pre>"; print_r($this->data);?>
+</div>
+<!--form action="<?php echo htmlspecialchars( SkinTemplate::makeSpecialUrl( 'Book' ) ) ?>" method="post" id="mw-collection-title-form">
 	<table id="mw-collection-title-table" style="width: 80%; background-color: transparent;" align="center">
 		<tbody>
 			<tr>
@@ -35,7 +37,7 @@ class CollectionPageTemplate extends QuickTemplate {
 	<noscript>
 		<input type="submit" value="<?php $this->msg( 'coll-update' ) ?>" />
 	</noscript>
-</form>
+</form-->
 
 <div id="collectionListContainer">
 <?php
@@ -44,6 +46,7 @@ $listTemplate->set( 'collection', $this->data['collection'] );
 $listTemplate->execute();
 ?>
 </div>
+
 <div style="display:none">
 	<span id="newChapterText"><?php $this->msg( 'coll-new_chapter' ) ?></span>
 	<span id="renameChapterText"><?php $this->msg( 'coll-rename_chapter' ) ?></span>
@@ -123,7 +126,7 @@ foreach ( $this->data['podpartners'] as $partnerKey => $partnerData ) {
 				</select>
 			<?php } ?>
 			</td><td id="collection-download-button">
-			<input type="hidden" name="bookcmd" value="render" />
+			<input type="hidden" name="bookcmd" value="download" /><!--render -->
 			<input id="downloadButton" type="submit" value="<?php echo $buttonLabel ?>"<?php if ( count( $this->data['collection']['items'] ) == 0 ) { ?> disabled="disabled"<?php } ?> />
 			</td></tr></tbody></table>
 		</form>

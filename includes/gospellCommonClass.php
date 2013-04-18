@@ -407,8 +407,7 @@ class gospellCommonFunctions {
     		);
             
  		$dbw->commit();
-            
-        
+      //echo $dbw->insertId();          
      return $dbw->insertId();
     }
     

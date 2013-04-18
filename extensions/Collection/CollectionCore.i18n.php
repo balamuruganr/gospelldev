@@ -43,7 +43,7 @@ $messages['en'] = array(
 	'coll-add_page_tooltip'         => 'Add the current wiki page to your book',
 	'coll-bookscategory'            => 'Books',
 	'coll-clear_collection'         => 'Clear book',
-	'coll-clear_collection_confirm' => 'Do you really want to completely clear your book?',
+	'coll-clear_collection_confirm' => 'Do you really want to completely clear all in your book?',
 	'coll-clear_collection_tooltip' => 'Remove all wiki pages from your current book',
 	'coll-help'                     => 'Help',
 	'coll-help_tooltip'             => 'Show help about creating books',
@@ -63,6 +63,8 @@ $messages['en'] = array(
 	'coll-suggest_empty'            => 'empty',
 	'coll-user_book_prefix'         => '-',
 	'coll-community_book_prefix'    => '-',
+    'coll-view-book-page-title'     => 'Book: $1',
+    'coll-view-item-title'          => '$1',
 );
 
 /** Message documentation (Message documentation)

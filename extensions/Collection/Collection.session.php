@@ -169,7 +169,7 @@ class CollectionSession {
     		$_SESSION['wsCollection']['enabled'] = false;
     		self::touchSession();
          }   
-        
+         
         $wsBookCollection = array();
         $wsBookCollection = $_SESSION['wsCollection'];
      return $wsBookCollection;
@@ -283,8 +283,7 @@ class CollectionSession {
 	/**
 	 * @return array
 	 */
-	static function getCollection() {
-	    //$user_id = User::idFromName( $user_name );        
+	static function getCollection() {   
 		return self::purge() ? $_SESSION['wsCollection'] : array();
 	}
 

@@ -374,6 +374,9 @@ $('#userlogin2').submit(function() {
 ///////////////////////////// Updated for Default book ///////////////////////////
 function goto_default_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+    //var blokedPages = Array("Book","UserLogout","UserLogout");
+   
+    
     var hint  = "";
     var oldid = "0";
     $.getJSON(script_url, {
@@ -386,12 +389,16 @@ function goto_default_bookset( bookid ){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
 		   } //else { $('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');} 
                       
-		}); 
+		});
+        
+        
 }
 function set_default_book(){
      var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
-     var userTo = decodeURIComponent( wgTitle ); 
-          
+     var userTo = decodeURIComponent( wgTitle );
+      
+    if( wgTitle !=='Book' ){ 
+        
      $.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxSetDefaultBookSettings',
@@ -400,6 +407,7 @@ function set_default_book(){
 		    goto_default_bookset( result.html );
 		});
         
+    }    
 }
 ///////////////////////////// Updated for Default book ///////////////////////////
 

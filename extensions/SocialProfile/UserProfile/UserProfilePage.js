@@ -491,7 +491,7 @@ function update_wall(){
      );   
    }
 }
-function save_collection( collection){
+function save_collection( collection ){
     $.jStorage.set('collection', collection);
 }
 function goto_this_bookset( bookid, url ){

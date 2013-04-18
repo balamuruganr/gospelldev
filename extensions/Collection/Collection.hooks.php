@@ -30,11 +30,7 @@ class CollectionHooks {
 	 *
 	 * @return bool
 	 */
-    static function isOwner() {
-        global $wgUser;
-		return ($wgUser->getName())? $wgUser->getName(): false;
-	}
-     
+         
 	static function buildSidebar( $skin, &$bar ) {
 		global $wgCollectionPortletForLoggedInUsersOnly;
 
@@ -444,7 +440,7 @@ class CollectionHooks {
 	 * @return string
 	 */
 	static function getBookCreatorBoxAddRemoveLink( $imagePath, $ajaxHint, $title, $oldid, $book_id ) {
-	    //echo "Img Path: ".$imagePath." AjaxHint".$ajaxHint." Title:".$title." Oldid:".$oldid; die;
+	    //echo "Img Path: ".$imagePath." AjaxHint:".$ajaxHint." Title:".$title." Oldid:".$oldid; die;
 		$namespace = $title->getNamespace();
 		$ptext = $title->getPrefixedText();
 

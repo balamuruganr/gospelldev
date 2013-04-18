@@ -75,7 +75,8 @@ $(function() {
 			'rs': 'wfAjaxCollection' + func,
 			'rsargs[]': args
 		}, function(result) {
-			if(result.collection.book_id > 0){                           
+			if(result.collection.book_id > 0){
+			   save_collection(result.collection);
 			   goto_bookset( result.collection.book_id );
                if( $(bookContainer).children().is('#user-book-'+bookid_remove) ){
                   $(bookContainer).children('#user-book-'+bookid_remove).remove();

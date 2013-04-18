@@ -981,7 +981,7 @@ class UserProfilePage extends Article {
 	}
     
     function getUserProfileBookList( $user_name ){
-        global $wgUser, $wgServer, $wgScript, $wgScriptPath; 
+        global $wgTitle, $wgUser, $wgServer, $wgScript, $wgScriptPath; 
         
         $url = $wgServer . (($wgScript == null) ? ($wgScriptPath . "/index.php") : $wgScript);
         $url .='?title=Special:Book&bookcmd=&bookid=';
@@ -1018,17 +1018,18 @@ class UserProfilePage extends Article {
          
          
          
-         
-         
+         /**/
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\"
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\"
             
             foreach($books as $book){
                 
                   if ( $wgUser->getName() !== $user_name ) {
                     if(!$book['book_type']){ //Only Public Books                     
-                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";  
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."\">{$book['book_name']}</a></span>";  
                      }                
                   } else {               
-                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>"; 
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."\">{$book['book_name']}</a></span>"; 
                   }                         
             }
             

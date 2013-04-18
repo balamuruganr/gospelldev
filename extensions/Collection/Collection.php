@@ -479,7 +479,7 @@ function wfAjaxCollectionGetRenderBookCreatorBox( $ajaxHint = '', $oldid = null,
 	if ( is_null( $title ) ) {
 		$title = Title::newMainPage();
 	}
-        
+            
     $_SESSION['wsCollection']['book_id'] = $book_id;
     $user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
     $user_name = gospellCommonFunctions::userNameFromBookId( $book_id ); 
