@@ -59,10 +59,16 @@ class UserProfilePage extends Article {
              $_SESSION['wsCollection']['user_id'] = $this->user_id;
              $_SESSION['wsCollection']['user_name'] = $this->user_name;
              
-             $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
+             if($this->isOwner()){
+                $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
+             } else {
+                $user_having_books = gospellCommonFunctions::get_user_current_book_public( $this->user_id, $this->user_name );
+             }
+             
               if(is_object($user_having_books)){
                    $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id; 
-              }                
+              }
+                              
         ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
          
 		$wgOut->addHTML( '<div id="profile-top">' );
@@ -1018,18 +1024,18 @@ class UserProfilePage extends Article {
          
          
          
-         /**/
-         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".$url.$book['book_id']."');\"
-         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\"
+         
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."');\"
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."');\"
             
             foreach($books as $book){
-                
+                  
                   if ( $wgUser->getName() !== $user_name ) {
                     if(!$book['book_type']){ //Only Public Books                     
-                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."\">{$book['book_name']}</a></span>";  
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>";  
                      }                
                   } else {               
-                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."\">{$book['book_name']}</a></span>"; 
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>"; 
                   }                         
             }
             

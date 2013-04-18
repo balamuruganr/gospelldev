@@ -172,6 +172,25 @@ class CollectionHooks {
 
 		return $out;
 	}
+    
+    static function setCollectionItems() {
+  $collection = $_SESSION['wsCollection'];
+
+	 $template = new CollectionListTemplate();
+	 $template->set( 'collection', $collection );
+	 $template->set( 'is_ajax', true );
+	 ob_start();
+	 $template->execute();
+	 $html = ob_get_contents();
+	 ob_end_clean();
+
+	 //$result = array();
+	 //$result['html'] = $html;
+	 //$result['collection'] = $collection;
+	 //$r = new AjaxResponse( FormatJson::encode( $result ) );
+	 //$r->setContentType( 'application/json' );
+	 //return $r;
+   }
 
 	/**
 	 * Callback for hook SiteNoticeAfter
@@ -285,6 +304,7 @@ class CollectionHooks {
 			return true;
 		}
         
+        //self::setCollectionItems($ajaxHint = '', $oldid = null, $book_id, $title);        
 		$siteNotice .= self::renderBookCreatorBox( $title, $mode = '', $book_id );
 		return true;
 	}
@@ -310,16 +330,19 @@ class CollectionHooks {
 		$addRemoveState = $mode;
         
         $book_user_name = $_SESSION['wsCollection']['user_name'];
-        $book_user_id   = $_SESSION['wsCollection']['user_id'];                          
+        $book_user_id   = $_SESSION['wsCollection']['user_id'];
+        $book_items     = $_SESSION['wsCollection']['items'];                            
         /////////////////////
         
         $book_obj = gospellCommonFunctions::get_user_current_book($book_user_id, $book_user_name, $book_id);
+        
         $book_type = ($book_obj->book_type)?"Private":"Public";
         $book_change_type = ($book_obj->book_type)?"Public":"Private";
         ////////////////////
         $book_user_name = $book_obj->user_name;
         
         $delete_edit_book_link = '';
+        $view_book_link = '';
         $html = '';
         //$html .= "<span>".$wgUser->getID()."</span>"."<span>".$wgUser->getName()."</span>"."<span>$book_id</span><span>".self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )."</span>";
         
@@ -339,6 +362,18 @@ class CollectionHooks {
                 								)).'">Rename This Book</a>
                                             </span>'; //,'referer' => $wgTitle                                 
         }
+        
+       
+           $view_book_link .='&nbsp;<span class="remove_edit_book_link">
+                                 <a href="'.SkinTemplate::makeSpecialUrl(
+                                     'Book',array(
+                                       'bookcmd' => 'viewbook', 
+                                       'bookid' => $book_id, 
+                                       'referer' => $ptext)).'">View This Book</a>
+                                 </span>'; 
+        
+        
+                                 
         ///*<a onclick="collectionCall('RemoveArticle', ['addarticle', wgNamespaceNumber, wgTitle, &quot;0&quot;, 4]); return false;" rel="nofollow" id="coll-remove_article" title="Remove the current wiki page from your book" href="/gospelldev/index.php?title=Special:Book&amp;bookcmd=remove_article&amp;arttitle=User%3AMathivanan&amp;oldid=0"><img width="16" height="16" alt="" src="/gospelldev/extensions/Collection/images/silk-remove.png">&nbsp;Remove this page from your book</a>*/
 		$html .= Xml::element( 'div',
 			array( 'class' => 'collection-creatorbox' ),
@@ -381,10 +416,11 @@ class CollectionHooks {
             '<span><strong>Book Title</strong>:&nbsp;'.$book_obj->book_name.'</span>&nbsp;' .
             '<span><strong>Sub Title</strong>:&nbsp;'.$book_obj->subtitle.'</span>&nbsp;' .
             '<span><strong>Book Type</strong>:&nbsp;<a title="Click to '. $book_change_type .'" style="cursor:pointer;">'.$book_type.'</a></span>' .
-             $delete_edit_book_link
+             $delete_edit_book_link .
+             $view_book_link
             /////////////////////////////
 		);
-                             
+        //if($wgUser->getName() === $book_user_name){                     
 		$html .= Xml::tags( 'div',
 			array(
 				'id' => 'coll-book_creator_box',
@@ -556,16 +592,17 @@ class CollectionHooks {
  					          'rel' => 'nofollow',
                               'title' => wfMessage( 'coll-show_collection_tooltip' )->text(),
             				  'class' => 'collection-creatorbox-iconlink',
-            				),
-                        array(
-                              'bookcmd' =>"",
-                              'bookid' => $book_id
-                              ),    
-						array( 'known', 'noclasses' )
+            				)
 					);
 		}
 	}
-/*Linker::linkKnown(
+/*
+                       ,
+                        array(
+                              'bookcmd' =>""
+                              ),    
+						array( 'known', 'noclasses' )
+Linker::linkKnown(
 				SpecialPage::getTitleFor( 'Book' ),
 				Xml::element( 'img',
 					array(

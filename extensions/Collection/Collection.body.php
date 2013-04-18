@@ -587,10 +587,10 @@ class SpecialCollection extends SpecialPage {
 	}
     
     function viewBookSpecialPage( $book_id, $referer, $par ) { 
-		global $wgUser, $wgCollectionFormats;
+		global $wgUser, $wgCollectionFormats, $wgScriptPath;
         global $wgOut, $wgTitle;
 
-		
+		$mediapath = $wgScriptPath . '/extensions/Collection/images/';
 
 		if ( !CollectionSession::hasSession() ) {
 			CollectionSession::startSession();
@@ -628,14 +628,40 @@ class SpecialCollection extends SpecialPage {
         $out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
 		//$out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
 		$out->addModules( 'ext.collection' );
-        
-        foreach($view_book['items'] as $bk_item){
-           $out->addHTML('==' . $this->msg( 'coll-view-item-title', $bk_item['title'] )->text() . '=='); 
+        if(is_array($view_book['items']) && !empty($view_book['items'])){
+            
+            foreach($view_book['items'] as $bk_item){
+                
+               $out->addHTML('<div>');
+               
+               if( $bk_item['type'] == 'article' ){                
+                $out->addHTML('<a href="' .htmlspecialchars( $bk_item['url'] ). '" title="' . $this->msg( 'coll-show' ) .'"><img src="' . htmlspecialchars( $mediapath . "show.png" ) . '" width="15" height="15" alt="' .$this->msg( 'coll-show' ) . '" /></a>');  
+               }             
+                
+               $out->addHTML( $this->msg( 'coll-view-item-title', $bk_item['title'] )->text() );
+               
+               $out->addHTML('</div>');
+                
+            }
+            
+        } else {
+         
+         $out->addHTML('<div>No items in this book.</div>');
+            
         }
-        //
-        
-
-		/*$template = new CollectionPageTemplate();
+       $out->addHTML('<br /><div id="cancel-button" class="collection-button cancel">'
+                   . Linker::link(
+						$title,
+						"Back",
+						array(
+							'rel' => 'nofollow',
+							// TOOD: title
+						),
+						array(),
+						array( 'known', 'noclasses' )
+					) .
+                    '</div>');
+        /*$template = new CollectionPageTemplate();
 		$template->set( 'collection', CollectionSession::getCollection() );
 		$template->set( 'podpartners', $this->mPODPartners );
 		$template->set( 'formats', $wgCollectionFormats );
@@ -697,17 +723,33 @@ class SpecialCollection extends SpecialPage {
 			$collection['items'] = array();
 		}
         
+        if(!empty($collection['items'])){
+            foreach($collection['items'] as $item){
+                if($item['type'] == 'chapter' && $item['title'] == $name ){
+                  return; 
+                }
+            }
+        }
+        
         $item = array(
             'book_id' => $collection['book_id'],
 			'type' => 'chapter',
-			'title' => $name
+            'content_type' => '',
+			'title' => $name,
+            'revision' => '',
+            'latest' => '',
+            'timestamp' => '',
+            'url' => '',
+            'currentVersion' => ''
 		);
         
 		/*array_push( $collection['items'], array(
 			'type' => 'chapter',
 			'title' => $name,
 		) );*/
-          //gospellCommonFunctions::send_book_items( $item );
+          
+          $item['position'] = count($collection['items']);
+          gospellCommonFunctions::send_book_items( $item );
           array_push( $collection['items'], $item );          
           CollectionSession::setCollection( $collection );
      return true;                  
@@ -727,7 +769,13 @@ class SpecialCollection extends SpecialPage {
 		if ( $collection['items'][$index]['type'] != 'chapter' ) {
 			return;
 		}
+        
+        $book_id = $collection['items'][$index]['book_id'];
+        //$user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+        $user_name = gospellCommonFunctions::userNameFromBookId( $book_id ); 
+        
 		$collection['items'][$index]['title'] = $name;
+        gospellCommonFunctions::rename_item_chapter( $name, $book_id, $user_name, $index );
 		CollectionSession::setCollection( $collection );
 	}
 
@@ -786,7 +834,7 @@ class SpecialCollection extends SpecialPage {
 			'latest' => strval( $latest ),
 			'timestamp' => wfTimestamp( TS_UNIX, $revision->getTimestamp() ),
 			'url' => $title->getCanonicalURL(),
-			'currentVersion' => $currentVersion,
+			'currentVersion' => $currentVersion
 		);
 
 		if ( $wgCollectionHierarchyDelimiter != null ) {
@@ -795,10 +843,12 @@ class SpecialCollection extends SpecialPage {
 				$item['displaytitle'] = end( $parts );
 			}
 		}
-
+                
+        $item['position'] = count($collection['items']);
+        
 		$collection['items'][] = $item;
-        gospellCommonFunctions::send_book_items( $item ); 
-		CollectionSession::setCollection( $collection );
+        gospellCommonFunctions::send_book_items( $item );
+        CollectionSession::setCollection( $collection );        
 		return true;
 	}
 
@@ -825,10 +875,12 @@ class SpecialCollection extends SpecialPage {
 			return false;
 		}
 		$collection = CollectionSession::getCollection();
-		$index = CollectionSession::findArticle( $title->getPrefixedText(), $oldid, $book_id );        
+		$index = CollectionSession::findArticle( $title->getPrefixedText(), $oldid, $book_id ); 
+        //$user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+        $user_name = gospellCommonFunctions::userNameFromBookId( $book_id );        
 		if ( $index != - 1 ) {
 			$is_deleted = gospellCommonFunctions::remove_book_item( 
-                           $collection['items'][$index]['book_id'], $wgUser->getName(), $collection['items'][$index]['type'], $collection['items'][$index]['title']
+                           $collection['items'][$index]['book_id'], $user_name, $collection['items'][$index]['type'], $collection['items'][$index]['title']
                           );
             if($is_deleted){
               array_splice( $collection['items'], $index, 1 ); 
@@ -946,12 +998,17 @@ class SpecialCollection extends SpecialPage {
 			return;
 		}
 		$collection = CollectionSession::getCollection();
+        
+        $book_id = $collection['book_id'];
+        $book_user_name = $collection['user_name'];
+        //print_r($items); die;
 		$old_items = $collection['items'];
 		$new_items = array();
 		foreach ( $items as $new_index => $old_index ) {
 			$new_items[$new_index] = $old_items[$old_index];
+            gospellCommonFunctions::reorder_book_items( $new_index, $book_id, $book_user_name, $old_index );
 		}
-		$collection['items'] = $new_items;
+		$collection['items'] = $new_items;        
 		CollectionSession::setCollection( $collection );
 	}
 

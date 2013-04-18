@@ -494,7 +494,7 @@ function update_wall(){
 function save_collection( collection ){
     $.jStorage.set('collection', collection);
 }
-function goto_this_bookset( bookid, url ){
+function goto_this_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
     //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
     var hint  = "";
@@ -506,8 +506,7 @@ function goto_this_bookset( bookid, url ){
 		}, function(result) { 
 		   if($('.mw-body').children().is('#siteNotice')){
 		      $('.mw-body').children('#siteNotice').html(result.html); 
-		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}		    
-           //window.location = url;
+		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}
 		}); 
 }
 function auto_book_list() {

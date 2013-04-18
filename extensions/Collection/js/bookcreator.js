@@ -31,7 +31,7 @@ $(function() {
 
 	window.wfCollectionSave = save_collection;
 
-	function refreshBookCreatorBox(hint, oldid, bookid) {
+	function refreshBookCreatorBox(hint, oldid, bookid) { 
 		$.getJSON(script_url, {
 			'action': 'ajax',
 			'rs': 'wfAjaxCollectionGetBookCreatorBoxContent',
@@ -49,12 +49,11 @@ $(function() {
 			'rsargs[]': args
 		}, function(result) {
 			var oldid = null;
-            var bookid = 0; 
+            var bookid = 0;             
 			if (args.length == 4) { // 3
 				oldid  = args[2]; // 2
                 bookid = args[3];
-			}
-            //alert("TEST:" +args.length+ " oldid:" +oldid+" bookid:" +bookid);
+			}            
 			refreshBookCreatorBox(hint, oldid, bookid);
 			save_collection(result.collection);
 		}, 'json');

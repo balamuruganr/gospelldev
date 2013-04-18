@@ -382,7 +382,7 @@ class gospellCommonFunctions {
  		$dbw->commit();       
     }    
        
-    static function send_book_items( $items = array() ){
+    static function send_book_items( $item = array() ){
         global $wgUser;
         
         $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
@@ -390,26 +390,104 @@ class gospellCommonFunctions {
         $dbw->insert(
 			'user_book_items',
 			array(
-				'bi_book_id' => $items['book_id'],
+				'bi_book_id' => $item['book_id'],
                 'bi_book_user_name' => $wgUser->getName(),
-				'bi_type' => $items['type'],
-                'bi_content_type' => $items['content_type'],
-                'bi_title' => $items['title'],
-				'bi_revision' => $items['revision'],
-                'bi_latest' => $items['latest'],
-				'bi_date' => date("Y-m-d H:i:s",$items['timestamp']),
-                'bi_url' => $items['url'],
-                'bi_current_version' => $items['currentVersion'],
-                'bi_displaytitle' => (isset($items['displaytitle']))? $items['displaytitle'] : "",
+				'bi_type' => $item['type'],
+                'bi_content_type' => $item['content_type'],
+                'bi_title' => $item['title'],
+				'bi_revision' => $item['revision'],
+                'bi_latest' => $item['latest'],
+				'bi_date' => date("Y-m-d H:i:s",$item['timestamp']),
+                'bi_url' => $item['url'],
+                'bi_current_version' => $item['currentVersion'],
+                'bi_displaytitle' => (isset($item['displaytitle']))? $item['displaytitle'] : "",
+                'bi_item_position' => $item['position'],
 			),
 			__METHOD__,
             array( 'IGNORE' )
     		);
             
  		$dbw->commit();
-      //echo $dbw->insertId();          
-     return $dbw->insertId();
     }
+    
+    static function reorder_book_items( $new_index, $book_id, $book_user_name, $old_index ){
+        global $wgUser;
+        
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+               
+        $s = $dbw->selectRow(
+				'user_book_items',
+				array( 'bi_item_position' ),
+				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $old_index),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->update(
+					'user_book_items',
+                    array( 'bi_item_position' => $new_index ),
+					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $old_index),
+					__METHOD__
+				);   
+            }
+            
+ 		$dbw->commit();
+    }
+    
+    static function get_book_items( $book_id = 0, $user_name ='' ){
+        global $wgUser;
+        
+        $dbr = wfGetDB( DB_SLAVE); 
+        $sql ="SELECT bi_book_id, bi_type, bi_content_type, bi_title, bi_revision, bi_latest, UNIX_TIMESTAMP(bi_date) AS unix_book_item_time, 
+                bi_url, bi_current_version, bi_displaytitle, bi_item_position, bi_status 
+                FROM user_book_items WHERE bi_book_id ={$book_id} AND bi_book_user_name ='{$user_name}' ORDER BY bi_item_position ASC"; 
+        //echo $sql;                      
+        $res = $dbr->query( $sql, __METHOD__);
+        $book_items = array();
+        $i = 0;
+        
+        foreach ( $res as $row ) {
+                $book_items[$i] = array(                          
+                      'book_id' => $row->bi_book_id,
+                      'type' => $row->bi_type,
+                      'content_type' => $row->bi_content_type,
+                      'title' => $row->bi_title,
+                      'revision' => $row->bi_revision,
+                      'latest' => $row->bi_latest,
+                      'timestamp' => $row->unix_book_item_time,
+                      'url' => $row->bi_url,
+                      'currentVersion' => $row->bi_current_version,
+                      'position' =>$row->bi_item_position,                       
+                 ); 
+                 
+                if($row->bi_displaytitle != ''){ $book_items[$i]['displaytitle'] = $row->bi_displaytitle; }
+                
+          $i = $i+1;      
+       	}
+     return $book_items;   
+    }
+    
+   static function rename_item_chapter( $name, $book_id, $user_name, $index ){
+        global $wgUser;
+        
+        $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
+               
+        $s = $dbw->selectRow(
+				'user_book_items',
+				array( 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
+				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $index ),
+				__METHOD__
+			);
+			if ( $s !== false ) {
+				$dbw->update(
+					'user_book_items',
+                    array( 'bi_title' => $name),
+					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $index ),
+					__METHOD__
+				);   
+            }
+            
+ 		$dbw->commit();
+   }
     
     static function remove_book_item( $book_id = 0, $user_name, $type, $title ){
         global $wgUser;
@@ -485,39 +563,7 @@ class gospellCommonFunctions {
                
       return $falg;
     }
-    
-    static function get_book_items( $book_id = 0, $user_name ='' ){
-        global $wgUser;
         
-        $dbr = wfGetDB( DB_SLAVE); 
-        $sql ="SELECT bi_book_id, bi_type, bi_content_type, bi_title, bi_revision, bi_latest, UNIX_TIMESTAMP(bi_date) AS unix_book_item_time, 
-                bi_url, bi_current_version, bi_displaytitle, bi_status 
-                FROM user_book_items WHERE bi_book_id ={$book_id} AND bi_book_user_name ='{$user_name}' ORDER BY bi_id ASC"; 
-        //echo $sql;                      
-        $res = $dbr->query( $sql, __METHOD__);
-        $book_items = array();
-        $i = 0;
-        
-        foreach ( $res as $row ) {
-                $book_items[$i] = array(                          
-                      'book_id' => $row->bi_book_id,
-                      'type' => $row->bi_type,
-                      'content_type' => $row->bi_content_type,
-                      'title' => $row->bi_title,
-                      'revision' => $row->bi_revision,
-                      'latest' => $row->bi_latest,
-                      'timestamp' => $row->unix_book_item_time,
-                      'url' => $row->bi_url,
-                      'currentVersion' => $row->bi_current_version                      
-                 ); 
-                 
-                if($row->bi_displaytitle != ''){ $book_items[$i]['displaytitle'] = $row->bi_displaytitle; }
-                
-          $i = $i+1;      
-       	}
-     return $book_items;   
-    }
-    
     static function get_user_current_book($user_id = 0, $user_name = '', $book_id = 0){
         global $wgUser;
         $dbr = wfGetDB( DB_SLAVE);
@@ -539,6 +585,27 @@ class gospellCommonFunctions {
        
      return $row;  
     }
+    
+    static function get_user_current_book_public( $user_id = 0, $user_name = '' ){
+        global $wgUser;
+        $dbr = wfGetDB( DB_SLAVE);
+        
+        
+        $book_sql = " ORDER BY book_id DESC LIMIT 0, 1";   
+        
+        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+                            FROM user_books 
+                            WHERE user_id ={$user_id} 
+                            AND user_name ='{$user_name}' 
+                            AND book_type = 0
+                            {$book_sql}";
+        
+       $res = $dbr->query( $sql, __METHOD__ );
+	   $row = $dbr->fetchObject( $res );
+       
+     return $row;  
+    }
+    
     
     static function get_user_books( $user_id, $user_name ){
        global $wgUser;

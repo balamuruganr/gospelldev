@@ -217,11 +217,12 @@ class CollectionSession {
 			return - 1;
 		}
         //////////////////////
+        $book_user_name = gospellCommonFunctions::userNameFromBookId( $book_id ); 
         
         if($book_id === 0){            
            $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $wgUser->getName() );              
-        }else if($book_id !== '' || $book_id !== 0 ){
-          $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $wgUser->getName() );  
+        }else if($book_id > 0 ){
+          $_SESSION['wsCollection']['items'] = gospellCommonFunctions::get_book_items( $book_id, $book_user_name );  
         }          
         /////////////////////////
         if(is_array($_SESSION['wsCollection']['items'])){
