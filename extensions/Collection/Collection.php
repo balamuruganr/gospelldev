@@ -499,11 +499,15 @@ $wgAjaxExportList[] = 'wfAjaxCollectionGetRenderBookCreatorBox';
 
 function wfAjaxSetDefaultBookSettings() {
 	global $wgUser;
+       $user_having_books = "";
         
        if(isset($_SESSION['wsCollection']['book_id']) && $_SESSION['wsCollection']['user_id'] && $_SESSION['wsCollection']['user_name']){ 
             $book_id = $_SESSION['wsCollection']['book_id'];
-        } else {           
-            $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );
+        } else { 
+            if( $wgUser->getName() ){
+              $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );  
+            }
+            
             $book_id = (is_object($user_having_books))? $user_having_books->book_id : '0';
         }
         

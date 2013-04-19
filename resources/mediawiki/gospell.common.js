@@ -236,7 +236,7 @@ jQuery( function ( $ ) {
         }).done();    
     });
    ////////////////////////////////
-   //set_default_book();
+   set_default_book();
    ///////////////////////////////      
 });
 
@@ -423,11 +423,9 @@ $('#userlogin2').submit(function() {
 });
 
 ///////////////////////////// Updated for Default book ///////////////////////////
-/*function goto_default_bookset( bookid ){
+function goto_default_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
-    //var blokedPages = Array("Book","UserLogout","UserLogout");
-   
-    
+    //var blokedPages = Array("Book","UserLogout","UserLogout");   
     var hint  = "";
     var oldid = "0";
     $.getJSON(script_url, {
@@ -455,11 +453,13 @@ function set_default_book(){
 			'rs': 'wfAjaxSetDefaultBookSettings',
 			'rsargs[]': []
 		}, function(result) {
-		    goto_default_bookset( result.html );
+		    if(result.html > 0 ){
+		      goto_default_bookset( result.html ); 
+		    } 		    
 		});
         
     }    
-}*/
+}
 ///////////////////////////// Updated for Default book ///////////////////////////
 
 function checkSignpostRedirectAndAssignTop() {

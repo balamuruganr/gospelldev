@@ -626,10 +626,17 @@ class SpecialCollection extends SpecialPage {
 
 		$this->setHeaders();
         $out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
-		//$out->setPageTitle( $this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() );
+        $wgOut->setSubtitle( $this->msg( 'coll-view-book-sub-title', $view_book['subtitle'])->text() );
 		$out->addModules( 'ext.collection' );
-        if(is_array($view_book['items']) && !empty($view_book['items'])){
-            
+        
+        $out->addHTML('<div id="book-container">');
+         
+        if(is_array($view_book['items']) && !empty($view_book['items'])){             
+             
+             $out->addHTML('<div id="book-image">');
+             $out->addHTML('</div>');
+             
+             $out->addHTML('<div id="book-block">');
             foreach($view_book['items'] as $bk_item){
                 
                $out->addHTML('<div>');
@@ -644,23 +651,33 @@ class SpecialCollection extends SpecialPage {
                 
             }
             
+          
+         $out->addHTML('</div>');
+               
         } else {
          
          $out->addHTML('<div>No items in this book.</div>');
             
         }
-       $out->addHTML('<br /><div id="cancel-button" class="collection-button cancel">'
+       $out->addHTML('<div id="book-bottom">'); 
+        $out->addHTML('<br /><div id="cancel-button" class="collection-button cancel">'
                    . Linker::link(
 						$title,
 						"Back",
 						array(
 							'rel' => 'nofollow',
+                            'class' => 'cancel-back'
 							// TOOD: title
 						),
 						array(),
 						array( 'known', 'noclasses' )
 					) .
                     '</div>');
+       
+        
+        $out->addHTML('</div>');
+                       
+       $out->addHTML('</div>');   
         /*$template = new CollectionPageTemplate();
 		$template->set( 'collection', CollectionSession::getCollection() );
 		$template->set( 'podpartners', $this->mPODPartners );

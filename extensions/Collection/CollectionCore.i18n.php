@@ -64,6 +64,7 @@ $messages['en'] = array(
 	'coll-user_book_prefix'         => '-',
 	'coll-community_book_prefix'    => '-',
     'coll-view-book-page-title'     => 'Book: $1',
+    'coll-view-book-sub-title'     => '$1',
     'coll-view-item-title'          => '$1',
 );
 

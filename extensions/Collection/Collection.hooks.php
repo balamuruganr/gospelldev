@@ -219,7 +219,7 @@ class CollectionHooks {
 		}
         
                                                               
-        if(isset($_SESSION['wsCollection']['book_id'])){ 
+        if(isset($_SESSION['wsCollection']['book_id']) && isset($_SESSION['wsCollection']['user_name'])){ 
              $book_id = $_SESSION['wsCollection']['book_id'];
              $book_user_id = $_SESSION['wsCollection']['user_id'];
              $book_user_name = $_SESSION['wsCollection']['user_name'];
@@ -329,9 +329,12 @@ class CollectionHooks {
 
 		$addRemoveState = $mode;
         
-        $book_user_name = $_SESSION['wsCollection']['user_name'];
-        $book_user_id   = $_SESSION['wsCollection']['user_id'];
-        $book_items     = $_SESSION['wsCollection']['items'];                            
+        $user_id = 
+        $user_name = 
+        
+        $book_user_name = gospellCommonFunctions::userNameFromBookId( $book_id );
+        $book_user_id   = gospellCommonFunctions::userIdFromBookId( $book_id );
+        //$book_items     = gospellCommonFunctions::get_book_items( $book_id );                            
         /////////////////////
         
         $book_obj = gospellCommonFunctions::get_user_current_book($book_user_id, $book_user_name, $book_id);

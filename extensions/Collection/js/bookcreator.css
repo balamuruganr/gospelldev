@@ -172,3 +172,28 @@
 .remove-book {
     color:#ff0000;
 }
+
+#book-container {
+  border:0px solid red; 
+  overflow: hidden; 
+}
+#book-image {
+  border:0px solid #000000;
+  width:20%;
+  min-height:200px;
+  float:left;
+    
+}
+#book-block {
+  border:0px solid red;
+  width:78%;
+  float:right; 
+  min-height:200px; 
+}
+#book-bottom {
+    border: 0px solid red;
+    bottom: 0;
+    position: absolute;
+    width: 100%; 
+}
+#book-bottom .cancel-back{ margin-left:10px; }
