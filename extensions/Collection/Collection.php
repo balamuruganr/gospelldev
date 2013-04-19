@@ -504,7 +504,7 @@ function wfAjaxSetDefaultBookSettings() {
        if(isset($_SESSION['wsCollection']['book_id']) && $_SESSION['wsCollection']['user_id'] && $_SESSION['wsCollection']['user_name']){ 
             $book_id = $_SESSION['wsCollection']['book_id'];
         } else { 
-            if( $wgUser->getName() ){
+            if( $wgUser->getName() ){                
               $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName() );  
             }
             

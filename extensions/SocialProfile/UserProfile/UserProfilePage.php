@@ -60,8 +60,9 @@ class UserProfilePage extends Article {
              $_SESSION['wsCollection']['user_name'] = $this->user_name;
              
              if($this->isOwner()){
+                
                 $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
-             } else {
+             } else { 
                 $user_having_books = gospellCommonFunctions::get_user_current_book_public( $this->user_id, $this->user_name );
              }
              

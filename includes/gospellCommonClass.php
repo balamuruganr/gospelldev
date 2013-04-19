@@ -578,7 +578,6 @@ class gospellCommonFunctions {
                             WHERE user_id ={$user_id} 
                             AND user_name ='{$user_name}'
                             {$book_sql}";
-       //echo "<br />".$sql."<br /><br /><br />";
         
        $res = $dbr->query( $sql, __METHOD__ );
 	   $row = $dbr->fetchObject( $res );

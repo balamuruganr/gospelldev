@@ -218,15 +218,15 @@ class CollectionHooks {
 			return true;
 		}
         
-                                                              
+                                                     
         if(isset($_SESSION['wsCollection']['book_id']) && isset($_SESSION['wsCollection']['user_name'])){ 
              $book_id = $_SESSION['wsCollection']['book_id'];
              $book_user_id = $_SESSION['wsCollection']['user_id'];
              $book_user_name = $_SESSION['wsCollection']['user_name'];
              
-             if($wgUser->isLoggedIn()){
+             if( $wgUser->isLoggedIn() && $book_user_id && $book_user_name ){ 
                $user_having_books = gospellCommonFunctions::get_user_current_book( $book_user_id, $book_user_name, $book_id ); 
-             } else {
+             } else { 
                $user_having_books = gospellCommonFunctions::get_user_current_book( $wgUser->getID(), $wgUser->getName(), $book_id );
              }             
         } else { 
