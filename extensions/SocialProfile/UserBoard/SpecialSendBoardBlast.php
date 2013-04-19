@@ -67,7 +67,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 			
 			$user_ids_to = $wgRequest->getVal( 'ids' ); //explode( ',',  );
 			//foreach ( $user_ids_to as $user_id ) {
-				$user = User::newFromId( $user_id );
+				$user = User::newFromId( $user_ids_to );
 				$user->loadFromId();
 				$user_name = $user->getName();
 				$b->sendBoardMessage(

@@ -350,6 +350,7 @@ class gospellCommonFunctions {
 				'subtitle' => $values['subtitle'],
                 'book_date' => $values['timestamp'],
                 'book_type' => $values['book_type'],
+                'book_image' => $values['book_image'], 
 			),
 			__METHOD__,
             array( 'IGNORE' )
@@ -407,10 +408,18 @@ class gospellCommonFunctions {
             array( 'IGNORE' )
     		);
             
- 		$dbw->commit();
+ 		$dbw->commit();       
+        
+        $sql = "SELECT bi_id, bi_book_id, bi_book_user_name, bi_type, bi_title 
+                            FROM user_book_items ORDER BY bi_id DESC LIMIT 0, 1";
+        
+        $res = $dbw->query( $sql, __METHOD__ );
+	    $row = $dbw->fetchObject( $res );
+        
+      return $row->bi_id;       
     }
     
-    static function reorder_book_items( $new_index, $book_id, $book_user_name, $old_index ){
+    static function reorder_book_items( $new_index, $item_id ){
         global $wgUser;
         
         $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
@@ -418,18 +427,18 @@ class gospellCommonFunctions {
         $s = $dbw->selectRow(
 				'user_book_items',
 				array( 'bi_item_position' ),
-				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $old_index),
+				array( 'bi_id' => $item_id ),
 				__METHOD__
 			);
 			if ( $s !== false ) {
 				$dbw->update(
 					'user_book_items',
                     array( 'bi_item_position' => $new_index ),
-					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $old_index),
+					array( 'bi_id' => $item_id ),
 					__METHOD__
-				);   
+				);
             }
-            
+           
  		$dbw->commit();
     }
     
@@ -437,7 +446,7 @@ class gospellCommonFunctions {
         global $wgUser;
         
         $dbr = wfGetDB( DB_SLAVE); 
-        $sql ="SELECT bi_book_id, bi_type, bi_content_type, bi_title, bi_revision, bi_latest, UNIX_TIMESTAMP(bi_date) AS unix_book_item_time, 
+        $sql ="SELECT bi_id, bi_book_id, bi_type, bi_content_type, bi_title, bi_revision, bi_latest, UNIX_TIMESTAMP(bi_date) AS unix_book_item_time, 
                 bi_url, bi_current_version, bi_displaytitle, bi_item_position, bi_status 
                 FROM user_book_items WHERE bi_book_id ={$book_id} AND bi_book_user_name ='{$user_name}' ORDER BY bi_item_position ASC"; 
         //echo $sql;                      
@@ -446,7 +455,8 @@ class gospellCommonFunctions {
         $i = 0;
         
         foreach ( $res as $row ) {
-                $book_items[$i] = array(                          
+                $book_items[$i] = array( 
+                      'item_id' => $row->bi_id,                          
                       'book_id' => $row->bi_book_id,
                       'type' => $row->bi_type,
                       'content_type' => $row->bi_content_type,
@@ -466,22 +476,22 @@ class gospellCommonFunctions {
      return $book_items;   
     }
     
-   static function rename_item_chapter( $name, $book_id, $user_name, $index ){
+   static function rename_item_chapter( $name, $item_id ){
         global $wgUser;
         
         $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
                
         $s = $dbw->selectRow(
 				'user_book_items',
-				array( 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
-				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $index ),
+				array( 'bi_id', 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
+				array( 'bi_id' => $item_id ),
 				__METHOD__
 			);
 			if ( $s !== false ) {
 				$dbw->update(
 					'user_book_items',
                     array( 'bi_title' => $name),
-					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_item_position' => $index ),
+					array( 'bi_id' => $item_id ),
 					__METHOD__
 				);   
             }
@@ -489,7 +499,7 @@ class gospellCommonFunctions {
  		$dbw->commit();
    }
     
-    static function remove_book_item( $book_id = 0, $user_name, $type, $title ){
+    static function remove_book_item( $item_id ){
         global $wgUser;
         $dbw = wfGetDB( DB_MASTER, array(), self::sharedDB() );
         $falg = false;
@@ -497,13 +507,13 @@ class gospellCommonFunctions {
          $s = $dbw->selectRow(
 				'user_book_items',
 				array( 'bi_book_id', 'bi_book_user_name', 'bi_type', 'bi_content_type', 'bi_title', 'bi_revision', 'bi_latest' ),
-				array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_type' =>$type, 'bi_title' => $title ),
+				array( 'bi_id' => $item_id ),
 				__METHOD__
 			);
 			if ( $s !== false ) {
 				$dbw->delete(
 					'user_book_items',
-					array( 'bi_book_id' => $book_id, 'bi_book_user_name' => $user_name, 'bi_type' =>$type, 'bi_title' => $title ),
+					array( 'bi_id' => $item_id ),
 					__METHOD__
 				);
              $falg = true;   
@@ -573,7 +583,7 @@ class gospellCommonFunctions {
         } else {
           $book_sql = " ORDER BY book_id DESC LIMIT 0, 1";   
         }
-        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, book_image, status 
                             FROM user_books 
                             WHERE user_id ={$user_id} 
                             AND user_name ='{$user_name}'
@@ -592,7 +602,7 @@ class gospellCommonFunctions {
         
         $book_sql = " ORDER BY book_id DESC LIMIT 0, 1";   
         
-        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+        $sql = "SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, book_image, status 
                             FROM user_books 
                             WHERE user_id ={$user_id} 
                             AND user_name ='{$user_name}' 
@@ -611,7 +621,7 @@ class gospellCommonFunctions {
        
        $dbr = wfGetDB( DB_SLAVE); 
         $sql ="SELECT book_id, book_name, user_id, user_name, is_anonym_user, enabled, title, subtitle, 
-                book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, status 
+                book_type, UNIX_TIMESTAMP(book_date) AS unix_book_time, book_image, status 
                 FROM user_books WHERE user_id ={$user_id} AND user_name ='{$user_name}' ORDER BY book_id DESC"; 
                              
         $res = $dbr->query( $sql, __METHOD__);
@@ -627,7 +637,8 @@ class gospellCommonFunctions {
                       'title' => $row->title,
                       'subtitle' => $row->subtitle,
                       'book_type' => $row->book_type,
-                      'book_time' => $row->unix_book_time                      
+                      'book_time' => $row->unix_book_time,
+                      'book_image' => $row->book_image                      
                  ); 
                       
        	}
@@ -683,7 +694,46 @@ class gospellCommonFunctions {
      
      return $user_id;       
     }
-       
+    
+    public static function resizeImage($source_image_path, $resize_image_path, $width, $height) {
+        //$source_image_path = str_replace("\\","/",$source_image_path); 
+        list($source_image_width, $source_image_height, $source_image_type) = getimagesize($source_image_path);
+        
+        switch ($source_image_type) {
+            case IMAGETYPE_GIF:
+                $source_gd_image = imagecreatefromgif($source_image_path);
+                break;
+            case IMAGETYPE_JPEG:
+                $source_gd_image = imagecreatefromjpeg($source_image_path);
+                break;
+            case IMAGETYPE_PNG:
+                $source_gd_image = imagecreatefrompng($source_image_path);
+                break;
+        }
+        if ($source_gd_image === false) {
+            return false;
+        }
+        $source_aspect_ratio = $source_image_width / $source_image_height;
+        $thumbnail_aspect_ratio = $width / $height;
+        if ($source_image_width <= $width && $source_image_height <= $height) {
+            $thumbnail_image_width = $source_image_width;
+            $thumbnail_image_height = $source_image_height;
+        } elseif ($thumbnail_aspect_ratio > $source_aspect_ratio) {
+            $thumbnail_image_width = (int) ($height * $source_aspect_ratio);
+            $thumbnail_image_height = $height;
+        } else {
+            $thumbnail_image_width = $width;
+            $thumbnail_image_height = (int) ($width / $source_aspect_ratio);
+        }
+        $thumbnail_gd_image = imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
+        imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
+        imagejpeg($thumbnail_gd_image, $resize_image_path, 100);
+        imagedestroy($source_gd_image);
+        imagedestroy($thumbnail_gd_image);
+        return true;        
+    }
+        
+        
 
 
 /*

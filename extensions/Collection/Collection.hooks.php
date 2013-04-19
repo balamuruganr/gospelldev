@@ -259,6 +259,7 @@ class CollectionHooks {
             			'subtitle' => $user_having_books->subtitle,
                         'items' => $book_items,
                         'book_type' => $user_having_books->book_type,
+                        'book_image' => $user_having_books->book_image,
                         'timestamp' => $user_having_books->unix_book_time
             		  );
           } else {
@@ -274,6 +275,7 @@ class CollectionHooks {
             			'subtitle' => '',
             			'items' => array(),
                         'book_type' => '',
+                        'book_image' => '',
                         'timestamp' => wfTimestampNow()
             		  );          
           }

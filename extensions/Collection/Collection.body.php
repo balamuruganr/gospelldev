@@ -20,7 +20,7 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 global $IP;  
-require_once("$IP/includes/gospellCommonClass.php"); 
+require_once("$IP/includes/gospellCommonClass.php");
 class SpecialCollection extends SpecialPage {
 	var $tempfile;
 
@@ -369,6 +369,7 @@ class SpecialCollection extends SpecialPage {
         $edit_book_type = ($is_rename)?$_SESSION['wsCollection']['book_type']:'';
         
        $output = '<div style="margin:10px 0;">
+                   <form action="'.SkinTemplate::makeSpecialUrl( 'Book' ).'" method="post" id="book-creater-form" enctype="multipart/form-data">
                    <div style="margin-bottom:10px;">
                      <lable>Book Title:</lable><input type="text" name="book_name" id="book_name" value="'.
                       $edit_book_title
@@ -379,6 +380,9 @@ class SpecialCollection extends SpecialPage {
                      $edit_book_subtitle
                      .'" />
                    </div><br />
+                   <div>
+                    <lable>Book Image:</lable><input type="file" name="book_image" id="book_image">
+                   </div><br /> 
                    <div>
                      <lable>Book Type:</lable>
                      <select name="book_type">
@@ -405,9 +409,15 @@ class SpecialCollection extends SpecialPage {
                      </select>
                    </div><br />
                    <div style="clear:both;"></div>
-                   <input type="hidden" name="pre_creater_link" id="pre_creater_link" value="'.SkinTemplate::makeSpecialUrl(
-                              'Book', $value_arr ).'" />
-                   <div id="create-button" class="collection-button ok">                    
+                   <input type="hidden" name="bookcmd" value="start_book_creator" />
+                   <input type="hidden" name="referer" value="'.$referer.'" />';
+                   
+          if($is_rename){
+            $output .= '<input type="hidden" name="book_id" value="'.$_SESSION['wsCollection']['book_id'].'" />';
+          }         
+          
+                    
+          $output .= '<div id="create-button" class="collection-button ok">                    
                     <a>';
                                         
                     ($is_rename)? $output .= 'Update book' : $output .= 'Create book';             
@@ -427,6 +437,7 @@ class SpecialCollection extends SpecialPage {
 					) .
                     '</div>
                    <div style="clear:both;"></div>
+                   </form>
                   </div>';
                   
         $out->addHTML($output);           
@@ -588,7 +599,7 @@ class SpecialCollection extends SpecialPage {
     
     function viewBookSpecialPage( $book_id, $referer, $par ) { 
 		global $wgUser, $wgCollectionFormats, $wgScriptPath;
-        global $wgOut, $wgTitle;
+        global $wgOut, $wgTitle, $wgUploadDirectory;
 
 		$mediapath = $wgScriptPath . '/extensions/Collection/images/';
 
@@ -619,7 +630,8 @@ class SpecialCollection extends SpecialPage {
             			'subtitle' => $user_book->subtitle,
                         'items' => $book_items,
                         'book_type' => $user_book->book_type,
-                        'timestamp' => $user_book->unix_book_time
+                        'timestamp' => $user_book->unix_book_time,
+                        'book_image' => $user_book->book_image 
             		  );
         
 		$out = $this->getOutput();
@@ -630,11 +642,14 @@ class SpecialCollection extends SpecialPage {
 		$out->addModules( 'ext.collection' );
         
         $out->addHTML('<div id="book-container">');
+             $out->addHTML('<div id="book-image">');
+             
+             $out->addHTML('<img src="' . $wgScriptPath.'/images/user_book_images/' .htmlspecialchars( $view_book['book_image'] ) . '" alt="' .$this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() . '" />');
+             
+             $out->addHTML('</div>');
          
         if(is_array($view_book['items']) && !empty($view_book['items'])){             
-             
-             $out->addHTML('<div id="book-image">');
-             $out->addHTML('</div>');
+                       
              
              $out->addHTML('<div id="book-block">');
             foreach($view_book['items'] as $bk_item){
@@ -656,26 +671,29 @@ class SpecialCollection extends SpecialPage {
                
         } else {
          
-         $out->addHTML('<div>No items in this book.</div>');
+         $out->addHTML('<div id="book-block">No items in this book.</div>');
             
         }
-       $out->addHTML('<div id="book-bottom">'); 
-        $out->addHTML('<br /><div id="cancel-button" class="collection-button cancel">'
-                   . Linker::link(
-						$title,
-						"Back",
-						array(
-							'rel' => 'nofollow',
-                            'class' => 'cancel-back'
-							// TOOD: title
-						),
-						array(),
-						array( 'known', 'noclasses' )
-					) .
-                    '</div>');
-       
         
-        $out->addHTML('</div>');
+        
+        
+           $out->addHTML('<div id="book-bottom">'); 
+            $out->addHTML('<br /><div id="cancel-button" class="collection-button cancel">'
+                       . Linker::link(
+    						$title,
+    						"Back",
+    						array(
+    							'rel' => 'nofollow',
+                                'class' => 'cancel-back'
+    							// TOOD: title
+    						),
+    						array(),
+    						array( 'known', 'noclasses' )
+    					) .
+                        '</div>');
+           $out->addHTML('</div>'); 
+        
+        
                        
        $out->addHTML('</div>');   
         /*$template = new CollectionPageTemplate();
@@ -749,6 +767,7 @@ class SpecialCollection extends SpecialPage {
         }
         
         $item = array(
+            'item_id' =>"",
             'book_id' => $collection['book_id'],
 			'type' => 'chapter',
             'content_type' => '',
@@ -766,7 +785,10 @@ class SpecialCollection extends SpecialPage {
 		) );*/
           
           $item['position'] = count($collection['items']);
-          gospellCommonFunctions::send_book_items( $item );
+          $last_insert_id = gospellCommonFunctions::send_book_items( $item );
+          if($last_insert_id > 0){
+           $item['item_id'] = $last_insert_id;    
+           }
           array_push( $collection['items'], $item );          
           CollectionSession::setCollection( $collection );
      return true;                  
@@ -792,7 +814,7 @@ class SpecialCollection extends SpecialPage {
         $user_name = gospellCommonFunctions::userNameFromBookId( $book_id ); 
         
 		$collection['items'][$index]['title'] = $name;
-        gospellCommonFunctions::rename_item_chapter( $name, $book_id, $user_name, $index );
+        gospellCommonFunctions::rename_item_chapter( $name, $collection['items'][$index]['item_id'] );
 		CollectionSession::setCollection( $collection );
 	}
 
@@ -843,6 +865,7 @@ class SpecialCollection extends SpecialPage {
 		}
 
 		$item = array(
+            'item_id' => "",
             'book_id' => $book_id,
 			'type' => 'article',
 			'content_type' => 'text/x-wiki',
@@ -861,10 +884,13 @@ class SpecialCollection extends SpecialPage {
 			}
 		}
                 
-        $item['position'] = count($collection['items']);
-        
-		$collection['items'][] = $item;
-        gospellCommonFunctions::send_book_items( $item );
+        $item['position'] = count($collection['items']);        
+		
+        $last_insert_id = gospellCommonFunctions::send_book_items( $item );
+        if($last_insert_id > 0){
+         $item['item_id'] = $last_insert_id;    
+        }   
+        $collection['items'][] = $item;
         CollectionSession::setCollection( $collection );        
 		return true;
 	}
@@ -894,11 +920,10 @@ class SpecialCollection extends SpecialPage {
 		$collection = CollectionSession::getCollection();
 		$index = CollectionSession::findArticle( $title->getPrefixedText(), $oldid, $book_id ); 
         //$user_id = gospellCommonFunctions::userIdFromBookId( $book_id );
+       
         $user_name = gospellCommonFunctions::userNameFromBookId( $book_id );        
 		if ( $index != - 1 ) {
-			$is_deleted = gospellCommonFunctions::remove_book_item( 
-                           $collection['items'][$index]['book_id'], $user_name, $collection['items'][$index]['type'], $collection['items'][$index]['title']
-                          );
+			$is_deleted = gospellCommonFunctions::remove_book_item( $collection['items'][$index]['item_id'] );
             if($is_deleted){
               array_splice( $collection['items'], $index, 1 ); 
             }             
@@ -979,9 +1004,7 @@ class SpecialCollection extends SpecialPage {
 			return false;
 		}
 		$collection = CollectionSession::getCollection();
-        $is_deleted = gospellCommonFunctions::remove_book_item( 
-                           $collection['items'][$index]['book_id'], $wgUser->getName(), $collection['items'][$index]['type'], $collection['items'][$index]['title']
-                          );
+        $is_deleted = gospellCommonFunctions::remove_book_item( $collection['items'][$index]['item_id'] );
         if($is_deleted){
          array_splice( $collection['items'], $index, 1 );   
         }                       
@@ -1023,8 +1046,9 @@ class SpecialCollection extends SpecialPage {
 		$new_items = array();
 		foreach ( $items as $new_index => $old_index ) {
 			$new_items[$new_index] = $old_items[$old_index];
-            gospellCommonFunctions::reorder_book_items( $new_index, $book_id, $book_user_name, $old_index );
+            gospellCommonFunctions::reorder_book_items( $new_index, $old_items[$old_index]['item_id'] );
 		}
+        //print_r($new_items); echo"<br />"; print_r($old_items); die;
 		$collection['items'] = $new_items;        
 		CollectionSession::setCollection( $collection );
 	}

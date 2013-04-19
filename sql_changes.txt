@@ -1,3 +1,7 @@
+ALTER TABLE `user_books` ADD `book_image` VARCHAR( 255 ) NOT NULL AFTER `book_date`;
+
+ALTER TABLE `user_book_items` ADD `bi_item_position` INT( 11 ) NOT NULL AFTER `bi_displaytitle`;
+
 CREATE TABLE IF NOT EXISTS `user_book_items` (
   `bi_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `bi_book_id` int(11) NOT NULL,

@@ -527,18 +527,38 @@ $(window).scroll(function() {
        //display_wall_post_onscroll_down(); 
    }
 });
+function to_find_url(s) {
+          var hlink = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+                   ///\s(ht|f)tp:\/\/([^ \,\;\:\!\)\(\"\'\\f\n\r\t\v])+/g;
+          return (s.replace(hlink, function($0, $1, $2) {
+              s = $0.substring(0, $0.length);
+              while (s.length > 0 && s.charAt(s.length - 1) == '.') s = s.substring(0, s.length - 1);
+
+              return ' ' + s + '';
+          }));
+}
+
 (function() { 
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post
-        display_wall_post();      
+        //display_wall_post();      
         //Autodisplay of Wall post's comments  
-        runAuto();    
+        //runAuto();    
         //AutoDisplay Of Messages
-       display_messages();
+       //display_messages();
        
        //auto_book_list(); 
    /////////////////// Auto Display using sajax ///////////////
    
+  $('#message').blur(function(){
+      var text = $("#message").val();
+      var hlink = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      if( text.match( hlink ) ){
+        var m = text.match( hlink )[0]; 
+      } 
+      //var s = to_find_url(text);   
+      alert('TEST:' +m);  
+  }); 
               
 })();
 mw.loader.using( ['jquery.ui.dialog'], function() {

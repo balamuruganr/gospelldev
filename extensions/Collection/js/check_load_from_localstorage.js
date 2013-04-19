@@ -36,32 +36,15 @@ function count_articles(items) {
 
 //=================================================================
     $('select[name="book_type"]').change(function(){
-       if( $('#book_name').val() !=='' ){
-        
-        var bk_type = $(this).val();
-        var bk_name = $('#book_name').val();
-        var bk_sbtitle = $('#sub_title').val();
-        
-        var str ="";
-        var x; 
-        x = $('#pre_creater_link').val().split("&book_type=");
-        str += x[0] + '&book_type=' + bk_type;
-        str +='&book_name=' + bk_name;
-        str +='&sub_title=' + bk_sbtitle;
-        
-        $('#create-button').children("a").attr('href', str);
-         
-       } else {
+       if( $('#book_name').val() =='' ){               
         alert("Please enter Book Title.");
         $('#book_name').focus();
-       }
-        
+       }        
     });
     
    $('#create-button').children("a").css('cursor',"pointer");
    
-   $('#create-button').children("a").click(function(){
-    
+   $('#create-button').children("a").click(function(){    
      if( $(this).attr("href") ){
         
         $('#create-button').children("a").attr('href', $(this).attr("href"));
@@ -69,19 +52,18 @@ function count_articles(items) {
         
      } else {
         
-        if( $('#book_name').val() !=='' ){
-            
-           var bk_type = $('select[name="book_type"]').val();
+        if( $('#book_name').val() !=='' ){            
+           /*var bk_type = $('select[name="book_type"]').val();
            var bk_name = $('#book_name').val();
            var bk_sbtitle = $('#sub_title').val();            
            var str ="";
-           var x;
-           
+           var x;           
            x = $('#pre_creater_link').val().split("&book_type=");
            str += x[0] + '&book_type=' + bk_type;
            str +='&book_name=' + bk_name;
            str +='&sub_title=' + bk_sbtitle;           
-           $('#create-button').children("a").attr('href', str);
+           $('#create-button').children("a").attr('href', str);*/
+           $('#book-creater-form').submit();
            return true;
             
         } else {

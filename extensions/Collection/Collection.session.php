@@ -63,14 +63,15 @@ class CollectionSession {
 			'title' => '',
 			'subtitle' => '',
 			'items' => array(),
-            'book_type' => ''
+            'book_type' => '',
+            'book_image' => '',
 		);
 		CollectionSuggest::clear();
 		self::touchSession();
 	}
 
 	static function enable( $book_name = '', $book_type = '', $sub_title = '' ) {
-	   global $wgUser, $wgOut, $wgTitle;
+	   global $wgUser, $wgOut, $wgTitle, $wgUploadDirectory, $wgFileExtensions, $wgGospellSettingsUserBordMessageFileSize;
        
 		if ( !self::hasSession() ) { 
 			self::startSession();
@@ -94,9 +95,26 @@ class CollectionSession {
            $coll['timestamp'] = date("Y-m-d H:i:s",strtotime($_SESSION['wsCollection']['timestamp']));
            $coll['book_type'] = $book_type;
            $coll['book_name'] = $book_name;
+                     
+           if (!empty($_FILES)) {
+             $fileParts  = pathinfo($_FILES['book_image']['name']);
+             if (in_array($fileParts['extension'],$wgFileExtensions)) {
+                if($_FILES['book_image']['size'] <= $wgGospellSettingsUserBordMessageFileSize){
+                   $fname = str_replace(".","",microtime(true)).".".$fileParts['extension'];
+                   $upload_dir =  $wgUploadDirectory."/temp/";
+                   $resiz_dir =  $wgUploadDirectory."/user_book_images/";
+                   $file_up = move_uploaded_file( $_FILES['book_image']["tmp_name"], $upload_dir . $fname );
+                   $is_resized = gospellCommonFunctions::resizeImage($upload_dir . $fname, $resiz_dir . $fname, 250, 250);
+                   if($is_resized){
+                    $coll['book_image'] = $fname;
+                    @unlink( $upload_dir . $fname );
+                   }   
+                }
+             }
+           }
           
         $user_book = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName());
-            
+           
         if($wgUser->getID()){
             gospellCommonFunctions::send_user_book($coll);
         } else {
@@ -121,7 +139,7 @@ class CollectionSession {
 	}
     
     static function editBook( $book_id, $book_name = '', $book_type = '', $sub_title = '' ) {
-	   global $wgUser, $wgOut, $wgTitle;
+	   global $wgUser, $wgOut, $wgTitle, $wgUploadDirectory, $wgFileExtensions, $wgGospellSettingsUserBordMessageFileSize;
        
 		if ( !self::hasSession() ) { 
 			self::startSession();
@@ -131,11 +149,28 @@ class CollectionSession {
 		}
                 
            $coll = array();
-        
+           
            $coll['title'] = $book_name;
            $coll['subtitle'] = $sub_title;
            $coll['book_type'] = $book_type;
            $coll['book_name'] = $book_name;
+           
+           if (!empty($_FILES)) {
+             $fileParts  = pathinfo($_FILES['book_image']['name']);
+             if (in_array($fileParts['extension'],$wgFileExtensions)) {
+                if($_FILES['book_image']['size'] <= $wgGospellSettingsUserBordMessageFileSize){
+                   $fname = str_replace(".","",microtime(true)).".".$fileParts['extension'];
+                   $upload_dir =  $wgUploadDirectory."/temp/";
+                   $resiz_dir =  $wgUploadDirectory."/user_book_images/";
+                   $file_up = move_uploaded_file( $_FILES['book_image']["tmp_name"], $upload_dir . $fname );
+                   $is_resized = gospellCommonFunctions::resizeImage($upload_dir . $fname, $resiz_dir . $fname, 250, 250);
+                   if($is_resized){
+                    $coll['book_image'] = $fname;
+                    @unlink( $upload_dir . $fname );
+                   }   
+                }
+             }
+           }
           
         $user_book = gospellCommonFunctions::get_user_current_book($wgUser->getID(), $wgUser->getName());
         
@@ -151,6 +186,7 @@ class CollectionSession {
         $_SESSION['wsCollection']['subtitle'] = $coll['subtitle'];  
         $_SESSION['wsCollection']['book_type'] = $coll['book_type'];
         $_SESSION['wsCollection']['book_name'] = $coll['book_name'];
+        $_SESSION['wsCollection']['book_image'] = $coll['book_image'];
         
         $wsBookCollection = array();
         $wsBookCollection = $_SESSION['wsCollection'];
