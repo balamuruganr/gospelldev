@@ -641,10 +641,18 @@ class SpecialCollection extends SpecialPage {
         $wgOut->setSubtitle( $this->msg( 'coll-view-book-sub-title', $view_book['subtitle'])->text() );
 		$out->addModules( 'ext.collection' );
         
+        $out->addHTML('<script type="text/javascript">var switchTo5x=true;</script>
+                       <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+                       <script type="text/javascript">stLight.options({publisher: "0149c997-6759-4cd9-97a1-3d68bbbfc442", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script>');
         $out->addHTML('<div id="book-container">');
              $out->addHTML('<div id="book-image">');
-             
-             $out->addHTML('<img src="' . $wgScriptPath.'/images/user_book_images/' .htmlspecialchars( $view_book['book_image'] ) . '" alt="' .$this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() . '" />');
+             //
+             if($view_book['book_image'] && file_exists($wgScriptPath.'/images/user_book_images/' .htmlspecialchars( $view_book['book_image'] ))){
+                $img = $wgScriptPath.'/images/user_book_images/' .htmlspecialchars( $view_book['book_image'] );
+             } else {
+                $img = $wgScriptPath.'/images/user_book_images/default_book.gif';
+             }
+             $out->addHTML('<img src="' . $img . '" alt="' .$this->msg( 'coll-view-book-page-title', $view_book['title'] )->text() . '" />');
              
              $out->addHTML('</div>');
          
@@ -690,7 +698,15 @@ class SpecialCollection extends SpecialPage {
     						array(),
     						array( 'known', 'noclasses' )
     					) .
-                        '</div>');
+                        '</div>
+                         <div id="share_buttons">                         
+                          <span class=\'st_sharethis\' displayText=\'ShareThis\'></span>
+                          <span class=\'st_facebook\' displayText=\'Facebook\'></span>
+                          <span class=\'st_twitter\' displayText=\'Tweet\'></span>
+                          <span class=\'st_googleplus\' displayText=\'Google +\'></span>
+                          <span class=\'st_linkedin\' displayText=\'LinkedIn\'></span>
+                          <span class=\'st_email\' displayText=\'Email\'></span>                         
+                         </div>');
            $out->addHTML('</div>'); 
         
         

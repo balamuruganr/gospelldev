@@ -732,7 +732,139 @@ class gospellCommonFunctions {
         return true;        
     }
         
+//===========================  Feach Url Functions ====================================
+   public static function checkYoutubeUrl($url) {    
+        $pattern = '/youtube/';
+        if(preg_match($pattern, $url)){        
+            return true;
+        }else{
+            return false;           
+        }    
+    } 
+    
+   public static function checkValues($value) {
+        $value = trim($value);
+        if (get_magic_quotes_gpc()) {
+        	$value = stripslashes($value);
+        }
+        $value = strtr($value, array_flip(get_html_translation_table(HTML_ENTITIES)));
+        $value = strip_tags($value);
+        $value = htmlspecialchars($value);
+        return $value;
+    }	
+     
+   public static function fetch_record($path) {
+        $file = @fopen($path, "r"); 
+        if (!$file)
+        {
+        	exit("");
+        } 
+        $data = '';
+        while (!feof($file))
+        {
+        	$data .= fgets($file, 1024);
+        }
+        return $data;
+    }
+    
+   public static function checkImgUrl($url) {
+        $img = @getimagesize($url);   
+        if(is_array($img)) {        
+            return true;
+        } 
+        else {
+            return false;
+        }
+    }
+  
+  static function featch_url( $url ){
+     $youtubeurl = self::checkYoutubeUrl($url);
+      if($youtubeurl) { 
         
+            $youtube_id_ary = explode('?v=',$url);
+            if(is_array($youtube_id_ary)){
+                $youtube_id = explode('&',$youtube_id_ary[1]);
+            }
+            if(isset($youtube_id[0])){
+                $youtube_json_data_url = "http://gdata.youtube.com/feeds/api/videos/$youtube_id[0]?v=2&prettyprint=true&alt=jsonc"; 
+                $json = file_get_contents($youtube_json_data_url);
+                $data = json_decode($json, TRUE);  
+                $url_title[0] = $data['data']['title'];
+                $images_array[] = $data['data']['thumbnail']['sqDefault'];
+                $tags['description'] = $data['data']['description'];
+            }
+            
+       } else {  //if $youtubeurl ends here and else starts here
+        
+            $is_img_url = false;
+            if(self::checkImgUrl($url)) {  
+                $is_img_url = true;
+                $parseurl = parse_url($url);
+                $url = $parseurl['scheme'].'://'.$parseurl['host'];
+            }
+            
+            $url = self::checkValues($url);
+            $string = self::fetch_record($url);    
+            /// fecth title
+            $title_regex = "/<title>(.+)<\/title>/i";
+            preg_match_all($title_regex, $string, $title, PREG_PATTERN_ORDER);
+            $url_title = $title[1];
+             
+            /// fecth decription
+            $tags = get_meta_tags($url);
+            
+            if($is_img_url) { 
+                $images_array[0] = $submited_url;
+            }else{
+                // fetch images
+                $image_regex = '/<img[^>]*'.'src=[\"|\'](.*)[\"|\']/Ui';
+                preg_match_all($image_regex, $string, $img, PREG_PATTERN_ORDER);
+                $images_array = $img[1];        
+            }         
+       } // else ends here
+    
+     $output = '<div class="is_url_content">';
+    
+     $output .='<div class="images">';
+     //
+            $k=1;
+            for ($i=0;$i<=sizeof($images_array);$i++)
+            {
+            	if(@$images_array[$i])
+            	{
+            		if(@getimagesize(@$images_array[$i]))
+            		{
+            			list($width, $height, $type, $attr) = getimagesize(@$images_array[$i]);
+            			if($width >= 50 && $height >= 50 ){
+             
+            			$output .= "<img src='".@$images_array[$i]."' width='100' id='".$k."' >";
+                        break;
+            			$k++;
+             
+            			}
+            		}
+            	}
+            }
+      
+      $output .='<!--input type="hidden" name="total_images" id="total_images" value="" /-->
+                  </div>';
+      $output .='<div class="info">
+                    <label class="title">
+                 		' . @$url_title[0] . '
+                	</label><br clear="all" />
+                	<label class="url">
+                		' . substr($url ,0,35) . '
+                	</label><br clear="all" /><br clear="all" />
+                	<label class="desc">
+                		' . @$tags['description'] .'
+                	</label><br clear="all" /><br clear="all" /><br clear="all" />                     
+                  </div>';
+                  
+    $output .='</div>';              
+                
+    return $output;          
+  }   
+//=====================================================================================        
 
 
 /*

@@ -317,6 +317,11 @@ function wfAutoBookList( $user_name ) {
  return "";//$profile->getUserProfileBookList( $user_name );
 }
 
+$wgAjaxExportList[] = 'wfAutoFetchUrl';
+function wfAutoFetchUrl( $uri ) {
+  
+  return gospellCommonFunctions::featch_url( $uri );       
+}
 
 $wgAjaxExportList[] = 'wfTestfunc';
 function wfTestMathi() {

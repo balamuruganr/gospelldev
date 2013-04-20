@@ -5,6 +5,12 @@ var posted = 0;
 function send_message() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	var encMsg = encodeURIComponent( document.getElementById( 'message' ).value );
+     if($('#user-page-message-form').children().is('#featch_url_content_block')){
+        var conObj = $('#user-page-message-form').children('#featch_url_content_block');
+        var cont = $(conObj).html();
+        encMsg = encMsg + cont;
+     }
+     
 	var msgType = document.getElementById( 'message_type' ).value;
 	if( document.getElementById( 'message' ).value && !posted ) {
 		posted = 1;
@@ -18,7 +24,7 @@ function send_message() {
 		);
 	}
 }
-//sendMessageFiles
+
 function send_files_also( userTo ){
     
         var input = document.getElementById("file_upload"), 
@@ -49,7 +55,7 @@ function send_files_also( userTo ){
 				success: function (res) {
 				 $('#file-attach-block').find('.file-block').html("<input type=\"file\" name=\"file_upload\" id=\"file_upload\" multiple>");
                  document.getElementById( 'message' ).value = '';
-                 display_messages();	
+                 //display_messages();	
 				}
 			});
 	 }   
@@ -527,18 +533,29 @@ $(window).scroll(function() {
        //display_wall_post_onscroll_down(); 
    }
 });
-function to_find_url(s) {
-          var hlink = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-                   ///\s(ht|f)tp:\/\/([^ \,\;\:\!\)\(\"\'\\f\n\r\t\v])+/g;
-          return (s.replace(hlink, function($0, $1, $2) {
-              s = $0.substring(0, $0.length);
-              while (s.length > 0 && s.charAt(s.length - 1) == '.') s = s.substring(0, s.length - 1);
 
-              return ' ' + s + '';
-          }));
+var url_fetched = 0; 
+function fetch_url(){
+      var text = $("#message").val();
+      var hlink = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      var is_url = "";
+      
+      if( text.match( hlink )[0].length > 0 ){
+         is_url = text.match( hlink )[0];
+          //$('#featch_url_content_block').prepend(is_url);
+          if(is_url && !url_fetched){
+              var url_fetched = 1;
+              sajax_request_type = 'POST';
+    		  sajax_do_call( 'wfAutoFetchUrl', [ is_url ], function( request ) {		      
+                 $('#featch_url_content_block').html('<div id="is_url_content">' + request.responseText + '</div>');
+                 $('#featch_url_content_block').show("slow");
+                 url_fetched = 0;                          
+               });
+           }           
+      } 
 }
 
-(function() { 
+jQuery( function ( $ ) {
    /////////////////// Auto Display using sajax /////////////// 
         //Autodisplay of Wall post
         //display_wall_post();      
@@ -549,18 +566,29 @@ function to_find_url(s) {
        
        //auto_book_list(); 
    /////////////////// Auto Display using sajax ///////////////
-   
-  $('#message').blur(function(){
+   $("#message").blur(function(){
       var text = $("#message").val();
-      var hlink = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-      if( text.match( hlink ) ){
-        var m = text.match( hlink )[0]; 
-      } 
-      //var s = to_find_url(text);   
-      alert('TEST:' +m);  
-  }); 
-              
-})();
+      var patttrn = /(^|)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi;
+      var is_url = "";
+      var url_fetched = 0;
+       if(patttrn.test(text)) {            
+        var test_res = $("#message").val().match(new RegExp(patttrn));
+        if(test_res){
+             is_url = test_res[0];
+            if(is_url && !url_fetched){
+               url_fetched = 1;
+              sajax_request_type = 'POST';
+    		  sajax_do_call( 'wfAutoFetchUrl', [ is_url ], function( request ) {		      
+                 $('#featch_url_content_block').append(request.responseText);
+                 $('#featch_url_content_block').show("slow");
+                 url_fetched = 0;                          
+               });
+            }
+          }
+      }  
+      
+   });             
+});
 mw.loader.using( ['jquery.ui.dialog'], function() {
 	jQuery( function( jQuery ) {
 	    

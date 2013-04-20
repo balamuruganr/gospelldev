@@ -1631,9 +1631,11 @@ class UserProfilePage extends Article {
 						</select--><p>
 						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'"/></textarea>                        
                         <div class="cleared"></div>
+                        <div id="featch_url_content_block">                         
+                        </div>
                         <form name="upload_file_frm" id="upload_file_frm" action="" enctype="multipart/form-data">
                          <div id="file-attach-block"><span class="add_files"><a>Attach files with message</a></span><div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div></div>
-                         <div class="cleared"></div>
+                         <div class="cleared"></div>                         
                         </form>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:send_message();" />

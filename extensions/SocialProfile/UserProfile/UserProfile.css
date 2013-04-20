@@ -855,3 +855,6 @@
 #user-book-list span a:hover {
    text-decoration:underline;  
 }
+#featch_url_content_block {
+    display:none;
+}
