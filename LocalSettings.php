@@ -154,6 +154,15 @@ $wgCollectionPODPartners = array(
     ),
 );
 
+/*
+* 
+*
+* Note: This (require_once('extensions/ShareThis.php');) works by hooking into 'MonoBookTemplateToolboxEnd'. 
+  If you're using a skin which doesn't call this hook, then the above will not work.
+*/
+//require_once('extensions/ShareThis/ShareThis.php');
+//$wgShowShareThisSidebar = true;
+
 //$wgCollectionPODPartners = false;
 //$wgGroupPermissions['user']['collectionsaveascommunitypage'] = true;
 //$wgGroupPermissions['user']['collectionsaveasuserpage']      = true;
