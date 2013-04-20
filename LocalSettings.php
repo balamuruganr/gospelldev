@@ -171,11 +171,11 @@ require_once( "$IP/extensions/WikiEditor/WikiEditor.php" );
 # Add more configuration options below.
 
 require_once("$IP/extensions/SocialProfile/SocialProfile.php");
-$wgUserProfileDisplay['friends'] = true;
-$wgUserProfileDisplay['foes'] = false;
-$wgUserBoard = true;
-$wgUserProfileDisplay['board'] = true;
-$wgUserProfileDisplay['stats'] = true;
+$wgUserProfileDisplay['friends']    = true;
+$wgUserProfileDisplay['foes']       = false;
+$wgUserBoard                        = true;
+$wgUserProfileDisplay['board']      = true;
+$wgUserProfileDisplay['stats']      = true;
 
 require_once("$IP/extensions/Facebook/Facebook.php");
 //hide ip address , because facebook config showing
@@ -183,8 +183,16 @@ $wgShowIPinHeader = false;
 
 $wgUploadDirectory = "{$IP}/images";
 
+//Disambiguation Custom Namespace
+define("NS_DISAMBIGUATION", 500);
+define("NS_DISAMBIGUATION_TALK", 501);
+$wgExtraNamespaces[NS_DISAMBIGUATION]               = "Disambiguation";
+$wgExtraNamespaces[NS_DISAMBIGUATION_TALK]          = "Disambiguation_talk";
+
 //Namespace edit protection from user , and sysop user can edit 
-$wgGroupPermissions['sysop']['edittemplate'] = true;
-$wgGroupPermissions['sysop']['edithelp'] = true;
-$wgNamespaceProtection[ NS_TEMPLATE ] = array( 'edittemplate' );
-$wgNamespaceProtection[NS_HELP]      = array( 'edithelp' );
+$wgGroupPermissions['sysop']['edittemplate']        = true;
+$wgGroupPermissions['sysop']['edithelp']            = true;
+
+$wgNamespaceProtection[ NS_TEMPLATE ]               = array( 'edittemplate' );
+$wgNamespaceProtection[ NS_HELP ]                   = array( 'edithelp' );
+

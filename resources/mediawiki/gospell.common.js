@@ -14,7 +14,7 @@ jQuery( function ( $ ) {
         signpost_template_array[1] = "/{{Incomplete}}/gi";
         signpost_template_array[2] = "/{{Disputed}}/gi";
         signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
-        signpost_template_array[4] = "";
+        signpost_template_array[4] = "/{{Disambiguation(.*)}}/gi";
         
         signpost_id_array[0] = "inaccurate";
         signpost_id_array[1] = "incomplete";
@@ -26,10 +26,7 @@ jQuery( function ( $ ) {
 
         for( i=0; i<singpost_template_cnt; i++ ) {   
             sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0; 
-            if(signpost_id_array[i] == 'disambiguation') {
-                patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
-                sign_post_avail=patt.test($("#wpTextbox1").val());                                                
-            }
+            
             if(sign_post_avail) {                             
                 $('#add'+signpost_id_array[i]).hide();
                 $('#remove'+signpost_id_array[i]).show(); 
@@ -41,7 +38,8 @@ jQuery( function ( $ ) {
             }           
         }                        
     };        
-   $('#addinaccurate, #addincomplete, #adddisputeed').click(function() {
+   $('#addinaccurate, #addincomplete, #adddisputeed, #adddisambiguation').click(function() {
+    
         var txt = $("#wpTextbox1");                  
         var signpost_ary = new Array();
         var enable_id_ary = new Array();
@@ -50,31 +48,38 @@ jQuery( function ( $ ) {
         signpost_ary['addinaccurate'] = '{{Inaccurate}}';
         signpost_ary['addincomplete'] = '{{Incomplete}}';
         signpost_ary['adddisputeed']  = '{{Disputed}}';
-        
+        signpost_ary['adddisambiguation']  = '{{Disambiguation| [[Disambiguation: '+wgTitle+']]}}';
+                
         add_signpost_msg_ary['addinaccurate']   = 'Inaccurate';
         add_signpost_msg_ary['addincomplete']   = 'Incomplete';
-        add_signpost_msg_ary['adddisputeed']    = 'Disputed';        
+        add_signpost_msg_ary['adddisputeed']    = 'Disputed';  
+        add_signpost_msg_ary['adddisambiguation']    = 'Disambiguation';              
 
         enable_id_ary['addinaccurate']  = 'removeinaccurate';
         enable_id_ary['addincomplete']  = 'removeincomplete';
-        enable_id_ary['adddisputeed']   = 'removedisputeed';        
+        enable_id_ary['adddisputeed']   = 'removedisputeed';
+        enable_id_ary['adddisambiguation']   = 'removedisambiguation';        
                     	
-        var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        var occurrence = (txt.val().match(new RegExp(eval('/'+signpost_ary[this.id]+'/gi')))) ? 1 : 0;  
+        if(this.id == 'adddisambiguation') {
+            var patt=/\{\{Disambiguation(.*)\}\}/gi;
+            occurrence = (patt.test($("#wpTextbox1").val())) ? 1 : 0;                     
+        }   
+                                          
         if(occurrence == 0){
             txt.val(signpost_ary[this.id]+"\n" + txt.val() );
             checkSignpostRedirectAndAssignTop();                                    
             $('#'+this.id).hide();
             $('#'+enable_id_ary[this.id]).show();
-            $('#signpost_msg_container').html('<font style="color:green">'+add_signpost_msg_ary[this.id]+' signpost added and please save the changes</font>');
-            
+            $('#signpost_msg_container').html('<font style="color:green">'+add_signpost_msg_ary[this.id]+' signpost added and please save the changes</font>');            
         }else{
             $('#signpost_msg_container').html('<font style="color:red">'+add_signpost_msg_ary[this.id]+' signpost is already added</font>');            
         }                    
     });
+    
     $('#addredirect').click(function() {
             $('#redirect_signpost_container').show();
-    }); 
-    
+    });     
     $('#removeredirect').click(function() {
             var txt = $("#wpTextbox1"); 
             var occurrence = (txt.val().match(new RegExp(eval('/#REDIRECT(.*)]]/gi')))) ? 1 : 0; 
@@ -103,44 +108,9 @@ jQuery( function ( $ ) {
         }else {
             $('#signpost_msg_container').html('<font style="color:red">Redirect signpost is already added</font>');
         }                    
-    });      
-           
-    $('#disambiguation').click(function() {
-        $('#disambiguation_signpost_container').show();
     });     
-    $('#removedisambiguation').click(function() {
-        var txt = $("#wpTextbox1"); 
-        var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
-        var occurrence=patt.test(txt.val());                                
-        if(occurrence){                
-            var replace_val = txt.val().replace(patt,'');
-            txt.val(replace_val);
-        }
-        $('#removedisambiguation').hide();
-        $('#disambiguation_signpost_container').hide();
-        $('#adddisambiguation').show();
-    }); 
-    $('#btn_signpost_disambiguation_page').click(function() {        
-        var disambiguation_page = $("#signpost_disambiguation_page").val();   
-        if(disambiguation_page == ''){
-            $('#signpost_msg_container').html('<font style="color:red">Please enter disambiguation page name</font>');
-            return false;
-        }
-        var txt = $("#wpTextbox1");       
-        var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
-        var occurrence=patt.test(txt.val());        
-        if(occurrence) {  
-            $('#signpost_msg_container').html('<font style="color:red">Disambiguation signpost is already added</font>');
-        }else {
-            txt.val('[['+disambiguation_page+' (disambiguation)]]\n' + txt.val() );
-            checkSignpostRedirectAndAssignTop();
-            $('#signpost_msg_container').html('<font style="color:green">Disambiguation signpost added and please save the changes</font>');         
-            $('#removedisambiguation').show();
-            $('#adddisambiguation').hide();
-            $('#disambiguation_signpost_container').hide();                                    
-        }                    
-    });                 
-    $('#removeinaccurate, #removeincomplete, #removedisputeed').click(function() {    
+                
+    $('#removeinaccurate, #removeincomplete, #removedisputeed, #removedisambiguation').click(function() {    
         var txt = $("#wpTextbox1");  
         var enable_id_ary = new Array();
         var rm_signpost_ary = new Array();        
@@ -149,18 +119,25 @@ jQuery( function ( $ ) {
         rm_signpost_ary['removeinaccurate'] = '{{Inaccurate}}';
         rm_signpost_ary['removeincomplete'] = '{{Incomplete}}';
         rm_signpost_ary['removedisputeed'] = '{{Disputed}}';
+        rm_signpost_ary['removedisambiguation'] = '{{Disambiguation(.*)}}';
         
         rm_signpost_msg_ary['removeinaccurate'] = 'Inaccurate';
         rm_signpost_msg_ary['removeincomplete'] = 'Incomplete';
         rm_signpost_msg_ary['removedisputeed'] = 'Disputed';
+        rm_signpost_msg_ary['removedisambiguation'] = 'Disambiguation';
 
         enable_id_ary['removeinaccurate'] = 'addinaccurate';
         enable_id_ary['removeincomplete'] = 'addincomplete';
         enable_id_ary['removedisputeed'] = 'adddisputeed';
+        enable_id_ary['removedisambiguation'] = 'adddisambiguation';
             	
-        var occurrence = (txt.val().replace(new RegExp(eval('/'+rm_signpost_ary[this.id]+'/gi')))) ? 1 : 0;    
+        var occurrence = (txt.val().replace(new RegExp(eval('/'+rm_signpost_ary[this.id]+'/gi')))) ? 1 : 0;
+        if(this.id == 'removedisambiguation') {
+            var patt=/\{\{Disambiguation(.*)\}\}/gi;
+            occurrence = (patt.test($("#wpTextbox1").val())) ? 1 : 0;              
+        }   
         if(occurrence) {
-            var replace_val = txt.val().replace(eval('/'+rm_signpost_ary[this.id]+'/gi'),' ');
+            var replace_val = txt.val().replace(eval('/'+rm_signpost_ary[this.id]+'/gi'),'');
             txt.val(replace_val);
             $('#'+this.id).hide();
             $('#'+enable_id_ary[this.id]).show();
@@ -177,7 +154,7 @@ jQuery( function ( $ ) {
         signpost_template_array[1] = "/{{Incomplete}}/gi";
         signpost_template_array[2] = "/{{Disputed}}/gi";
         signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
-        signpost_template_array[4] = "";
+        signpost_template_array[4] = "/{{Disambiguation(.*)}}/gi";
         
         signpost_template_name_array[0] = "Inaccurate";
         signpost_template_name_array[1] = "Incomplete";
@@ -186,21 +163,16 @@ jQuery( function ( $ ) {
         signpost_template_name_array[4] = "Disambiguation";
         
         var singpost_template_cnt = signpost_template_array.length;
-
         for( i=0; i<singpost_template_cnt; i++ ) {   
-            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;            
+            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;
             if(sign_post_avail) {            
                 inaccurate_occurrence = $("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i]))).length;
-                if(signpost_template_name_array[i] == 'Disambiguation') {
-                    var patt=/\[\[(.*)\(disambiguation\)\]\]/gi;
-                    inaccurate_occurrence = $("#wpTextbox1").val().match(patt).length;                      
-                }                             
                 if(inaccurate_occurrence > 1) {
                     $('#signpost_msg_container').html('<font style="color:red">'+signpost_template_name_array[i]+' signpost is added more than one time. Please add it one time and save the changes</font>');
                     return false;
                 } 
             }           
-        }                
+        }        
     });     
     
     mw.loader.using( ['jquery.typewatch'], function() {    
