@@ -1,3 +1,5 @@
+ALTER TABLE `user_board` ADD `ub_no_parse` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_type`;
+
 ALTER TABLE `user_books` ADD `book_image` VARCHAR( 255 ) NOT NULL AFTER `book_date`;
 
 ALTER TABLE `user_book_items` ADD `bi_item_position` INT( 11 ) NOT NULL AFTER `bi_displaytitle`;

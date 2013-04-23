@@ -837,8 +837,8 @@ class gospellCommonFunctions {
             			list($width, $height, $type, $attr) = getimagesize(@$images_array[$i]);
             			if($width >= 50 && $height >= 50 ){
              
-            			$output .= "<img src='".@$images_array[$i]."' width='100' id='".$k."' >";
-                        break;
+            			$output .= '<img src="'.@$images_array[$i].'" width="100" id="'.$k.'" />';
+                        break;//<img src="http://sociall.in/wp-content/themes/local-business/images/sociall-webpage.gif" id="1" width="100" />
             			$k++;
              
             			}
@@ -846,24 +846,23 @@ class gospellCommonFunctions {
             	}
             }
       
-      $output .='<!--input type="hidden" name="total_images" id="total_images" value="" /-->
-                  </div>';
-      $output .='<div class="info">
-                    <label class="title">
-                 		' . @$url_title[0] . '
-                	</label><br clear="all" />
-                	<label class="url">
-                		' . substr($url ,0,35) . '
-                	</label><br clear="all" /><br clear="all" />
-                	<label class="desc">
-                		' . @$tags['description'] .'
-                	</label><br clear="all" /><br clear="all" /><br clear="all" />                     
-                  </div>';
+      $output .='</div>';
+      $output .='<div class="info">';
+      
+      if( @$url_title[0] ){           
+          $output .='<label class="title">' . @$url_title[0] . '</label><br/>';                            
+      }      
+                    
+      $output .='<label class="url"><a href="'.$url.'"> ' . substr($url ,0,35) . '</a></label><br/><br/>';
+      $output .='<label class="desc">' . @$tags['description'] .'</label><br/><br/><br/>';
+                           
+      $output .='</div>';
                   
     $output .='</div>';              
                 
     return $output;          
-  }   
+  } 
+    
 //=====================================================================================        
 
 

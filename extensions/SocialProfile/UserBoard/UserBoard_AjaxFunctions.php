@@ -3,7 +3,7 @@
  * AJAX functions used by UserBoard.
  */
 $wgAjaxExportList[] = 'wfSendBoardMessage';
-function wfSendBoardMessage( $user_name, $message, $message_type, $count ) {
+function wfSendBoardMessage( $user_name, $message, $message_type, $parse, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
@@ -12,14 +12,14 @@ function wfSendBoardMessage( $user_name, $message, $message_type, $count ) {
 
 	$m = $b->sendBoardMessage(
 		$wgUser->getID(), $wgUser->getName(), $user_id_to, $user_name,
-		urldecode( $message ), $message_type
+		urldecode( $message ), $message_type, $parse
 	);
  
 	return $b->displayMessages( $user_id_to, 0, $count );
 }
 
-$wgAjaxExportList[] = 'wfDisplayAutoBoardMessage';
-function wfDisplayAutoBoardMessage( $user_name, $count ) {
+$wgAjaxExportList[] = 'wfDisplayBoardMessage';
+function wfDisplayBoardMessage( $user_name, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
@@ -27,6 +27,17 @@ function wfDisplayAutoBoardMessage( $user_name, $count ) {
 	$b = new UserBoard();
 
 	return $b->displayMessages( $user_id_to, 0, $count );
+}
+
+$wgAjaxExportList[] = 'wfAutoDisplayBoardMessage';
+function wfAutoDisplayBoardMessage( $last_id, $user_name ) {
+	global $wgUser;
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+	$b = new UserBoard();
+
+	return $b->autoDisplayMessages( $last_id, $user_id_to, 0 );
 }
 
 $wgAjaxExportList[] = 'wfDeleteBoardMessage';
@@ -84,18 +95,30 @@ function wfSendBoardMessageWall( $currnt_wall_id, $user_name, $message, $message
 	return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count );
 }
 
-$wgAjaxExportList[] = 'wfDisplayAutoWallPost';
-function wfDisplayAutoWallPost($currnt_wall_id, $user_name, $count, $page) {
+$wgAjaxExportList[] = 'wfDisplayWallPost';
+function wfDisplayWallPost( $currnt_wall_id, $user_name, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
 	$user_id_to = User::idFromName( $user_name );
     $currnt_wall_id = stripslashes( $currnt_wall_id );
-    $currnt_wall_id = urldecode( $currnt_wall_id );
-        
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
 	$b = new UserBoard();
-    //echo $page;
-  return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count, $page );
+    
+  return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count );
+}
+
+$wgAjaxExportList[] = 'wfDisplayAutoWallPost';
+function wfDisplayAutoWallPost( $currnt_wall_id, $last_post_id, $user_name ) {
+	global $wgUser;
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    $currnt_wall_id = stripslashes( $currnt_wall_id );
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
+	$b = new UserBoard();
+    //echo $currnt_wall_id."<==>".$last_post_id; die;
+  return $b->displayAutoWallPosts( $currnt_wall_id, $last_post_id, $user_name, $user_id_to );
 }
 
 $wgAjaxExportList[] = 'wfSendWallPostComment';
@@ -124,6 +147,15 @@ function wfSendEditWallPostComment( $user_name, $uwc_id, $message_id, $comment )
 	$b = new UserBoard();
 	$m = $b->SendEditWallPostComment( $uwc_id, $message_id, urldecode( $comment ) );
 
+	return $b->displayWallPostComments( $user_name, $message_id );
+}
+
+$wgAjaxExportList[] = 'wfDisplayWallComment';
+function wfDisplayWallComment($user_name, $message_id) {
+	global $wgUser;  
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );              
+	$b = new UserBoard();
 	return $b->displayWallPostComments( $user_name, $message_id );
 }
 
@@ -322,6 +354,31 @@ function wfAutoFetchUrl( $uri ) {
   
   return gospellCommonFunctions::featch_url( $uri );       
 }
+
+$wgAjaxExportList[] = 'wfSetLastPostId';
+function wfSetLastPostId($wall_id, $user_name){
+   
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    $b = new UserBoard();
+    
+   return $b->getLastPostId( $wall_id, $user_name, $user_id );
+}
+
+$wgAjaxExportList[] = 'wfSetLastMessageId';
+function wfSetLastMessageId($user_name){
+   
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    $b = new UserBoard();
+    
+   return $b->getLastMessageId( $user_id, 0 );
+}
+
 
 $wgAjaxExportList[] = 'wfTestfunc';
 function wfTestMathi() {

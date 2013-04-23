@@ -1617,22 +1617,12 @@ class UserProfilePage extends Article {
 				$output .= '<div class="user-page-message-form">
                        
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
-						<!--span class="profile-board-message-type">' .
-							wfMsgHtml( 'userboard_messagetype' ) .
-						'</span-->
+						
                         <input type="hidden" id="message_type" value="1" />
-						<!--select id="message_type">
-							<option value="0">' .
-								wfMsgHtml( 'userboard_public' ) .
-							'</option>
-							<option value="1">' .
-								wfMsgHtml( 'userboard_private' ) .
-							'</option>
-						</select--><p>
-						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'"/></textarea>                        
+						<p>
+						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'" onblur="javascript:fetch_url();"/></textarea>                        
                         <div class="cleared"></div>
-                        <div id="featch_url_content_block">                         
-                        </div>
+                        <div id="featch_url_content_block" style="display:none;"></div>
                         <form name="upload_file_frm" id="upload_file_frm" action="" enctype="multipart/form-data">
                          <div id="file-attach-block"><span class="add_files"><a>Attach files with message</a></span><div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div></div>
                          <div class="cleared"></div>                         
@@ -1649,10 +1639,15 @@ class UserProfilePage extends Article {
 				'</div>';
 			}
 		}
+        
+       $b = new UserBoard();
 
-		$output .= '<div id="user-page-board">';
-		$b = new UserBoard();
-		$output .= $b->displayMessages( $user_id, 0, 10);
+		$output .= '<input type="hidden" name="last_msg_id" id="last_msg_id" value="'.$b->getLastmessageId( $user_id, 0 ).'">
+                   <div id="user-page-board">';
+                            
+		            
+		 $output .= $b->displayMessages($user_id, 0, 10);         
+          
 		$output .= '</div>';
         
      $output .='</div>';
@@ -1757,7 +1752,8 @@ class UserProfilePage extends Article {
 				$output .= '<div class="user-page-message-form">
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
 					    <input type="hidden" id="message_type_wall" value="0" />
-						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="What are you thinking about?"/></textarea></p>
+						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="What are you thinking about?" onblur="javascript:fetch_wall_url();" /></textarea></p>
+                        <div id="featch_wall_url_content_block"></div>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall_post();" />
 						</div>
@@ -1770,11 +1766,13 @@ class UserProfilePage extends Article {
 			}
 		//}
 
-		$output .= '<div id="user-page-wall">';         
-         
-		 $output .= $b->displayWallPosts( $current_wall_id, $user_name, $user_id, 0, 10 );
-         
+		$output .= '<input type="hidden" name="last_post_id" id="last_post_id" value="'.$b->getLastPostId( $current_wall_id, $user_name, $user_id, 0 ).'">
+                    <div id="user-page-wall">';                 
+          
+		   $output .= $b->displayWallPosts( $current_wall_id, $user_name, $user_id, 0, 10 );          
+           
 		$output .= '</div>';
+        
       $output .='</div>';
       
 		return $output;

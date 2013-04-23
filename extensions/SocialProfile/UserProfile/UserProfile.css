@@ -269,7 +269,6 @@
 
 /* Message Board */
 #user-board-wall-block{
-    border: 0px solid red;
     float: left;
     margin-right: 2px;
     width: 49%;
@@ -328,7 +327,8 @@
 }
 
 .user-board-message-body {
-	margin: 0px 10px 0px 0px;
+	margin: 0px 10px 0px 0px;    
+    border: 0px solid #ff0000;
 }
 
 .user-board-message-body p {
