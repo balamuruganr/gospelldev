@@ -108,6 +108,35 @@ function wfDisplayWallPost( $currnt_wall_id, $user_name, $count ) {
   return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count );
 }
 
+$wgAjaxExportList[] = 'wfDisplayWallPostOnScroll';
+function wfDisplayWallPostOnScroll( $currnt_wall_id, $user_name, $count, $page ) {
+	global $wgUser;
+    if($page <= 1 ){
+       $page = 1; 
+    }
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    $currnt_wall_id = stripslashes( $currnt_wall_id );
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
+	$b = new UserBoard();
+  return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count, $page );
+}
+
+$wgAjaxExportList[] = 'wfDisplayMessageOnScroll';
+function wfDisplayMessageOnScroll( $user_name, $count, $page ) {
+	global $wgUser;
+    if($page <= 1 ){
+       $page = 1; 
+    }
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );      
+	$b = new UserBoard();
+  return $b->displayMessages( $user_id_to, 0, $count, $page );
+}
+
+
 $wgAjaxExportList[] = 'wfDisplayAutoWallPost';
 function wfDisplayAutoWallPost( $currnt_wall_id, $last_post_id, $user_name ) {
 	global $wgUser;

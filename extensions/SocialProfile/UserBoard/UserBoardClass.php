@@ -824,7 +824,8 @@ class UserBoard {
 				$user_sql .= " OR ( ub_wall_id={$wall_id} AND ub_user_id={$user_id} AND ub_user_id_from={$wgUser->getID() }" . " AND ub_type = 0 AND ub_pinned !=1 ) ";
 			}
 		}
-
+        //echo $limit_sql."<br />"; die;
+        
 		$sql = "SELECT ub_id, ub_wall_id, ub_user_id_from, ub_user_name_from, ub_user_id, ub_user_name,
 			ub_message,UNIX_TIMESTAMP(ub_date) AS unix_time,ub_type, ub_pinned FROM {$dbr->tableName( 'user_board' )} 
             WHERE {$user_sql}
@@ -1157,8 +1158,7 @@ class UserBoard {
 
 		$output = ''; //Prevent E_NOTICE
         $isThereAnyMsg=0;
-        
-                
+                        
 		$messages = $this->getUserBoardMessages( $user_id, $user_id_2, $count, $page );
 		if ( $messages ) {
 		  
@@ -1567,6 +1567,7 @@ class UserBoard {
 		return $output;
 	}
     
+        
     public function displayAutoWallPosts( $wall_id, $last_post_id, $user_name, $user_id, $user_id_2 = 0 ) {
 		global $wgUser, $wgTitle, $wgStylePath;
 

@@ -166,26 +166,6 @@ function auto_display_wall_post() {
 	}
 }
 
-/*var wall_post_scrolled_down = 0;
-var post_page = 2;
-function display_wall_post_onscroll_down() {
-	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
-    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    	
-	if( !wall_post_scrolled_down && post_page ) {
-		wall_post_scrolled_down = 1;
-		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10, post_page ], function( request ) {
-		  //alert(request.responseText);
-		        if($(request.responseText).is(".user-board-message")){
-		          $('#user-page-wall').append( request.responseText );
-		         }				
-				wall_post_scrolled_down = 0;
-                post_page++;
-			}
-		);
-	}
-}*/
-
 var last_post_idset = 0;
 function set_last_post_id( wall_id ){
   var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
@@ -673,6 +653,57 @@ function fetch_wall_url(){
         $('#featch_wall_url_content_block').html(""); 
       } 
 }
+
+var wall_post_scrolled_down = 0;
+var post_page = 2;
+function display_wall_post_onscroll_down() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
+	if( !wall_post_scrolled_down ) {
+		wall_post_scrolled_down = 1;
+        //$('#scrolled-wall-posts').append( "<span>Madyvanan</span>" ); 
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayWallPostOnScroll', [ currWallId, userTo, 10, post_page ], function( request ) {
+		        if(request.responseText){
+		           if( !$(request.responseText).is('.no-info-container') ){
+		            $('#scrolled-wall-posts').append( request.responseText ); 
+		           }
+		         }				
+				wall_post_scrolled_down = 0;
+                post_page++;
+			}
+		);
+	}
+}
+
+var msg_scrolled_down = 0;
+var msg_page = 2;
+function display_message_onscroll_down() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;    
+	if( !msg_scrolled_down ) {
+		msg_scrolled_down = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayMessageOnScroll', [ userTo, 10, msg_page ], function( request ) {
+		        if(request.responseText){
+		           if( !$(request.responseText).is('.no-info-container') ){
+		            $('#scrolled-board-messages').append( request.responseText ); 
+		           }
+		         }				
+				msg_scrolled_down = 0;
+                msg_page++;
+			}
+		);
+	}
+}
+
+$(window).scroll(function()
+{
+    if($(window).scrollTop() == $(document).height() - $(window).height())
+    {
+      display_wall_post_onscroll_down();
+      display_message_onscroll_down();
+    }
+});
 
 jQuery( function ( $ ) {
    /////////////////// Auto Display using sajax /////////////// 
