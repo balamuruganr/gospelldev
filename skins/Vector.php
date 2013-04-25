@@ -167,6 +167,10 @@ class VectorTemplate extends BaseTemplate {
 			<!-- firstHeading -->
 			<h1 id="firstHeading" class="firstHeading"><span dir="auto"><?php $this->html( 'title' ) ?></span></h1>
 			<!-- /firstHeading -->
+            <!-- hilight word -->      
+            <style>.highlight { background-color: yellow }</style>      
+            <span id="js_gsFindWord_con"><input id="gsFindWord_txt_bx" placeholder="find word" /><input type="button" id="gsFindWord_btn" value="submit"/></span>
+            <!-- hilight word -->
 			<!-- bodyContent -->
 			<div id="bodyContent">
 				<?php if ( $this->data['isarticle'] ): ?>

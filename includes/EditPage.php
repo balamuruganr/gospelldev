@@ -303,7 +303,6 @@ class EditPage {
 		if ( !wfRunHooks( 'AlternateEdit', array( $this ) ) ) {
 			return;
 		}
-
 		wfProfileIn( __METHOD__ );
 		wfDebug( __METHOD__ . ": enter\n" );
 
@@ -1836,8 +1835,16 @@ class EditPage {
 		if ( $this->section == 'new' ) {
 			$this->showSummaryInput( true, $this->summary );
 			$wgOut->addHTML( $this->getSummaryPreview( true, $this->summary ) );
-		}        
-               gospellCommonFunctions::showSignPostButton();
+		}               
+               $block_ns_array = array(
+                                        NS_DISAMBIGUATION
+                                       );                                
+               if(!in_array($this->mTitle->getNamespace(),$block_ns_array)) {                  
+                    gospellCommonFunctions::showSignPostButton();
+               }               
+               if($this->mTitle->getNamespace() == NS_DISAMBIGUATION){                
+                    gospellCommonFunctions::showDisambiguationTxtBox();
+               }
 		$wgOut->addHTML( $this->editFormTextBeforeContent );
 
 		if ( !$this->isCssJsSubpage && $showToolbar && $wgUser->getOption( 'showtoolbar' ) ) {

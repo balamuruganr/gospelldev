@@ -871,7 +871,7 @@ add and remove sign post container
 */
     public static function showSignPostButton() {
         global $wgOut;
-        
+                        
         $wgOut->addHTML( '<div>' );
         $wgOut->addHTML( '<div id="signpost_msg_container"></div>' );
         $wgOut->addHTML( '<input type="hidden" name="signpost_page_protect" id="signpost_page_protect" />' );
@@ -896,6 +896,19 @@ add and remove sign post container
 		$wgOut->addHTML( "</div>\n" );              
     }
     
+    public static function showDisambiguationTxtBox() {
+        global $wgOut;
+                                
+        $wgOut->addHTML( '<div>' );
+        $wgOut->addHTML( '<div id="disambiguation_msg_container"></div>' );
+        $wgOut->addHTML( '<span id="disambiguation_txt_box_con" >
+                          <input type="text" placeholder="enter page name" autofocus="autofocus" id="disambiguation_src_txt_bx" name="disambiguation_src_txt_bx" />
+                          <input type="button" name="sub_disambig_src_txt_bx" id="sub_disambig_src_txt_bx" value="Submit" />
+                          </span>' 
+                        );                                             
+		$wgOut->addHTML( "</div>\n" );              
+    }
+        
     public static function getUserRealNameByUserId($user_id) {  
          $usr_real_name = '';   
          if(isset($user_id)) {                                     
@@ -966,6 +979,5 @@ add and remove sign post container
                 $dbw->commit();                        
             }
         }
-    }
-     
+    }          
 }

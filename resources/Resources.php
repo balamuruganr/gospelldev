@@ -957,5 +957,8 @@ return array(
 	),
 	'jquery.typewatch' => array(
         'scripts' => 'resources/jquery/jquery.typewatch.js',
-	),        
+	),
+	'jquery.highlight' => array(
+        'scripts' => 'resources/jquery/jquery.highlight.js',
+	)	
 );

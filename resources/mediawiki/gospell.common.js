@@ -3,8 +3,7 @@
  */
 jQuery( function ( $ ) {
     
-    
-    if($('#wpTextbox1').length) {    
+    if($('#wpTextbox1').length && wgNamespaceNumber != 500) {    
 
         var inaccurate_occurrence, i, match_string, sign_post_avail, patt;        
         var signpost_template_array = new Array();
@@ -145,34 +144,35 @@ jQuery( function ( $ ) {
         }                    
     });        
     $('#wpSave').click(function() {
-
-        var inaccurate_occurrence, i, match_string, sign_post_avail;        
-        var signpost_template_array = new Array();
-        var signpost_template_name_array = new Array();
-        
-        signpost_template_array[0] = "/{{Inaccurate}}/gi";
-        signpost_template_array[1] = "/{{Incomplete}}/gi";
-        signpost_template_array[2] = "/{{Disputed}}/gi";
-        signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
-        signpost_template_array[4] = "/{{Disambiguation(.*)}}/gi";
-        
-        signpost_template_name_array[0] = "Inaccurate";
-        signpost_template_name_array[1] = "Incomplete";
-        signpost_template_name_array[2] = "Disputed";
-        signpost_template_name_array[3] = "Redirect";
-        signpost_template_name_array[4] = "Disambiguation";
-        
-        var singpost_template_cnt = signpost_template_array.length;
-        for( i=0; i<singpost_template_cnt; i++ ) {   
-            sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;
-            if(sign_post_avail) {            
-                inaccurate_occurrence = $("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i]))).length;
-                if(inaccurate_occurrence > 1) {
-                    $('#signpost_msg_container').html('<font style="color:red">'+signpost_template_name_array[i]+' signpost is added more than one time. Please add it one time and save the changes</font>');
-                    return false;
-                } 
-            }           
-        }        
+        if(wgNamespaceNumber != 500) {
+            var inaccurate_occurrence, i, match_string, sign_post_avail;        
+            var signpost_template_array = new Array();
+            var signpost_template_name_array = new Array();
+            
+            signpost_template_array[0] = "/{{Inaccurate}}/gi";
+            signpost_template_array[1] = "/{{Incomplete}}/gi";
+            signpost_template_array[2] = "/{{Disputed}}/gi";
+            signpost_template_array[3] = "/#REDIRECT(.*)]]/gi";
+            signpost_template_array[4] = "/{{Disambiguation(.*)}}/gi";
+            
+            signpost_template_name_array[0] = "Inaccurate";
+            signpost_template_name_array[1] = "Incomplete";
+            signpost_template_name_array[2] = "Disputed";
+            signpost_template_name_array[3] = "Redirect";
+            signpost_template_name_array[4] = "Disambiguation";
+            
+            var singpost_template_cnt = signpost_template_array.length;
+            for( i=0; i<singpost_template_cnt; i++ ) {   
+                sign_post_avail = ($("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i])))) ? 1 : 0;
+                if(sign_post_avail) {            
+                    inaccurate_occurrence = $("#wpTextbox1").val().match(new RegExp(eval(signpost_template_array[i]))).length;
+                    if(inaccurate_occurrence > 1) {
+                        $('#signpost_msg_container').html('<font style="color:red">'+signpost_template_name_array[i]+' signpost is added more than one time. Please add it one time and save the changes</font>');
+                        return false;
+                    } 
+                }           
+            } 
+        }       
     });     
     
     mw.loader.using( ['jquery.typewatch'], function() {    
@@ -181,9 +181,13 @@ jQuery( function ( $ ) {
     			callback: searchUserName,
                 captureLength:1
     		});
+    		$('#disambiguation_src_txt_bx').typeWatch({
+    			callback: getPageTitlesForDisambiguation,
+                captureLength:1
+    		});
+            
     	});
     });
-    
     $('#wpName2').change(function() {        
         var fname = $.trim($('#wpFirstName2').val());
         var lname = $.trim($('#wpLastName2').val());
@@ -209,8 +213,65 @@ jQuery( function ( $ ) {
     });
    ////////////////////////////////
    set_default_book();
-   ///////////////////////////////      
+   ///////////////////////////////     
+    $('#sub_disambig_src_txt_bx').click(function() {         
+        var title = $('#disambiguation_src_txt_bx').val();
+        if(title === ''){
+            return false;
+        }
+        
+        title_pat = "/"+title+"]]/gi";
+        title_occur = ($("#wpTextbox1").val().match(new RegExp(eval(title_pat)))) ? 1 : 0;
+        if(title_occur){
+            $('#disambiguation_msg_container').html('<p><font style="color:red">This page is already added</font></p>');
+            return false;
+        }
+                                  
+        $.ajax({
+		url: mw.util.wikiScript( 'api' ),
+		data: {
+			action: 'query',
+			titles: title,
+			prop: 'revisions',
+			rvprop: 'content',
+			format: 'json'
+		},
+        cache: false,
+        success: function ( data ) {            
+            var tmp_ary = data['query']['pages'];
+            $('#disambiguation_msg_container').html('');
+            $.each(tmp_ary, function(i, field) {                                 
+                if ( typeof field['pageid'] !== 'undefined' ) {
+                    var disamb_page_desc, tmp_var, res_title, full_desc;
+                    
+                    tmp_var = tmp_ary[field['pageid']];  
+                    res_title = tmp_var['title'];                         
+                    full_desc = tmp_var['revisions'][0]['*'];
+                    //remove html special char
+                    full_desc = full_desc.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+                    full_desc = full_desc.replace(/(\r\n|\n|\r)/gm,"");
+                    disamb_page_desc = '# '+'[['+res_title+']]<p>'+full_desc.substring(0,140)+'</p>'; 
+                                           
+                    $("#wpTextbox1").val( disamb_page_desc+"\n" + $("#wpTextbox1").val() );
+                    $('#disambiguation_msg_container').html('<p><font style="color:green">Page added and please save the changes</font></p>');
+                  }
+                  else {
+                    $('#disambiguation_msg_container').html('<p><font style="color:red">No Results Found</font></p>');  
+                  }                   
+                });    
+        }                
+        }).done();    
+    });       
 });
+
+mw.loader.using( ['jquery.highlight'], function() {
+    jQuery( function ( $ ) {
+        $('#gsFindWord_btn').click(function() {
+            var highlight_val = $("#gsFindWord_txt_bx").val();             
+            $('#mw-content-text').removeHighlight().highlight(highlight_val);
+        });
+    });
+});            
 
 function isValidEmailAddress(emailAddress) {
     var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
@@ -462,4 +523,25 @@ function searchUserName(){
         res = res + '</ul>';
         $('#js_user_search_result').html(res);                  
     });     
+}
+
+function getPageTitlesForDisambiguation(){
+    var that = this;
+    var title = $(this).val();    
+    var request = $.ajax( {
+    					url: mw.util.wikiScript( 'api' ),
+    					data: {
+    						action: 'opensearch',
+    						search: title,
+    						namespace: 0,
+    						suggest: '',
+    						format: 'json',
+                            limit: 1
+    					},
+    					dataType: 'json',
+                        cache: false,
+    					success: function ( data ) {    					       					   
+    						$(that).suggestions( 'suggestions', data[1] );
+    					}
+    				});
 }
