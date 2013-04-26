@@ -34,9 +34,10 @@ $('#user_avatar_sub').click(function() {
     cache: false
     }).done(function( html ) {            
         var userExist = html.split('||');            
-        if($.trim(userExist[0]) == 1) {                
+        if($.trim(userExist[0]) == 1) {     			
             $("#user_cover_photo").attr("src",userExist[1]);   
             $('#img_cover_target_container').hide();
+			$('#fb-root').html(userExist[2]);			
             $('#user_avatar_sub').remove();                                                      
         }
     });           
