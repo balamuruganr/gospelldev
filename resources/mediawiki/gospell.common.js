@@ -230,11 +230,12 @@ jQuery( function ( $ ) {
         $.ajax({
 		url: mw.util.wikiScript( 'api' ),
 		data: {
-			action: 'query',
-			titles: title,
-			prop: 'revisions',
-			rvprop: 'content',
-			format: 'json'
+            action: 'query',
+            titles: title,
+            prop: 'revisions',
+            rvprop: 'content',
+            format: 'json',
+            limit: 1
 		},
         cache: false,
         success: function ( data ) {            
@@ -247,10 +248,12 @@ jQuery( function ( $ ) {
                     tmp_var = tmp_ary[field['pageid']];  
                     res_title = tmp_var['title'];                         
                     full_desc = tmp_var['revisions'][0]['*'];
-                    //remove html special char
-                    full_desc = full_desc.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-                    full_desc = full_desc.replace(/(\r\n|\n|\r)/gm,"");
-                    disamb_page_desc = '# '+'[['+res_title+']]<p>'+full_desc.substring(0,140)+'</p>'; 
+
+                    full_desc = full_desc.replace(/(\{\{(.*)\}\})/gm,"").replace(/(\[\[File:(.*)\]\])/gm,"");//remove templates                                        
+                    full_desc = full_desc.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");//remove html special char
+                    full_desc = full_desc.replace(/(\r\n|\n|\r)/gm,"");//remove tab
+                    full_desc = full_desc.replace(/[^\w\s]/gi, '');//remove special char
+                    disamb_page_desc = '# '+'[['+res_title+']]<p>'+full_desc.substring(0,140)+'...</p>'; 
                                            
                     $("#wpTextbox1").val( disamb_page_desc+"\n" + $("#wpTextbox1").val() );
                     $('#disambiguation_msg_container').html('<p><font style="color:green">Page added and please save the changes</font></p>');
@@ -531,12 +534,11 @@ function getPageTitlesForDisambiguation(){
     var request = $.ajax( {
     					url: mw.util.wikiScript( 'api' ),
     					data: {
-    						action: 'opensearch',
-    						search: title,
-    						namespace: 0,
-    						suggest: '',
-    						format: 'json',
-                            limit: 1
+                            action: 'opensearch',
+                            search: title,
+                            namespace: 0,
+                            suggest: '',
+                            format: 'json'
     					},
     					dataType: 'json',
                         cache: false,
