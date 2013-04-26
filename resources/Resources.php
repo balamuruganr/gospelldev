@@ -954,5 +954,11 @@ return array(
 	),
 	'gospell.common' => array(
         'scripts' => 'resources/mediawiki/gospell.common.js',
-	),    
+	),
+	'jquery.typewatch' => array(
+        'scripts' => 'resources/jquery/jquery.typewatch.js',
+	),
+	'jquery.highlight' => array(
+        'scripts' => 'resources/jquery/jquery.highlight.js',
+	)	
 );

@@ -1,3 +1,50 @@
+ALTER TABLE `user_board` ADD `ub_no_parse` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `ub_type`;
+
+ALTER TABLE `user_books` ADD `book_image` VARCHAR( 255 ) NOT NULL AFTER `book_date`;
+
+ALTER TABLE `user_book_items` ADD `bi_item_position` INT( 11 ) NOT NULL AFTER `bi_displaytitle`;
+
+CREATE TABLE IF NOT EXISTS `user_book_items` (
+  `bi_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `bi_book_id` int(11) NOT NULL,
+  `bi_book_user_name` varchar(255) NOT NULL,
+  `bi_type` varchar(255) NOT NULL,
+  `bi_content_type` varchar(255) NOT NULL,
+  `bi_title` varchar(255) NOT NULL,
+  `bi_revision` int(6) NOT NULL,
+  `bi_latest` int(6) NOT NULL,
+  `bi_date` datetime NOT NULL,
+  `bi_url` text NOT NULL,
+  `bi_current_version` int(6) NOT NULL,
+  `bi_displaytitle` varchar(255) NOT NULL,
+  `bi_status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`bi_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `user_books` (
+  `book_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `book_name` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `is_anonym_user` tinyint(1) NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `book_type` tinyint(1) NOT NULL,
+  `book_date` datetime NOT NULL,
+  `status` varchar(255) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+
+
+ALTER TABLE `user_board` CHANGE `up_pinned` `ub_pinned` TINYINT( 1 ) NOT NULL DEFAULT '0';
+
+//add user group 
+INSERT INTO `user_groups` (`ug_user`, `ug_group`) VALUES
+(1, 'bureaucrat'),
+(1, 'sysop');
 
 --
 -- Table structure for table `user_walls`
@@ -89,6 +136,33 @@ CREATE INDEX /*$wgDBprefix*/user_fbconnect_user ON /*$wgDBprefix*/user_fbconnect
 /*
 social profile sql
 */
+CREATE TABLE /*_*/user_status (
+	-- Unique status ID number
+	`us_id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	-- ID number of the user who wrote this status update
+	`us_user_id` int(11) NOT NULL default '0',
+	-- Timestamp of the status update
+	`us_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	-- The text of the status update
+	`us_status` varchar(140) NOT NULL default ''
+)/*$wgDBTableOptions*/;
+
+CREATE TABLE /*_*/user_status_history (
+	`ush_id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	`ush_user_id` int(11) NOT NULL default '0',
+	`ush_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`ush_status` varchar(140) NOT NULL default ''
+)/*$wgDBTableOptions*/;
+
+CREATE TABLE /*_*/user_status_likes (
+	-- Unique ID number
+	`usl_id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	--ID of the status which was liked
+	`usl_status_id` int(11) NOT NULL default '0',
+	--ID of the user who likes the (usl_status_id) status 
+	`usl_user_id` int(11) NOT NULL default '0'
+)/*$wgDBTableOptions*/;
+
 CREATE TABLE /*_*/user_profile (
   `up_user_id` int(5) NOT NULL PRIMARY KEY default '0',
   `up_location_city` varchar(255) default NULL,

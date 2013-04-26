@@ -141,7 +141,7 @@ mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
 		});
         
         jQuery( 'form[name="profile"]' ).validate();
-        /*{
+        /*{ //jquery.ui.dialog
               rules: {
                 real_name: "required"//,
                 //password_again: {

@@ -138,7 +138,8 @@ $wgGroupPermissions['sysop']['edit'] = true;
 
 $wgGospellSettingsProfileAboutMaxLenth = 512;
 $wgGospellSettingsUserProfileAgeLimit  = 13;
-$wgGospellSettingsUserBordMessageFileSize = 2097152; //2097152 = 2 mb in bytes;
+$wgGospellSettingsUserBordMessageFileSize = 10485760; //10485760 = 10MB & 2097152 = 2 mb in bytes;
+$wgGospellSettingsUserBordMessageTextLenth = 600;
 
 $wgLegacyJavaScript = true;
 $wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
@@ -152,6 +153,15 @@ $wgCollectionPODPartners = array(
         'infopagetitle' => 'coll-order_info_article',
     ),
 );
+
+/*
+* 
+*
+* Note: This (require_once('extensions/ShareThis.php');) works by hooking into 'MonoBookTemplateToolboxEnd'. 
+  If you're using a skin which doesn't call this hook, then the above will not work.
+*/
+//require_once('extensions/ShareThis/ShareThis.php');
+//$wgShowShareThisSidebar = true;
 
 //$wgCollectionPODPartners = false;
 //$wgGroupPermissions['user']['collectionsaveascommunitypage'] = true;
@@ -170,14 +180,28 @@ require_once( "$IP/extensions/WikiEditor/WikiEditor.php" );
 # Add more configuration options below.
 
 require_once("$IP/extensions/SocialProfile/SocialProfile.php");
-$wgUserProfileDisplay['friends'] = true;
-$wgUserProfileDisplay['foes'] = false;
-$wgUserBoard = true;
-$wgUserProfileDisplay['board'] = true;
-$wgUserProfileDisplay['stats'] = true;
+$wgUserProfileDisplay['friends']    = true;
+$wgUserProfileDisplay['foes']       = false;
+$wgUserBoard                        = true;
+$wgUserProfileDisplay['board']      = true;
+$wgUserProfileDisplay['stats']      = true;
 
 require_once("$IP/extensions/Facebook/Facebook.php");
 //hide ip address , because facebook config showing
 $wgShowIPinHeader = false; 
 
 $wgUploadDirectory = "{$IP}/images";
+
+//Disambiguation Custom Namespace
+define("NS_DISAMBIGUATION", 500);
+define("NS_DISAMBIGUATION_TALK", 501);
+$wgExtraNamespaces[NS_DISAMBIGUATION]               = "Disambiguation";
+$wgExtraNamespaces[NS_DISAMBIGUATION_TALK]          = "Disambiguation_talk";
+
+//Namespace edit protection from user , and sysop user can edit 
+$wgGroupPermissions['sysop']['edittemplate']        = true;
+$wgGroupPermissions['sysop']['edithelp']            = true;
+
+$wgNamespaceProtection[ NS_TEMPLATE ]               = array( 'edittemplate' );
+$wgNamespaceProtection[ NS_HELP ]                   = array( 'edithelp' );
+

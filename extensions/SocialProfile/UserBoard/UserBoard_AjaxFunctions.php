@@ -3,7 +3,7 @@
  * AJAX functions used by UserBoard.
  */
 $wgAjaxExportList[] = 'wfSendBoardMessage';
-function wfSendBoardMessage( $user_name, $message, $message_type, $count ) {
+function wfSendBoardMessage( $user_name, $message, $message_type, $parse, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
@@ -12,14 +12,14 @@ function wfSendBoardMessage( $user_name, $message, $message_type, $count ) {
 
 	$m = $b->sendBoardMessage(
 		$wgUser->getID(), $wgUser->getName(), $user_id_to, $user_name,
-		urldecode( $message ), $message_type
+		urldecode( $message ), $message_type, $parse
 	);
  
 	return $b->displayMessages( $user_id_to, 0, $count );
 }
 
-$wgAjaxExportList[] = 'wfDisplayAutoBoardMessage';
-function wfDisplayAutoBoardMessage( $user_name, $count ) {
+$wgAjaxExportList[] = 'wfDisplayBoardMessage';
+function wfDisplayBoardMessage( $user_name, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
@@ -27,6 +27,17 @@ function wfDisplayAutoBoardMessage( $user_name, $count ) {
 	$b = new UserBoard();
 
 	return $b->displayMessages( $user_id_to, 0, $count );
+}
+
+$wgAjaxExportList[] = 'wfAutoDisplayBoardMessage';
+function wfAutoDisplayBoardMessage( $last_id, $user_name ) {
+	global $wgUser;
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+	$b = new UserBoard();
+
+	return $b->autoDisplayMessages( $last_id, $user_id_to, 0 );
 }
 
 $wgAjaxExportList[] = 'wfDeleteBoardMessage';
@@ -84,17 +95,59 @@ function wfSendBoardMessageWall( $currnt_wall_id, $user_name, $message, $message
 	return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count );
 }
 
-$wgAjaxExportList[] = 'wfDisplayAutoWallPost';
-function wfDisplayAutoWallPost($currnt_wall_id, $user_name, $count) {
+$wgAjaxExportList[] = 'wfDisplayWallPost';
+function wfDisplayWallPost( $currnt_wall_id, $user_name, $count ) {
 	global $wgUser;
 	$user_name = stripslashes( $user_name );
 	$user_name = urldecode( $user_name );
 	$user_id_to = User::idFromName( $user_name );
     $currnt_wall_id = stripslashes( $currnt_wall_id );
-    $currnt_wall_id = urldecode( $currnt_wall_id );
-        
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
 	$b = new UserBoard();
+    
   return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count );
+}
+
+$wgAjaxExportList[] = 'wfDisplayWallPostOnScroll';
+function wfDisplayWallPostOnScroll( $currnt_wall_id, $user_name, $count, $page ) {
+	global $wgUser;
+    if($page <= 1 ){
+       $page = 1; 
+    }
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    $currnt_wall_id = stripslashes( $currnt_wall_id );
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
+	$b = new UserBoard();
+  return $b->displayWallPosts( $currnt_wall_id, $user_name, $user_id_to, 0, $count, $page );
+}
+
+$wgAjaxExportList[] = 'wfDisplayMessageOnScroll';
+function wfDisplayMessageOnScroll( $user_name, $count, $page ) {
+	global $wgUser;
+    if($page <= 1 ){
+       $page = 1; 
+    }
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );      
+	$b = new UserBoard();
+  return $b->displayMessages( $user_id_to, 0, $count, $page );
+}
+
+
+$wgAjaxExportList[] = 'wfDisplayAutoWallPost';
+function wfDisplayAutoWallPost( $currnt_wall_id, $last_post_id, $user_name ) {
+	global $wgUser;
+	$user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    $currnt_wall_id = stripslashes( $currnt_wall_id );
+    $currnt_wall_id = urldecode( $currnt_wall_id );        
+	$b = new UserBoard();
+    //echo $currnt_wall_id."<==>".$last_post_id; die;
+  return $b->displayAutoWallPosts( $currnt_wall_id, $last_post_id, $user_name, $user_id_to );
 }
 
 $wgAjaxExportList[] = 'wfSendWallPostComment';
@@ -123,6 +176,15 @@ function wfSendEditWallPostComment( $user_name, $uwc_id, $message_id, $comment )
 	$b = new UserBoard();
 	$m = $b->SendEditWallPostComment( $uwc_id, $message_id, urldecode( $comment ) );
 
+	return $b->displayWallPostComments( $user_name, $message_id );
+}
+
+$wgAjaxExportList[] = 'wfDisplayWallComment';
+function wfDisplayWallComment($user_name, $message_id) {
+	global $wgUser;  
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );              
+	$b = new UserBoard();
 	return $b->displayWallPostComments( $user_name, $message_id );
 }
 
@@ -162,10 +224,29 @@ function wfSetPinnedPost( $wall_id, $user_name, $ub_id ) {
     $wall_id = urldecode( $wall_id );
     
 	$b = new UserBoard();
-	$b->setPinnedWall( $ub_id );
+	$b->setPinnedWallPost( $ub_id );
     
    return $b->displayWallPosts( $wall_id, $user_name, $user_id_to );
 }
+
+$wgAjaxExportList[] = 'wfUnSetPinnedPost';
+function wfUnSetPinnedPost( $wall_id, $user_name, $ub_id ) {
+	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    
+    $wall_id = stripslashes( $wall_id );
+    $wall_id = urldecode( $wall_id );
+    
+	$b = new UserBoard();
+	$b->unSetPinnedWallPost( $ub_id );
+    
+   return $b->displayWallPosts( $wall_id, $user_name, $user_id_to );
+}
+
+
 
 $wgAjaxExportList[] = 'wfSendWallLike';
 function wfSendWallLike( $wall_id, $user_name, $ub_id ) {
@@ -243,8 +324,93 @@ function wfCreateWall( $user_name, $wall_name ) {
  return $b->displayWalls( $user_name, $user_id_to, 0, 10 );
 }
 
+$wgAjaxExportList[] = 'wfUpdateWall';
+function wfUpdateWall( $user_name, $wall_id, $wall_name ) {
+	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+    
+    $wall_id = stripslashes( $wall_id );
+	$wall_name = stripslashes( $wall_name );
+    
+	$b = new UserBoard();
+    
+	$m = $b->sendEditWall( 
+		urldecode( $wall_id ),  urldecode( $wall_name ) 
+        );
+ 
+ return $b->displayWalls( $user_name, $user_id_to, 0, 10 );
+}
+
+$wgAjaxExportList[] = 'wfDeleteWall';
+function wfDeleteWall( $user_name, $wall_id ) {
+	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+	$user_id_to = User::idFromName( $user_name );
+        
+    $wall_id = stripslashes( $wall_id );
+    
+	$b = new UserBoard();
+    
+	$m = $b->sendDeleteWall( $wall_id );
+ 
+ return $b->displayWalls( $user_name, $user_id_to, 0, 10 );
+}
+
+$wgAjaxExportList[] = 'wfAutoBookList';
+function wfAutoBookList( $user_name ) {
+	global $wgUser;
+    
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    //$profile = new UserProfilePage( $user_name );
+    
+    //"<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".$url.$book['book_id']."');\">{$book['book_name']}</a></span>";
+	
+    
+ 
+ return "";//$profile->getUserProfileBookList( $user_name );
+}
+
+$wgAjaxExportList[] = 'wfAutoFetchUrl';
+function wfAutoFetchUrl( $uri ) {
+  
+  return gospellCommonFunctions::featch_url( $uri );       
+}
+
+$wgAjaxExportList[] = 'wfSetLastPostId';
+function wfSetLastPostId($wall_id, $user_name){
+   
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    $b = new UserBoard();
+    
+   return $b->getLastPostId( $wall_id, $user_name, $user_id );
+}
+
+$wgAjaxExportList[] = 'wfSetLastMessageId';
+function wfSetLastMessageId($user_name){
+   
+    $user_name = stripslashes( $user_name );
+	$user_name = urldecode( $user_name );
+    $user_id = User::idFromName( $user_name );
+    
+    $b = new UserBoard();
+    
+   return $b->getLastMessageId( $user_id, 0 );
+}
+
+
 $wgAjaxExportList[] = 'wfTestfunc';
-function wfTestMathi( $fd ) {
+function wfTestMathi() {
 	global $wgUser;
       
  $b->displayWallPostComments( $user_name, $ub_id );

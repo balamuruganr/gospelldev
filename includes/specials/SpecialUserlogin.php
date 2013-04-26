@@ -145,7 +145,7 @@ class LoginForm extends SpecialPage {
 			'userlogin' : 'userloginnocreate' )->text();
 	}
 
-	public function execute( $par ) {
+	public function execute( $par ) { 
 	   global $IP;
 		if ( session_id() == '' ) {
 			wfSetupSession();
@@ -763,9 +763,23 @@ class LoginForm extends SpecialPage {
 		global $wgMemc, $wgLang;
 
 		switch ( $this->authenticateUserData() ) {
-			case self::SUCCESS:
+			case self::SUCCESS: 
 				# We've verified now, update the real record
 				$user = $this->getUser();
+                ///////////////////////////////////////// Default Book Settings //////////////////////////////////// 
+                        
+                $user_having_books = gospellCommonFunctions::get_user_current_book( $user->getID(), $user->getName() );
+                if(is_object($user_having_books)){
+                   $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id;
+                   $_SESSION['wsCollection']['user_id'] = $user->getID();
+                   $_SESSION['wsCollection']['user_name'] = $user->getName(); 
+                } else {
+                   unset( $_SESSION['wsCollection']['book_id'],
+                          $_SESSION['wsCollection']['user_id'],
+                          $_SESSION['wsCollection']['user_name']
+                          );
+                }
+                ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
 				if( (bool)$this->mRemember != (bool)$user->getOption( 'rememberpassword' ) ) {
 					$user->setOption( 'rememberpassword', $this->mRemember ? 1 : 0 );
 					$user->saveSettings();
@@ -1281,6 +1295,7 @@ class LoginForm extends SpecialPage {
 			$query['returnto'] = $this->mReturnTo;
 			$query['returntoquery'] = $this->mReturnToQuery;
 		}
+                
 		$check = $titleObj->getFullURL( $query );
 
 		$this->getOutput()->redirect( $check );

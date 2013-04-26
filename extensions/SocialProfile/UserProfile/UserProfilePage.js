@@ -5,11 +5,17 @@ var posted = 0;
 function send_message() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	var encMsg = encodeURIComponent( document.getElementById( 'message' ).value );
+    var p = 0;
+     if($('#featch_url_content_block').is(":visible")){        
+         var cont = encodeURIComponent( $('#featch_url_content_block').html() );
+         encMsg = encMsg + cont;
+         p = (cont)? 1 : 0;              
+     }
 	var msgType = document.getElementById( 'message_type' ).value;
 	if( document.getElementById( 'message' ).value && !posted ) {
 		posted = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfSendBoardMessage', [ userTo, encMsg, msgType, 10 ], function( request ) {
+		sajax_do_call( 'wfSendBoardMessage', [ userTo, encMsg, msgType, p, 10 ], function( request ) {
 				//document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
                 //call to upload files
                 send_files_also(userTo);
@@ -18,7 +24,7 @@ function send_message() {
 		);
 	}
 }
-//sendMessageFiles
+
 function send_files_also( userTo ){
     
         var input = document.getElementById("file_upload"), 
@@ -49,25 +55,47 @@ function send_files_also( userTo ){
 				success: function (res) {
 				 $('#file-attach-block').find('.file-block').html("<input type=\"file\" name=\"file_upload\" id=\"file_upload\" multiple>");
                  document.getElementById( 'message' ).value = '';
-                 display_messages();	
 				}
 			});
 	 }   
 }
-//Auto Display of Messages
+
 var messages_displayed = 0;
-function display_messages() {
+/*function display_messages() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;	
 	if( !messages_displayed ) {
 		messages_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoBoardMessage', [ userTo, 10 ], function( request ) {
+		sajax_do_call( 'wfDisplayBoardMessage', [ userTo, 10 ], function( request ) {
 				document.getElementById( 'user-page-board' ).innerHTML = request.responseText;
 				messages_displayed = 0;
 			}
 		);
 	}
- setTimeout(display_messages, 5000);   
+}*/
+
+//Auto Display of Messages
+var auto_display_messages_timer;
+var auto_messages_displayed = 0;
+function auto_display_messages() {
+    var last_id = $('#last_msg_id').val();
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;	
+	if( !auto_messages_displayed ) {
+		auto_messages_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfAutoDisplayBoardMessage', [ last_id, userTo ], function( request ) {
+		       if(request.responseText) {
+		           set_last_messageid();
+		           $('#user-page-board').prepend(request.responseText);
+                   if($('#user-page-board').children().is('.no-info-container')){
+                     $('#user-page-board').children('.no-info-container').remove();
+                   }
+		       }		     	
+				auto_messages_displayed = 0;
+                auto_display_messages_timer = setTimeout(auto_display_messages, 2000);
+			}
+		);
+	}
 }
 
 var wall_posted = 0;
@@ -75,20 +103,23 @@ function send_wall_post() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
     var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value ); 
 	var encMsg = encodeURIComponent( document.getElementById( 'message_wall' ).value );
+    if($('#featch_wall_url_content_block').html()){        
+        var cont = $('#featch_wall_url_content_block').html();
+        encMsg = encMsg + encodeURIComponent( cont );      
+     }
 	var msgType = document.getElementById( 'message_type_wall' ).value;
 	if( document.getElementById( 'message_wall' ).value && !wall_posted ) {
 		wall_posted = 1;
 		sajax_request_type = 'POST';
 		sajax_do_call( 'wfSendBoardMessageWall', [ currWallId, userTo, encMsg, msgType, 10 ], function( request ) {
-				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+				///document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
 				wall_posted = 0;
 				document.getElementById( 'message_wall' ).value = '';
 			}
 		);
 	}
 }
-// Auto display posted wall
-var display_wall_post_timer;
+
 var wall_post_displayed= 0;
 function display_wall_post() {
 	var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
@@ -96,13 +127,72 @@ function display_wall_post() {
 	if( !wall_post_displayed ) {
 		wall_post_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, userTo, 10 ], function( request ) {
-				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
-				wall_post_displayed = 0;
+		sajax_do_call( 'wfDisplayWallPost', [ currWallId, userTo, 10 ], function( request ) {
+		        document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+                 wall_post_displayed = 0;				
 			}
 		);
 	}
- display_wall_post_timer = setTimeout(display_wall_post, 8000);        
+}
+
+// Auto display posted wall
+var auto_display_wall_post_timer;
+var auto_wall_post_displayed= 0;
+function auto_display_wall_post() {
+    var obj = $('#user-page-wall').children('div[id*="user-wall-message"]:first');    
+    var last_id = $('#last_post_id').val();
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    	
+	if( !auto_wall_post_displayed ) {
+		auto_wall_post_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoWallPost', [ currWallId, last_id, userTo ], function( request ) {
+		  if(request.responseText){
+                set_last_post_id( currWallId ); 
+                var firstObj = $('#user-page-wall').children().first();
+                if($(firstObj).children(".user-board-message-from").children().is('#user-board-message-pined')){ 
+                    $(request.responseText).insertAfter(firstObj);
+                } else {
+                  $('#user-page-wall').prepend(request.responseText);   
+                }
+                  if($('#user-page-wall').children().is('.no-info-container')){
+                     $('#user-page-wall').children('.no-info-container').remove();
+                   } 
+               }                                      
+                auto_wall_post_displayed = 0;                
+                auto_display_wall_post_timer = setTimeout(auto_display_wall_post, 2000);    				
+			}
+		);
+	}
+}
+
+var last_post_idset = 0;
+function set_last_post_id( wall_id ){
+  var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+  if( !last_post_idset ) {
+		last_post_idset = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSetLastPostId', [ wall_id, userTo ], function( request ) {
+		        $('#last_post_id').val( request.responseText );
+                 last_post_idset = 0;			
+			}
+		);
+	}
+    
+}
+
+var last_msg_idset = 0;
+function set_last_messageid(){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+  if( !last_msg_idset ) {
+		last_msg_idset = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfSetLastMessageId', [ userTo ], function( request ) {
+		        $('#last_msg_id').val( request.responseText );
+                 last_msg_idset = 0;			
+			}
+		);
+	}
 }
 
 //to display the posts of clicked Wall
@@ -110,6 +200,7 @@ function display_postfor_wall( wall_id ){
     document.getElementById( 'current_wall_id' ).value =  wall_id;
     $('span[id*="curr_wall_"]').each(function(){$(this).removeClass("active_wall");});
     $('#curr_wall_'+ wall_id).addClass("active_wall");
+    set_last_post_id( wall_id );
     display_wall_post();
 }
 
@@ -150,14 +241,28 @@ function send_edit_comment( uwc_id, ub_id){
 	}
 }
 
-var wall_comment_displayed = 0;
+/*var wall_comment_displayed = 0;
 function display_wall_comment(msg_id) { 
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
 	if( !wall_comment_displayed ) {
 		wall_comment_displayed = 1;
 		sajax_request_type = 'POST';
-		sajax_do_call( 'wfDisplayAutoWallComment', [ userTo, msg_id ], function( request ) {
+		sajax_do_call( 'wfDisplayWallComment', [ userTo, msg_id ], function( request ) {
                 $('.wall-comments-'+msg_id).html(request.responseText);
+				wall_comment_displayed = 0;
+			}
+		);
+	}
+}*/
+
+var wall_comment_displayed = 0;
+function auto_display_wall_comment(msg_id) { 
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	if( !wall_comment_displayed ) {
+		wall_comment_displayed = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayAutoWallComment', [ userTo, msg_id ], function( request ) {
+                $('.wall-comments-'+msg_id).html(request.responseText);                
 				wall_comment_displayed = 0;
 			}
 		);
@@ -175,11 +280,10 @@ function delete_comment( uwc_id, ub_id ) {
 
 function show_comment_textarea(id){
     $('.comment-add-'+ id).show();
-    $('#wall_comment_'+ id).focus();
-    window.clearTimeout(display_wall_post_timer);   
+    $('#wall_comment_'+ id).focus(); 
 }
 function add_comment(e, id){
-   window.clearTimeout(display_wall_post_timer); 
+  
    var code = e.keyCode || e.which;
     
     if (code === 13)
@@ -189,8 +293,7 @@ function add_comment(e, id){
      }
 }
 function edit_post_comment(e,uwc_id,ub_id){
-    window.clearTimeout(display_wall_post_timer);
-    
+        
     var code = e.keyCode || e.which;  
     if (code === 13)
      {
@@ -303,7 +406,7 @@ var comment_timer;
 function runAuto(){
        $('div[id*="user-wall-message"]').each(function(){
         var msg_id = $(this).attr("id").split("-")[3];
-         display_wall_comment(msg_id);
+         auto_display_wall_comment(msg_id);
        });  
       comment_timer = setTimeout(runAuto, 5000);       
 }
@@ -313,10 +416,9 @@ function edit_comment(uwc_id, ub_id){
           var x = $.trim($(div_obj).children(".user-wall-comment-txt").text());          
           $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-body").remove();
           $('#user-wall-comment-block-'+uwc_id).children(".user-wall-comment-links").remove();         
-          $('#user-wall-comment-block-'+uwc_id).append('<textarea onkeypress="edit_post_comment(event, ' + uwc_id + ', ' + ub_id + ');" id="edit_wall_comment_' + ub_id + '" name="edit_wall_comment_' + ub_id + '" onfocus="javascript:stop_auto_load();">' + x + '</textarea>');
+          $('#user-wall-comment-block-'+uwc_id).append('<textarea onkeypress="edit_post_comment(event, ' + uwc_id + ', ' + ub_id + ');" id="edit_wall_comment_' + ub_id + '" name="edit_wall_comment_' + ub_id + '">' + x + '</textarea>');
           
-          window.clearTimeout(comment_timer); 
-          window.clearTimeout(display_wall_post_timer);        
+          window.clearTimeout(comment_timer);   
 }
 //-------------- Like functions --------------------
 var liked = 0;
@@ -382,8 +484,7 @@ function unlike_post_comment(ub_id, uwc_id){
 var pinned = 0; 
 function set_pinned(ub_id){
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
-    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
-    
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    
     if( !pinned ) {
       pinned = 1;
       sajax_request_type = 'POST';
@@ -393,6 +494,21 @@ function set_pinned(ub_id){
 			}
 		);   
     }
+}
+
+var unpinned = 0;
+function unset_pinned( ub_id ){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );    
+    if( !unpinned ) {
+      unpinned = 1;
+      sajax_request_type = 'POST';
+      sajax_do_call( 'wfUnSetPinnedPost', [ currWallId, userTo, ub_id ], function( request ) {
+				document.getElementById( 'user-page-wall' ).innerHTML = request.responseText;
+				unpinned = 0;
+			}
+		);   
+    } 
 }
 
 var wall_created = 0;
@@ -411,25 +527,206 @@ function create_wall(){
    }  
 }
 
-function stop_auto_load(){
-  window.clearTimeout(display_wall_post_timer);  
+function delete_wall( wall_id ){
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+	if( confirm( 'Are you sure you want to delete this message?' ) ) {
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDeleteWall', [ userTo, wall_id ], function( request ) {
+			document.getElementById( 'wall-title-list' ).innerHTML = request.responseText;
+		} );
+	} 
 }
 
-(function() { 
+function rename_wall( wall_id ){
+ $('#rename_wall_block').dialog( "open" );
+ $('#edit_wall_id').val( wall_id ); 
+ $('#edit_wall_name').val($('#curr_wall_'+ wall_id).children("a").text());
+}
+function cancle_update_wall( wall_id ){
+ $('#rename_wall_block').dialog( "close" );   
+}
+var wall_updateded = 0;
+function update_wall(){
+  var userTo = decodeURIComponent( wgTitle ); 
+  var encwall_id  = encodeURIComponent( document.getElementById( 'edit_wall_id' ).value );  
+  var encWallName = encodeURIComponent( document.getElementById( 'edit_wall_name' ).value );   
+  if( document.getElementById( 'edit_wall_name' ).value && !wall_updateded ) {
+     wall_updateded = 1;
+     sajax_request_type = 'POST';
+     sajax_do_call( 'wfUpdateWall', [ userTo, encwall_id, encWallName ], function( request ) {
+         document.getElementById( 'wall-title-list' ).innerHTML = request.responseText;
+         wall_updateded = 0;
+         $('#rename_wall_block').dialog( "close" );            
+       }       
+     );   
+   }
+}
+function save_collection( collection ){
+    $.jStorage.set('collection', collection);
+}
+function goto_this_bookset( bookid ){
+    var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
+    //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
+    var hint  = "";
+    var oldid = "0";    
+    $.getJSON(script_url, {
+			'action': 'ajax',
+			'rs': 'wfAjaxCollectionGetRenderBookCreatorBox',
+			'rsargs[]': [hint, oldid, bookid, wgPageName]
+		}, function(result) { 
+		   if($('.mw-body').children().is('#siteNotice')){
+		      $('.mw-body').children('#siteNotice').html(result.html); 
+		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}
+		}); 
+}
+function auto_book_list() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;    
+    if($('#user-page-left').children().is('.user-books-container')){       
+       var firstbkObj = $('div.user-books-container span:first-child');
+       var bookid_arr = $(firstbkObj).attr("id").split("-");
+       var bookid = parseInt( bookid_arr[2] );//alert(bookid); 
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfAutoBookList', [ userTo ], function( request ) {		  
+		    $('#user-page-left').children('.user-books-container').html(request.responseText);
+               auto_book_list_timer = setTimeout(auto_book_list, 2000);
+        });
+   }     
+}
+$(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+       //display_wall_post_onscroll_down(); 
+   }
+});
+
+var url_fetched = 0; 
+function fetch_url(){
+      var text = $("#message").val();
+      var patttrn = /(^|)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi;
+      //var patttrn = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
+      var is_url = "";
+      var url_fetched = 0;
+      var test_res ="";
+       if(patttrn.test(text)) {            
+        var test_res = $("#message").val().match(new RegExp(patttrn));
+        if(test_res){ 
+            if(/^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(test_res[0])){
+              is_url = test_res[0];
+            }             
+            if(is_url && !url_fetched){
+               url_fetched = 1;
+              sajax_request_type = 'POST';
+    		  sajax_do_call( 'wfAutoFetchUrl', [ is_url ], function( request ) {
+                 $('#featch_url_content_block').append(request.responseText);
+                 $('#featch_url_content_block').show("slow");
+                 url_fetched = 0;                          
+               });
+            }
+          }
+      } 
+}
+
+var url_fetched = 0; 
+function fetch_wall_url(){
+      var text = $("#message_wall").val();
+      var patttrn = /(^|)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi;
+      var is_url = "";
+      var url_fetched = 0;
+      var test_res ="";
+       if(patttrn.test(text)) {            
+        var test_res = $("#message_wall").val().match(new RegExp(patttrn));
+        if(test_res){ 
+            if(/^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(test_res[0])){
+              is_url = test_res[0];
+            }             
+            if(is_url && !url_fetched){
+               url_fetched = 1;
+              sajax_request_type = 'POST';
+    		  sajax_do_call( 'wfAutoFetchUrl', [ is_url ], function( request ) {
+                 $('#featch_wall_url_content_block').append(request.responseText);
+                 $('#featch_wall_url_content_block').show("slow");
+                 url_fetched = 0;                          
+               });
+            }
+          }
+      } else {
+        $('#featch_wall_url_content_block').hide("slow");
+        $('#featch_wall_url_content_block').html(""); 
+      } 
+}
+
+var wall_post_scrolled_down = 0;
+var post_page = 2;
+function display_wall_post_onscroll_down() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;
+    var currWallId = encodeURIComponent( document.getElementById( 'current_wall_id' ).value );
+	if( !wall_post_scrolled_down ) {
+		wall_post_scrolled_down = 1;
+        //$('#scrolled-wall-posts').append( "<span>Madyvanan</span>" ); 
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayWallPostOnScroll', [ currWallId, userTo, 10, post_page ], function( request ) {
+		        if(request.responseText){
+		           if( !$(request.responseText).is('.no-info-container') ){
+		            $('#scrolled-wall-posts').append( request.responseText ); 
+		           }
+		         }				
+				wall_post_scrolled_down = 0;
+                post_page++;
+			}
+		);
+	}
+}
+
+var msg_scrolled_down = 0;
+var msg_page = 2;
+function display_message_onscroll_down() {
+    var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;    
+	if( !msg_scrolled_down ) {
+		msg_scrolled_down = 1;
+		sajax_request_type = 'POST';
+		sajax_do_call( 'wfDisplayMessageOnScroll', [ userTo, 10, msg_page ], function( request ) {
+		        if(request.responseText){
+		           if( !$(request.responseText).is('.no-info-container') ){
+		            $('#scrolled-board-messages').append( request.responseText ); 
+		           }
+		         }				
+				msg_scrolled_down = 0;
+                msg_page++;
+			}
+		);
+	}
+}
+
+$(window).scroll(function()
+{
+    if($(window).scrollTop() == $(document).height() - $(window).height())
+    {
+      display_wall_post_onscroll_down();
+      display_message_onscroll_down();
+    }
+});
+
+jQuery( function ( $ ) {
    /////////////////// Auto Display using sajax /////////////// 
-        //Autodisplay of Wall post
-        display_wall_post();      
-        //Autodisplay of Wall post's comments  
-        runAuto();    
-        //AutoDisplay Of Messages
-       display_messages(); 
+         //Autodisplay of Wall post
+         auto_display_wall_post();    
+         //Autodisplay of Wall post's comments  
+         runAuto();    
+         //AutoDisplay Of Messages
+         auto_display_messages();       
+       //auto_book_list(); 
    /////////////////// Auto Display using sajax /////////////// 
-   
-    /*$('.user-board-message-from').each(function(){
-        $(this).hover(
-          function(){ $(this).children("#user-board-message-pin").show(); },
-          function(){ $(this).children("#user-board-message-pin").hide(); }
-          );
-    });*/    
-              
-})();    
+                 
+});
+mw.loader.using( ['jquery.ui.dialog'], function() {
+	jQuery( function( jQuery ) {
+	    
+         $( '#rename_wall_block' ).dialog({
+                autoOpen: false,
+                height: 150,
+                width: 200,
+                modal: true
+             });
+        
+        
+	});
+});    

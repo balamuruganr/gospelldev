@@ -9,6 +9,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
  */
 
+global $IP;
+require_once("$IP/includes/gospellCommonClass.php"); 
+
 class UserProfilePage extends Article {
 
 	public $title = null;
@@ -44,11 +47,43 @@ class UserProfilePage extends Article {
 			parent::view();
 			return '';
 		}
+                                       
+       
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
+        if(isset($_SESSION['wsCollection']['user_id']) && isset($_SESSION['wsCollection']['user_name'])){
+            if($_SESSION['wsCollection']['is_anonymous_user'] === 1){
+              unset($_SESSION['wsCollection']['book_id'],$_SESSION['wsCollection']['user_id'],$_SESSION['wsCollection']['user_name']);  
+            }
+        }
+        
+             $_SESSION['wsCollection']['user_id'] = $this->user_id;
+             $_SESSION['wsCollection']['user_name'] = $this->user_name;
+             
+             if($this->isOwner()){
+                
+                $user_having_books = gospellCommonFunctions::get_user_current_book( $this->user_id, $this->user_name );
+             } else { 
+                $user_having_books = gospellCommonFunctions::get_user_current_book_public( $this->user_id, $this->user_name );
+             }
+             
+              if(is_object($user_having_books)){
+                   $_SESSION['wsCollection']['book_id'] = $user_having_books->book_id; 
+              }
+                              
+        ///////////////////////////////////////// Default Book Settings ////////////////////////////////////
          
 		$wgOut->addHTML( '<div id="profile-top">' );
 		$wgOut->addHTML( $this->getProfileTop( $this->user_id, $this->user_name ) );
-		$wgOut->addHTML( '<div class="cleared"></div></div>' );
-
+        ////////////////////////////////////////////////////////////////////////////////////
+		$wgOut->addHTML( '<div class="cleared"></div>
+                           <div id="create_book_link"><a href="'.SkinTemplate::makeSpecialUrl(
+                              'Book',array(
+									'bookcmd' => 'book_creator',
+									'referer' => $wgTitle,
+								)).'">Create Book</a></div>
+                          </div><div class="cleared"></div>');
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////
 		// User does not want social profile for User:user_name, so we just
 		// show header + page content
 		if (
@@ -67,7 +102,14 @@ class UserProfilePage extends Article {
 		if ( !wfRunHooks( 'UserProfileBeginLeft', array( &$this ) ) ) {
 			wfDebug( __METHOD__ . ": UserProfileBeginLeft messed up profile!\n" );
 		}
-
+        
+        $wgOut->addHTML( '<div id="user-books-block" class="clearfix" style="width:100%">');
+        ////////////// Book List
+        $wgOut->addHTML( $this->getUserProfileBookList( $this->user_name ) ); 
+        
+        $wgOut->addHTML( '</div>');  
+        ////////////// Book List
+        
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 1 ) );
 		$wgOut->addHTML( $this->getRelationships( $this->user_name, 2 ) );
 		$wgOut->addHTML( $this->getGifts( $this->user_name ) );
@@ -527,6 +569,7 @@ class UserProfilePage extends Article {
 		$defaultCountry = wfMsgForContent( 'user-profile-default-country' );
 
 		// Current location
+/*        
 		$location = $profile_data['location_city'] . ', ' . $profile_data['location_state'];
 		if ( $profile_data['location_country'] != $defaultCountry ) {
 			if ( $profile_data['location_city'] && $profile_data['location_state'] ) { // city AND state
@@ -542,12 +585,15 @@ class UserProfilePage extends Article {
 				$location .= $profile_data['location_country'];
 			}
 		}
-
-		if ( $location == ', ' ) {
+*/        
+        $location = $profile_data['location_country'];
+		if (empty($location)) {
 			$location = '';
 		}
+        $hometown = '';
 
 		// Hometown
+/*
 		$hometown = $profile_data['hometown_city'] . ', ' . $profile_data['hometown_state'];
 		if ( $profile_data['hometown_country'] != $defaultCountry ) {
 			if ( $profile_data['hometown_city'] && $profile_data['hometown_state'] ) { // city AND state
@@ -567,7 +613,7 @@ class UserProfilePage extends Article {
 		if ( $hometown == ', ' ) {
 			$hometown = '';
 		}
-
+*/
 		$joined_data = $profile_data['real_name'] . $location . $hometown .
 						$profile_data['birthday'] . $profile_data['occupation'] .
 						$profile_data['websites'] . $profile_data['places_lived'] .
@@ -594,7 +640,7 @@ class UserProfilePage extends Article {
 			<div class="profile-info-container">' .
 				$this->getProfileSection( wfMsg( 'user-personal-info-real-name' ), $profile_data['real_name'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-location' ), $location, false ) .
-				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
+//				$this->getProfileSection( wfMsg( 'user-personal-info-hometown' ), $hometown, false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-birthday' ), $profile_data['birthday'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-occupation' ), $profile_data['occupation'], false ) .
 				$this->getProfileSection( wfMsg( 'user-personal-info-websites' ), $profile_data['websites'], false ) .
@@ -831,9 +877,13 @@ class UserProfilePage extends Article {
 			</div>'; */
 		}
         $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
-		$output .= '<div id="profile-image">' . $avatar->getAvatarURL() .
-			'</div>';
-
+        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';
+        if ( $wgUser->getName() == $user_name ) {        
+            $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
+        		'</a></div>';
+        }else {
+            $output .= '<div id="profile-image">' . $avatar->getAvatarURL() .'</div>';                
+        }            
 		$output .= '<div id="profile-right">';
         
 		$output .= '<div id="profile-title-container">
@@ -865,17 +915,20 @@ class UserProfilePage extends Article {
 				'<a href="' . $update_profile->escapeFullURL() . '">' . wfMsg( 'user-edit-profile' ) . '</a>',
 				'<a href="' . $upload_avatar->escapeFullURL() . '">' . wfMsg( 'user-upload-avatar' ) . '</a>',
 				'<a href="' . $watchlist->escapeFullURL() . '">' . wfMsg( 'user-watchlist' ) . '</a>',
-				'<a href="'.$update_profile->escapeFullURL().'/books" rel="nofollow">' . wfMsg( 'user-books' ) . '</a>',
-                '<a href="'.$update_profile->escapeFullURL().'/wall" rel="nofollow">' . wfMsg( 'user-wall' ) . '</a>',
                 ''
 			) );
 		} elseif ( $wgUser->isLoggedIn() ) {
 			if ( $relationship == false ) {
-				$output .= $wgLang->pipeList( array(
-					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
-//					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
-					''
-				) );
+                if( UserRelationship::userHasRequestByID( $id, $wgUser->getID() ) ) {
+                    $output .= wfMsg( 'ur-already-submitted' );
+                    $output .= ' |';
+                }else {
+                    $output .= $wgLang->pipeList( array(
+                    '<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=1' ) . '" rel="nofollow">' . wfMsg( 'user-add-friend' ) . '</a>',
+                    //					'<a href="' . $add_relationship->escapeFullURL( 'user=' . $user_safe . '&rel_type=2' ) . '" rel="nofollow">' . wfMsg( 'user-add-foe' ) . '</a>',
+                    ''
+                    ) );
+                }
 			} else {
 				if ( $relationship == 1 ) {
 					$output .= $wgLang->pipeList( array(
@@ -933,7 +986,68 @@ class UserProfilePage extends Article {
 
 		return $output;
 	}
-
+    
+    function getUserProfileBookList( $user_name ){
+        global $wgTitle, $wgUser, $wgServer, $wgScript, $wgScriptPath; 
+        
+        $url = $wgServer . (($wgScript == null) ? ($wgScriptPath . "/index.php") : $wgScript);
+        $url .='?title=Special:Book&bookcmd=&bookid=';
+        
+        if ( $wgUser->getName() !== $user_name ) {
+          $user_id = User::idFromName( $user_name );   
+        } else {
+          $user_id = $wgUser->getID(); 
+        }
+         
+         $books = gospellCommonFunctions::get_user_books( $user_id, $user_name );         
+         $bk_out = '';
+         
+         if( $books ) {
+         
+         $bk_out .= '<div class="user-section-heading">
+                     <div class="user-section-title">Books</div>
+                      <div class="user-section-actions">
+                       <div class="action-right"></div>
+                       <div class="action-left"></div>
+                      </div>
+    				  <div class="cleared"></div>
+                    </div>
+			        <div class="cleared"></div>
+                    <div class="user-books-container">';
+                    /*
+					<div class="action-left">';
+			if ( intval( str_replace( ',', '', $relationship_count ) ) > 4 ) {
+				$output .= wfMsg( 'user-count-separator', $per_row, $relationship_count );
+			} else {
+				$output .= wfMsg( 'user-count-separator', $relationship_count, $relationship_count );
+			}
+			$output .= '</div>*/
+         
+         
+         
+         
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}', '".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."');\"
+         //onclick=\"javascript:goto_this_bookset('{$book['book_id']}','".SkinTemplate::makeSpecialUrl('Book',array('bookcmd' => 'viewbook', 'bookid' => $book['book_id'], 'referer' => $wgTitle))."');\"
+            
+            foreach($books as $book){
+                  
+                  if ( $wgUser->getName() !== $user_name ) {
+                    if(!$book['book_type']){ //Only Public Books                     
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>";  
+                     }                
+                  } else {               
+                      $bk_out .= "<span id=\"user-book-{$book['book_id']}\"><a href=\"javascript:void(0);\" onclick=\"javascript:goto_this_bookset('{$book['book_id']}');\">{$book['book_name']}</a></span>"; 
+                  }                         
+            }
+            
+             
+          $bk_out .= '</div>'; 
+                     
+         }     
+        
+     return $bk_out;     
+    }
+    
 	/**
 	 * This is currently unused, seems to be a leftover from the ArmchairGM
 	 * days.
@@ -1503,23 +1617,15 @@ class UserProfilePage extends Article {
 				$output .= '<div class="user-page-message-form">
                        
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
-						<!--span class="profile-board-message-type">' .
-							wfMsgHtml( 'userboard_messagetype' ) .
-						'</span-->
+						
                         <input type="hidden" id="message_type" value="1" />
-						<!--select id="message_type">
-							<option value="0">' .
-								wfMsgHtml( 'userboard_public' ) .
-							'</option>
-							<option value="1">' .
-								wfMsgHtml( 'userboard_private' ) .
-							'</option>
-						</select--><p>
-						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'"/></textarea>                        
+						<p>
+						<textarea name="message" id="message" cols="43" rows="4" placeholder="Write a message to '.$user_name.'" onblur="javascript:fetch_url();"/></textarea>                        
                         <div class="cleared"></div>
+                        <div id="featch_url_content_block" style="display:none;"></div>
                         <form name="upload_file_frm" id="upload_file_frm" action="" enctype="multipart/form-data">
                          <div id="file-attach-block"><span class="add_files"><a>Attach files with message</a></span><div class="file-block"><input type="file" name="file_upload" id="file_upload" multiple></div></div>
-                         <div class="cleared"></div>
+                         <div class="cleared"></div>                         
                         </form>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userboard_sendbutton' ) . '" class="site-button" onclick="javascript:send_message();" />
@@ -1533,10 +1639,15 @@ class UserProfilePage extends Article {
 				'</div>';
 			}
 		}
+        
+       $b = new UserBoard();
 
-		$output .= '<div id="user-page-board">';
-		$b = new UserBoard();
-		$output .= $b->displayMessages( $user_id, 0, 10);
+		$output .= '<input type="hidden" name="last_msg_id" id="last_msg_id" value="'.$b->getLastmessageId( $user_id, 0 ).'">
+                   <div id="user-page-board">';
+                            
+		            
+		 $output .= $b->displayMessages($user_id, 0, 10);         
+          
 		$output .= '</div>';
         
      $output .='</div>';
@@ -1617,7 +1728,16 @@ class UserProfilePage extends Article {
          //}
         $output .= '<div id="wall-title-list">';
          $output .= $b->displayWalls($user_name, $user_id, 0, 10);
-        $output .= '</div>';
+        $output .= '</div>
+                    <div id="rename_wall_block"> 
+                      <span class="add-wall-txtbox"><input type="text" name="edit_wall_name" id="edit_wall_name"></span>
+                      <div class="cleared"></div>
+                      <div style="margin-top:10px;">
+                       <input type="hidden" name="edit_wall_id" id="edit_wall_id">
+                       <input type="button" onclick="javascript:update_wall();" class="site-button" value="Update Wall">&nbsp;
+                       <input type="button" onclick="javascript:cancle_update_wall();" class="site-button" value="Cancel">
+                      </div>
+                    </div>';
                     
        $output .= '</div>';
        //Walls list section    
@@ -1632,7 +1752,8 @@ class UserProfilePage extends Article {
 				$output .= '<div class="user-page-message-form">
 						<input type="hidden" id="user_name_to" name="user_name_to" value="' . addslashes( $user_name ) . '" />
 					    <input type="hidden" id="message_type_wall" value="0" />
-						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="What are you thinking about?"/></textarea></p>
+						<p><textarea name="message_wall" id="message_wall" cols="43" rows="4" placeholder="What are you thinking about?" onblur="javascript:fetch_wall_url();" /></textarea></p>
+                        <div id="featch_wall_url_content_block"></div>
 						<div class="user-page-message-box-button">
 							<input type="button" value="' . wfMsg( 'userwall_sendbutton' ) . '" class="site-button" onclick="javascript:send_wall_post();" />
 						</div>
@@ -1645,11 +1766,13 @@ class UserProfilePage extends Article {
 			}
 		//}
 
-		$output .= '<div id="user-page-wall">';         
-         
-		 $output .= $b->displayWallPosts($current_wall_id, $user_name, $user_id, 0, 10);
-         
+		$output .= '<input type="hidden" name="last_post_id" id="last_post_id" value="'.$b->getLastPostId( $current_wall_id, $user_name, $user_id, 0 ).'">
+                    <div id="user-page-wall">';                 
+          
+		   $output .= $b->displayWallPosts( $current_wall_id, $user_name, $user_id, 0, 10 );          
+           
 		$output .= '</div>';
+        
       $output .='</div>';
       
 		return $output;

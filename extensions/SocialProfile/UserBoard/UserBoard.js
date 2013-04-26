@@ -1,3 +1,4 @@
+
 var UserBoard = {
 	posted: 0,
 
@@ -80,5 +81,11 @@ var UserBoard = {
 				window.location.reload();
 			});
 		}
-	}
+	},    
+    checkMessageLength: function(){
+       var wgGospellSettingsUserBordMessageTextLenth = 10;
+       if($('textarea[name="message"]').text().length !=0 && $('textarea[name="message"]').text().length > wgGospellSettingsUserBordMessageTextLenth ){ 
+        alert("Not allowed above " + wgGospellSettingsUserBordMessageTextLenth + " characters.");
+       } 
+    }
 };
