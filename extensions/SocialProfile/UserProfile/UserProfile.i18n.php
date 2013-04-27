@@ -470,6 +470,8 @@ Click [[Special:UserLogin|here]] to login or click [[Special:UserLogin/signup|he
 'user-wall' => "Wall",
 'user-books' => "Books",
 'user-wall-login-message' => 'You must be <a href="$1">logged in</a> to post wall',
+'avatarupload-savesuccess' => 'The avatar has been successfully saved',
+'coverphotoupload-savesuccess' => 'The cover photo has been successfully removed',
 );
 
 /** Message documentation (Message documentation)

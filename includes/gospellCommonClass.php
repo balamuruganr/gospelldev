@@ -931,10 +931,10 @@ add and remove sign post container
         
         $files = glob( $wgUploadDirectory . '/cover_photos/' . $wgDBname . '_cover_' . $user_id .  '.jpg');
         if ( !isset( $files[0] ) || !$files[0] ) {
-            $cover_filename = 'default_cover.gif';
-            return '';
+            $cover_filename = 'default_cover.jpg?ts='.rand();
+            return "<img src=\"{$wgUploadPath}/cover_photos/{$cover_filename}\" alt=\"coverphoto\" border=\"0\" />";
         } else {
-            $cover_filename = basename( $files[0] ) . '?r=' . filemtime( $files[0] );
+            $cover_filename = basename( $files[0] ) . '?r=' . rand( );
             return "<img src=\"{$wgUploadPath}/cover_photos/{$cover_filename}\" alt=\"coverphoto\" border=\"0\" />";
         }        		
     }    

@@ -48,7 +48,7 @@ class SpecialUploadCoverPhoto extends SpecialUpload {
             
             if(gospellCommonFunctions::cropUserAvatar($user_id,$w,$h,$x1,$y1,850,315,$c_path,$image_for = 'cover')) {
                 @unlink($wgUploadDirectory . '/temp/usr_tmp_cover_photos_'.$user_id.'.jpg'); 
-                echo '1||'.$wgUploadPath.'/cover_photos/'.$wgDBname.'_cover_'.$user_id.'.jpg';
+                echo '1||'.$wgUploadPath.'/cover_photos/'.$wgDBname.'_cover_'.$user_id.'.jpg||'.wfMsgForContent( 'avatarupload-savesuccess' );
                 die();
             }
             echo '0||';
