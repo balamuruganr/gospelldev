@@ -175,11 +175,33 @@ class LoginForm extends SpecialPage {
 			$this->onCookieRedirectCheck( $this->mCookieCheck );
 			return;
 		} elseif( $this->mPosted ) {
-			if( $this->mCreateaccount ) {
-			 if(gospellCommonFunctions::checkUserProfileData($_POST)) {
-				$this->addNewAccount();
-				return;
-                }                
+			if( $this->mCreateaccount ) {                
+                if( empty( $_POST['wpFirstName'] ) || strlen( trim( $_POST['wpFirstName'] ) ) <= 0 ) {
+                    $this->mainLoginForm( 'invalid first name' );    
+                    return false;
+                }
+                if( empty( $_POST['wpLastName'] ) || strlen( trim( $_POST['wpLastName'] ) ) <= 0 ) {
+                    $this->mainLoginForm( 'invalid lastname' );    
+                    return false;
+                }
+                if( empty( $_POST['wpGender2'] ) || strlen( trim( $_POST['wpGender2'] ) ) <= 0 ) {
+                    $this->mainLoginForm( 'invalid gender' );    
+                    return false;
+                }
+                if( empty( $_POST['birthday'] ) || strlen( trim( $_POST['birthday'] ) ) <= 0 ) {
+                    $this->mainLoginForm( 'invalid birthday' );    
+                    return false;
+                }
+                if( empty( $_POST['hometown_country'] ) || strlen( trim( $_POST['hometown_country'] ) ) <= 0 ) {
+                    $this->mainLoginForm( 'invalid home counry' );    
+                    return false;
+                }
+                if( empty( $_POST['aboutme'] ) || strlen( trim( $_POST['aboutme'] ) ) <= 0 ) {    
+                    $this->mainLoginForm( 'invalid about me' );                
+                    return false;
+                }            
+    			$this->addNewAccount();
+    			return;                                         
 			} elseif ( $this->mCreateaccountMail ) {
 				$this->addNewAccountMailPassword();
 				return;
