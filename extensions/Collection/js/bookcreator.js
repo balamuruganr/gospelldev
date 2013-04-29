@@ -40,7 +40,8 @@ $(function() {
 			$('#coll-book_creator_box').html(result.html);
 		});
 	}
-
+    
+    
 	function collectionCall(func, args) {
 	  var hint = args.shift();
 		$.post(script_url, {

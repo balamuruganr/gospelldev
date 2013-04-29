@@ -343,13 +343,15 @@ class CollectionHooks {
         
         $book_type = ($book_obj->book_type)?"Private":"Public";
         $book_change_type = ($book_obj->book_type)?"Public":"Private";
+        $book_change_type_value = ($book_obj->book_type)?"0":"1";
         ////////////////////
         $book_user_name = $book_obj->user_name;
         
         $delete_edit_book_link = '';
         $view_book_link = '';
+        $change_book_type = '';
         $html = '';
-        //$html .= "<span>".$wgUser->getID()."</span>"."<span>".$wgUser->getName()."</span>"."<span>$book_id</span><span>".self::getBookCreatorBoxContent( $title, $addRemoveState, $oldid, $book_id )."</span>";
+        
         
         //$book_user_name
         if($wgUser->getName() === $book_user_name){           
@@ -365,7 +367,18 @@ class CollectionHooks {
                                                     'edit_book' => '1',
                                                     'referer' => $ptext
                 								)).'">Rename This Book</a>
-                                            </span>'; //,'referer' => $wgTitle                                 
+                                            </span>'; //,'referer' => $wgTitle 
+                                            
+           $change_book_type .='<a href="'.SkinTemplate::makeSpecialUrl(
+                                                'Book',array(
+                									'bookcmd' => 'change_book_type',
+                                                    'bookid' => $book_id,
+                                                    'book_type' => $book_change_type_value,
+                                                    'referer' => $ptext
+                								)).'" title="Click to '. $book_change_type .'" style="cursor:pointer;">' .$book_type. '</a>';                                                                  
+        } else {
+            
+           $change_book_type .='<a>'.$book_type.'</a>';            
         }
         
        
@@ -420,7 +433,7 @@ class CollectionHooks {
             
             '<span><strong>Book Title</strong>:&nbsp;'.$book_obj->book_name.'</span>&nbsp;' .
             '<span><strong>Sub Title</strong>:&nbsp;'.$book_obj->subtitle.'</span>&nbsp;' .
-            '<span><strong>Book Type</strong>:&nbsp;<a title="Click to '. $book_change_type .'" style="cursor:pointer;">'.$book_type.'</a></span>' .
+            '<span><strong>Book Type</strong>:&nbsp;' . $change_book_type .'</span>' .
              $delete_edit_book_link .
              $view_book_link
             /////////////////////////////
@@ -484,8 +497,9 @@ class CollectionHooks {
 	    //echo "Img Path: ".$imagePath." AjaxHint:".$ajaxHint." Title:".$title." Oldid:".$oldid; die;
 		$namespace = $title->getNamespace();
 		$ptext = $title->getPrefixedText();
-
-		if ( $ajaxHint == 'suggest' || $ajaxHint == 'showbook' ) { 
+        $is_user_arr = explode(":",$title);
+        
+		if ( $ajaxHint == 'suggest' || $ajaxHint == 'showbook' || $is_user_arr[0] == 'User') { 
 			return Xml::tags( 'span',
 				array( 'style' => 'color: #777;' ),
 				Xml::element( 'img',

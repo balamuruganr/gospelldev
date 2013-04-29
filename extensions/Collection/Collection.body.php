@@ -95,7 +95,17 @@ class SpecialCollection extends SpecialPage {
                 CollectionSession::editBook( $request->getVal( 'book_id', '' ), $request->getVal( 'book_name', '' ), $request->getVal( 'book_type', '' ), $request->getVal( 'sub_title', '' ) );
                                                        
 				$out->redirect( $title->getFullURL() );
-				return;                
+				return;
+            case 'change_book_type':
+                $title = Title::newFromText( $request->getVal( 'referer', '' ) );
+				if ( is_null( $title ) ) {
+					$title = Title::newMainPage();
+				}
+                
+                CollectionSession::changeBookType( $request->getVal( 'bookid', '' ), $request->getVal( 'book_type', '' ) );
+                                                                      
+				$out->redirect( $title->getFullURL() );
+				return;                    
 			case 'stop_book_creator':
 				$title = Title::newFromText( $request->getVal( 'referer', '' ) );
 				if ( is_null( $title ) || $title->equals( $this->getTitle( $par ) ) ) {
@@ -353,7 +363,7 @@ class SpecialCollection extends SpecialPage {
 		$out->addModules( 'ext.collection.checkLoadFromLocalStorage' );
 
 		$dialogtxt = $this->msg( 'coll-load_local_book' )->text();
-
+        
 		$out->addScript(
 			"<script type=\"$wgJsMimeType\">\n" .
 			"var collection_dialogtxt = " . Xml::encodeJsVar( $dialogtxt ) . ";\n" .
@@ -397,7 +407,7 @@ class SpecialCollection extends SpecialPage {
           }
           
           $value_arr = array( 
-                             'bookcmd' => ($is_rename)? 'edit_book_creator' : 'start_book_creator',
+                             'bookcmd' => ( $is_rename == 1 )? 'edit_book_creator' : 'start_book_creator',
 							 'referer' => $referer,
 							);
           if($is_rename){
@@ -409,12 +419,14 @@ class SpecialCollection extends SpecialPage {
                      </select>
                    </div><br />
                    <div style="clear:both;"></div>
-                   <input type="hidden" name="bookcmd" value="start_book_creator" />
-                   <input type="hidden" name="referer" value="'.$referer.'" />';
+                    <input type="hidden" name="referer" value="'.$referer.'" />';
                    
           if($is_rename){
-            $output .= '<input type="hidden" name="book_id" value="'.$_SESSION['wsCollection']['book_id'].'" />';
-          }         
+            $output .= '<input type="hidden" name="bookcmd" value="edit_book_creator" />
+                        <input type="hidden" name="book_id" value="'.$_SESSION['wsCollection']['book_id'].'" />';
+          } else {
+            $output .= '<input type="hidden" name="bookcmd" value="start_book_creator" />';
+          }        
           
                     
           $output .= '<div id="create-button" class="collection-button ok">                    

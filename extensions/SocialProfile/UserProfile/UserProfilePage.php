@@ -75,14 +75,22 @@ class UserProfilePage extends Article {
 		$wgOut->addHTML( '<div id="profile-top">' );
 		$wgOut->addHTML( $this->getProfileTop( $this->user_id, $this->user_name ) );
         ////////////////////////////////////////////////////////////////////////////////////
-		$wgOut->addHTML( '<div class="cleared"></div>
-                           <div id="create_book_link"><a href="'.SkinTemplate::makeSpecialUrl(
-                              'Book',array(
-									'bookcmd' => 'book_creator',
-									'referer' => $wgTitle,
-								)).'">Create Book</a></div>
-                          </div><div class="cleared"></div>');
         
+        $wgOut->addHTML( '<div class="cleared"></div>');
+        
+            if($this->isOwner()){
+                
+    		  $wgOut->addHTML( '<div id="create_book_link"><a href="'.SkinTemplate::makeSpecialUrl(
+                                  'Book',array(
+    									'bookcmd' => 'book_creator',
+    									'referer' => $wgTitle,
+    								)).'">Create Book</a></div>
+                                </div>');
+                                
+            }
+            
+        $wgOut->addHTML( '<div class="cleared"></div>'); 
+              
         ///////////////////////////////////////////////////////////////////////////////////////////
 		// User does not want social profile for User:user_name, so we just
 		// show header + page content
@@ -1585,7 +1593,7 @@ class UserProfilePage extends Article {
 				wfMsg( 'user-board-title' ) .
 			'</div>
 			<div class="user-section-actions">
-				<div class="action-right">';
+				<div class="action-left">';//action-right
 		if ( $wgUser->getName() == $user_name ) {
 			if ( $friends ) {
 				$output .= '<a href="' . UserBoard::getBoardBlastURL() . '">' .

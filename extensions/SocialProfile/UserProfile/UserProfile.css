@@ -858,3 +858,11 @@
 #featch_url_content_block {
     display:none;
 }
+
+/*====================== Discussion pages has hide in the User Profile ==============*/
+
+li#ca-talk {
+ display: none;
+}
+
+/*===================================================================================*/

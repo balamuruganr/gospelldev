@@ -56,6 +56,7 @@ $listTemplate->execute();
 </div>
 
 <div class="collection-column collection-column-right">
+<!--
 <?php if ( $this->data['podpartners'] ) { ?>
 	<div class="collection-column-right-box" id="coll-orderbox">
 		<h2><span class="mw-headline"><?php $this->msg( 'coll-book_title' ) ?></span></h2>
@@ -101,7 +102,7 @@ foreach ( $this->data['podpartners'] as $partnerKey => $partnerData ) {
 	</ul></div>
 <?php
 } /* if */
-?>
+?> -->
 
 	<div class="collection-column-right-box" id="coll-downloadbox">
 		<h2><span class="mw-headline"><?php $this->msg( 'coll-download_title' ) ?></span></h2>
