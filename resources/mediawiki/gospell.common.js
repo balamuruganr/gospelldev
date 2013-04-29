@@ -309,7 +309,7 @@ function CheckPasswordStrength(pwd) {
         return false;        
     }
 	else if (pwd.length < 6){
-		pass_strength = "<font style='color:red'>password length minimum 6</font>";
+		pass_strength = "<font style='color:red'>The password should be a minimum of 6 characters long</font>";
         $('#errpassword2').html(pass_strength);
         return false;        
     }    
@@ -341,7 +341,7 @@ mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
 function chkValidPassword() {       
     if($('#wpPassword2').val().length < 6){
         $('#wpPassword2').focus();
-        $("#errpassword2").text("password length minimum 6");
+        $("#errpassword2").text("The password should be a minimum of 6 characters long");
         return false;
     }else{
         $("#errpassword2").text("");
@@ -404,7 +404,7 @@ $('#userlogin2').submit(function() {
             }            
             if($('#wpPassword2').val().length < 6){                
                 $('#wpPassword2').focus();
-                $("#errpassword2").text("password length is minimum 6 test");
+                $("#errpassword2").text("The password should be a minimum of 6 characters long");
                 return false;
             }else{
                 $("#errpassword2").text("");
