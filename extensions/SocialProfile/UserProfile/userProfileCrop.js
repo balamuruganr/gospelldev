@@ -37,7 +37,8 @@ $('#user_avatar_sub').click(function() {
             $("#usrAvatar_l").attr("src",userExist[1]+'l.jpg');
             $("#usrAvatar_ml").attr("src",userExist[1]+'ml.jpg');
             $("#usrAvatar_m").attr("src",userExist[1]+'m.jpg');
-            $("#usrAvatar_s").attr("src",userExist[1]+'s.jpg');   
+            $("#usrAvatar_s").attr("src",userExist[1]+'s.jpg'); 
+			$('#fb-root').html(userExist[2]);			
             $('#img_target_container').hide();
             $('#user_avatar_sub').remove();                                                      
         }

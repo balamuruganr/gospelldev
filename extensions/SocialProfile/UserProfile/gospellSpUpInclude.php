@@ -20,7 +20,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
         gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,30,30,$m_path);
         gospellCommonFunctions::cropUserAvatar($user_id,160,160,$x1,$y1,16,16,$s_path);                                            
         @unlink($wgUploadDirectory . '/temp/usr_tmp_avatar_'.$user_id.'.jpg'); //delete the main temporary uploaded file
-        echo '1||'.$wgUploadPath.'/avatars/'.$wgDBname.'_'.$user_id.'_';
+        echo '1||'.$wgUploadPath.'/avatars/'.$wgDBname.'_'.$user_id.'_||'.wfMsgForContent( 'avatarupload-savesuccess' );
         die();
     }
     echo '0||';

@@ -860,6 +860,7 @@ class UserProfilePage extends Article {
 		$contributions = SpecialPage::getTitleFor( 'Contributions', $user );
 		$send_message = SpecialPage::getTitleFor( 'UserBoard' );
 		$upload_avatar = SpecialPage::getTitleFor( 'UploadAvatar' );
+        $upload_cover_photo = SpecialPage::getTitleFor( 'UploadCoverPhoto' );
 		$user_page = Title::makeTitle( NS_USER, $user );
 		$user_social_profile = Title::makeTitle( NS_USER_PROFILE, $user );
 		$user_wiki = Title::makeTitle( NS_USER_WIKI, $user );
@@ -884,12 +885,14 @@ class UserProfilePage extends Article {
 					$toggleMessage . '</a>
 			</div>'; */
 		}
-        $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;
-        $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';
-        if ( $wgUser->getName() == $user_name ) {        
+        $gs_user_real_name = ($profile_data['real_name']) ? $profile_data['real_name'] : $user_name;                
+        if ( $wgUser->getName() == $user_name ) {
+            
+            $output .= '<div id="profile-cover"><a href="' . $upload_cover_photo->escapeFullURL() . '">' . gospellCommonFunctions::getCoverPhotoURL($user_id) . '</a></div>';
             $output .= '<div id="profile-image"><a href="' . $upload_avatar->escapeFullURL() . '">' . $avatar->getAvatarURL() .
         		'</a></div>';
         }else {
+            $output .= '<div id="profile-cover">' . gospellCommonFunctions::getCoverPhotoURL($user_id) .'</div>';
             $output .= '<div id="profile-image">' . $avatar->getAvatarURL() .'</div>';                
         }            
 		$output .= '<div id="profile-right">';

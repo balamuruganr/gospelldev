@@ -230,11 +230,12 @@ jQuery( function ( $ ) {
         $.ajax({
 		url: mw.util.wikiScript( 'api' ),
 		data: {
-			action: 'query',
-			titles: title,
-			prop: 'revisions',
-			rvprop: 'content',
-			format: 'json'
+            action: 'query',
+            titles: title,
+            prop: 'revisions',
+            rvprop: 'content',
+            format: 'json',
+            limit: 1
 		},
         cache: false,
         success: function ( data ) {            
@@ -247,10 +248,12 @@ jQuery( function ( $ ) {
                     tmp_var = tmp_ary[field['pageid']];  
                     res_title = tmp_var['title'];                         
                     full_desc = tmp_var['revisions'][0]['*'];
-                    //remove html special char
-                    full_desc = full_desc.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-                    full_desc = full_desc.replace(/(\r\n|\n|\r)/gm,"");
-                    disamb_page_desc = '# '+'[['+res_title+']]<p>'+full_desc.substring(0,140)+'</p>'; 
+
+                    full_desc = full_desc.replace(/(\{\{(.*)\}\})/gm,"").replace(/(\[\[File:(.*)\]\])/gm,"");//remove templates                                        
+                    full_desc = full_desc.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");//remove html special char
+                    full_desc = full_desc.replace(/(\r\n|\n|\r)/gm,"");//remove tab
+                    full_desc = full_desc.replace(/[^\w\s]/gi, '');//remove special char
+                    disamb_page_desc = '# '+'[['+res_title+']]<p>'+full_desc.substring(0,140)+'...</p>'; 
                                            
                     $("#wpTextbox1").val( disamb_page_desc+"\n" + $("#wpTextbox1").val() );
                     $('#disambiguation_msg_container').html('<p><font style="color:green">Page added and please save the changes</font></p>');
@@ -283,60 +286,37 @@ jQuery("#wpRetype").change(function() {
         $('#wpRetype').focus();
         $("#errretype").text("password must match");
         return false;
-    }
-    else{
-        $("#errretype").text("");
-        return true;
+    }else{
+        $("#errretype").text("");        
     }        
 });
-    
-function IsEnoughLength(str,length) { 
-	if ((str == null) || isNaN(length))
-		return false;
-	else if (str.length < length)
-		return false;
-	return true;
-	
-}
-
-function HasMixedCase(passwd) {    
-	if(passwd.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/))
-		return true;
-	else
-		return false;
-}
-
-function HasNumeral(passwd) {
-	if(passwd.match(/[0-9]/))
-		return true;
-	else
-		return false;
-}
-
-function HasSpecialChars(passwd) {    
-	if(passwd.match(/.[!,@,#,$,%,^,&,*,?,_,~]/))
-		return true;
-	else
-		return false;
-}
-
 
 function CheckPasswordStrength(pwd) {
-    var pass_strength;
-	if (IsEnoughLength(pwd,10) && HasMixedCase(pwd) && HasNumeral(pwd) && HasSpecialChars(pwd)) {
+    var pass_strength = '';
+	if (pwd.length > 10 && pwd.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/) && pwd.match(/[0-9]/) && pwd.match(/.[!,@,#,$,%,^,&,*,?,_,~]/)) {
 		pass_strength = "<font style='color:olive'>Very strong</font>";
+        $('#errpassword2').html(pass_strength);
+        return false;
     }
-	else if (IsEnoughLength(pwd,8) && HasMixedCase(pwd) && (HasNumeral(pwd) || HasSpecialChars(pwd))) {
+	else if (pwd.length > 8 && pwd.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/) && (pwd.match(/[0-9]/) || pwd.match(/.[!,@,#,$,%,^,&,*,?,_,~]/))) {
 		pass_strength = "<font style='color:Blue'>Strong</font>";
+        $('#errpassword2').html(pass_strength);
+        return false;
     }
-	else if (IsEnoughLength(pwd,6) && HasNumeral(pwd)){
+	else if (pwd.length > 6 && pwd.match(/[0-9]/)){
 		pass_strength = "<font style='color:Green'>Good</font>";
+        $('#errpassword2').html(pass_strength);
+        return false;        
     }
-	else if ($('#wpPassword2').val().length < 6){
+	else if (pwd.length < 6){
 		pass_strength = "<font style='color:red'>password length minimum 6</font>";
+        $('#errpassword2').html(pass_strength);
+        return false;        
     }    
 	else {
 	   	pass_strength = "<font style='color:red'>Weak</font>";
+        $('#errpassword2').html(pass_strength);
+        return false;        
     }
     $('#errpassword2').html(pass_strength);
 }
@@ -358,32 +338,25 @@ mw.loader.using( ['jquery.validate','jquery.ui.datepicker'], function() {
 	});
 });
 
-function chkValidEmail(email) {
-    var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;        
-    if( !emailReg.test( email ) ) {
-        $("#erremail").text("Please enter valid email");
-        return false;
-    } else {        
-        return true;
-    }    
-}
 function chkValidPassword() {       
     if($('#wpPassword2').val().length < 6){
+        $('#wpPassword2').focus();
         $("#errpassword2").text("password length minimum 6");
         return false;
+    }else{
+        $("#errpassword2").text("");
     }
     if($('#wpPassword2').val() != $('#wpRetype').val()){
         $('#wpRetype').focus();
         $("#errretype").text("password must match");
         return false;
-    }
-    else{
-        $("#errretype").text("");
-        return true;
-    }       
+    }else{
+        $("#errretype").text("");             
+    } 
+    return true;      
 }
 
-$('#userlogin2').submit(function() {    
+$('#userlogin2').submit(function() {        
     var userAgent = navigator.userAgent.toLowerCase();    
     if (/msie/.test(userAgent) && 
         parseFloat((userAgent.match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9) { 
@@ -391,68 +364,100 @@ $('#userlogin2').submit(function() {
                 $('#wpFirstName2').focus();
                 $("#errfirstname2").text("required");         
                 return false;
+            }else{
+                $("#errfirstname2").text("");
             }
             if($('#wpLastName2').val() == ''){   
                 $('#wpLastName2').focus();
                 $("#errlastname2").text("required");
                 return false;
+            }else{
+                $("#errlastname2").text("");
             }
             if($('#wpGender2').val() == ''){   
                 $('#wpGender2').focus();
                 $("#errgender").text("required");
                 return false;
+            }else{
+                $("#errgender").text("");
             }
             if($('#birthday').val() == ''){   
                 $('#birthday').focus();
                 $("#errbirthday").text("required");
                 return false;
+            }else{
+                $("#errbirthday").text("");
             }                                          
             if($('#wpName2').val() == ''){   
                 $('#wpName2').focus();
                 $("#errname2").text("required");
                 return false;
+            }else{
+                $("#errname2").text("");
             }
             if($('#wpPassword2').val() == ''){
                 $('#wpPassword2').focus();
                 $("#errpassword2").text("required");
                 return false;
+            }else{
+                $("#errpassword2").text("");
             }            
-            if($('#wpPassword2').length() < 6){
+            if($('#wpPassword2').val().length < 6){                
                 $('#wpPassword2').focus();
-                $("#errpassword2").text("password length is minimum 6");
+                $("#errpassword2").text("password length is minimum 6 test");
                 return false;
+            }else{
+                $("#errpassword2").text("");
             }                    
             if($('#wpPassword2').val() != $('#wpRetype').val()){
                 $('#wpRetype').focus();
                 $("#errretype").text("password must match");
                 return false;
+            }else{
+                $("#errretype").text("");
             }    
             if($('#wpEmail').val() == ''){  
                 $('#wpEmail').focus();
                 $("#erremail").text("required");
                 return false;
-            }     
+            }else{
+                $("#erremail").text("");
+            }
+            if(!isValidEmailAddress($('#wpEmail').val())){
+                $('#wpEmail').focus();
+                $("#erremail").text("Please enter Valid email");
+                return false;
+            }else{
+                $("#erremail").text("");
+            }                    
             if($('#hometown_country').val() == ''){  
                 $('#hometown_country').focus();
                 $("#errhomecountry").text("required");
                 return false;
+            }else{
+                $("#errhomecountry").text("");
             }                                     
-            if(!isValidEmailAddress($('#wpEmail').val())){
-                $("#erremail").text("Please enter Valid email");
-                return false;
-            }   
             if($('#aboutme').val() == ''){  
                 $('#aboutme').focus();
                 $("#erraboutme").text("required");
                 return false;
+            }else{
+                $("#erraboutme").text("");
             }            
+            return true;
     }
-    if(chkValidEmail($('#wpEmail').val()) && chkValidPassword()) {        
-        return true
-    } else {
+    
+    if(!isValidEmailAddress($('#wpEmail').val())){
+        $('#wpEmail').focus();
+        $("#erremail").text("Please enter Valid email");
+        return false;        
+    }else{
+        $("#erremail").text("");
+    }        
+    if(!chkValidPassword()) {        
         return false;
-
-    }    
+    }        
+    return true;        
 });
 
 ///////////////////////////// Updated for Default book ///////////////////////////
@@ -531,12 +536,11 @@ function getPageTitlesForDisambiguation(){
     var request = $.ajax( {
     					url: mw.util.wikiScript( 'api' ),
     					data: {
-    						action: 'opensearch',
-    						search: title,
-    						namespace: 0,
-    						suggest: '',
-    						format: 'json',
-                            limit: 1
+                            action: 'opensearch',
+                            search: title,
+                            namespace: 0,
+                            suggest: '',
+                            format: 'json'
     					},
     					dataType: 'json',
                         cache: false,

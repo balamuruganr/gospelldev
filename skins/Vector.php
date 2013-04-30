@@ -168,8 +168,13 @@ class VectorTemplate extends BaseTemplate {
 			<h1 id="firstHeading" class="firstHeading"><span dir="auto"><?php $this->html( 'title' ) ?></span></h1>
 			<!-- /firstHeading -->
             <!-- hilight word -->      
-            <style>.highlight { background-color: yellow }</style>      
-            <span id="js_gsFindWord_con"><input id="gsFindWord_txt_bx" placeholder="find word" /><input type="button" id="gsFindWord_btn" value="submit"/></span>
+            <style>.highlight { background-color: yellow }</style>
+            <?php             
+            $title = $this->getSkin()->getTitle();
+            if( $title->getNamespace() == NS_DISAMBIGUATION && !isset($_REQUEST['action'])) {                
+            ?>      
+                <span id="js_gsFindWord_con"><input id="gsFindWord_txt_bx" placeholder="find word" /><input type="button" id="gsFindWord_btn" value="submit"/></span>
+            <?php } ?>
             <!-- hilight word -->
 			<!-- bodyContent -->
 			<div id="bodyContent">
