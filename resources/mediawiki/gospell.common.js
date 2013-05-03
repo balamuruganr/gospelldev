@@ -523,7 +523,9 @@ function searchUserName(){
         var res = '<ul>';
         $.each(html, function(i, field){            
             var split_username = field.split('||');
-            res = res + '<li><a href="'+window.wgScript+'?title=user:'+split_username[0]+'">'+split_username[1]+'</a>';     
+            if(split_username[0]){
+                res = res + '<li><span>'+split_username[2]+split_username[3]+'<br></span><a href="'+window.wgScript+'?title=user:'+split_username[0]+'">'+split_username[1]+'</a>';
+            }     
         });    
         res = res + '</ul>';
         $('#js_user_search_result').html(res);                  

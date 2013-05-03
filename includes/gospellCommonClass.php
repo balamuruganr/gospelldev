@@ -293,20 +293,32 @@ class gospellCommonFunctions {
             $user_name = strtolower( $user_name );    
                       
             $dbw = wfGetDB( DB_SLAVE);  
-            $res = $dbw->query("SELECT user_name,user_real_name FROM user
+            $res = $dbw->query("SELECT  a.user_id,a.user_name,a.user_real_name,b.up_hometown_country 
+                                FROM user AS a INNER JOIN user_profile AS b ON a.user_id = b.up_user_id 
                                 WHERE LOWER(CONVERT(user_real_name USING latin1))  LIKE '%".$user_name."%'
-                                LIMIT 50");   
-                                
+                                LIMIT 50");                                   
             $usr_ary = array();            
             foreach ( $res as $row ) {
-                $usr_ary[] = $row->user_name.'||'.$row->user_real_name;                
+                $img_thumb = self::getSmallAvatar($row->user_id);
+                $home_town = ($row->up_hometown_country) ? $row->up_hometown_country : ''; 
+                $usr_ary[] = $row->user_name . '||' . $row->user_real_name . '||' . $img_thumb . '||' . $home_town;                
         	}  
             header('Content-type:application/json');          
             echo json_encode($usr_ary);            
             die();                                    
         }              
     }
-    
+ 	public static function getSmallAvatar($user_id) {
+		global $wgUploadPath, $wgUploadDirectory, $wgDBname;
+
+		$files = glob( $wgUploadDirectory . '/avatars/' . $wgDBname . '_' . $user_id .  '_s*' );
+		if ( !isset( $files[0] ) || !$files[0] ) {
+			$avatar_filename = 'default_s.gif?r='. rand();
+		} else {
+			$avatar_filename = basename( $files[0] ) . '?r=' . rand();
+		}        
+		return "<img src=\"{$wgUploadPath}/avatars/{$avatar_filename}\" alt=\"avatar\" border=\"0\" />";
+	}   
     public static function searchUserFriends( $user_id, $friend_name ){
         global $wgUser;
         
