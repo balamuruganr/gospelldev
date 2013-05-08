@@ -142,7 +142,7 @@ $wgGospellSettingsUserBordMessageFileSize = 10485760; //10485760 = 10MB & 209715
 $wgGospellSettingsUserBordMessageTextLenth = 600;
 
 $wgLegacyJavaScript = true;
-$wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
+$wgFileExtensions = array('png','gif','jpg','jpeg','doc','xls','mpp','mp4','mp3','pdf','ppt','tiff','bmp','docx', 'xlsx', 'pptx','ps','odt','ods','odp','odg');
 
 require_once("$IP/extensions/Collection/Collection.php");
 $wgCollectionPODPartners = array(
@@ -154,6 +154,20 @@ $wgCollectionPODPartners = array(
     ),
 );
 
+
+require_once("$IP/extensions/MediawikiPlayer/MediawikiPlayer.php");
+MediawikiPlayer::useAddOn('PlayerPointer');  
+$wgMWPlayerDefaultSettings = array(
+              'width' => '400',
+              'height' => '300',
+              'allowfullscreen' => 'true',
+              'backcolor' => 'eeeeee',
+              );
+$wgMWPlayerDir =  "$IP/extensions/MediawikiPlayer";   
+$wgMWPlayerUseSWFObject = true;
+
+require_once('extensions/FlashMP3/flashmp3.php');
+//require_once('extensions/MP3/mp3.php');
 /*
 * 
 *

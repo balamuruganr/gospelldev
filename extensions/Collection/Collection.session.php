@@ -193,6 +193,17 @@ class CollectionSession {
         
      return $wsBookCollection;       
 	}
+    
+    static function changeBookType( $book_id, $book_type ){
+        
+           $coll = array();
+           $c = array();
+           $coll = self::getCollection();           
+           $coll['book_type'] = $book_type; 
+           $c['book_type'] = $book_type;   
+           gospellCommonFunctions::edit_user_book($c, $book_id);           
+           self::setCollection( $coll );       
+    }
 
 	static function disable() {
 	    global $wgUser, $wgOut, $wgTitle;

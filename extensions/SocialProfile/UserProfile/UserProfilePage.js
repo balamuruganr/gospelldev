@@ -540,7 +540,7 @@ function delete_wall( wall_id ){
 function rename_wall( wall_id ){
  $('#rename_wall_block').dialog( "open" );
  $('#edit_wall_id').val( wall_id ); 
- $('#edit_wall_name').val($('#curr_wall_'+ wall_id).children("a").text());
+ $('#edit_wall_name').val($('#curr_wall_'+ wall_id).children("a").first().text());
 }
 function cancle_update_wall( wall_id ){
  $('#rename_wall_block').dialog( "close" );   
@@ -564,6 +564,7 @@ function update_wall(){
 function save_collection( collection ){
     $.jStorage.set('collection', collection);
 }
+
 function goto_this_bookset( bookid ){
     var script_url = wgServer + ((wgScript == null) ? (wgScriptPath + "/index.php") : wgScript);
     //alert(script_url + " == " + wgPageName + " BKid::" + bookid);
@@ -579,6 +580,7 @@ function goto_this_bookset( bookid ){
 		   } //else {$('.mw-body').prepend('<div id="siteNotice">' + result.html + '</div>');}
 		}); 
 }
+
 function auto_book_list() {
     var userTo = decodeURIComponent( wgTitle ); //document.getElementById( 'user_name_to' ).value;    
     if($('#user-page-left').children().is('.user-books-container')){       
