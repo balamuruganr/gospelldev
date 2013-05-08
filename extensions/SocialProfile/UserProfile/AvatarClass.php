@@ -47,7 +47,7 @@ class wAvatar {
 			if ( !isset( $files[0] ) || !$files[0] ) {
 				$avatar_filename = 'default_' . $this->avatar_size . '.gif';
 			} else {
-				$avatar_filename = basename( $files[0] ) . '?r=' . filemtime( $files[0] );
+				$avatar_filename = basename( $files[0] ) . '?r=' . rand();
 			}
 			$wgMemc->set( $key, $avatar_filename );
 		}
